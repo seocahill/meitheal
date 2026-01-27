@@ -1,0 +1,83 @@
+<%= form_with model: event, class: "space-y-6" do |form| %>
+  <% if event.errors.any? %>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <h2 class="font-bold"><%= pluralize(event.errors.count, "error") %> prohibited this event from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <%= form.label :starts_at, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.datetime_local_field :starts_at, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+
+    <div>
+      <%= form.label :doors_at, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.datetime_local_field :doors_at, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+
+    <div>
+      <%= form.label :ends_at, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.datetime_local_field :ends_at, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :description, rows: 6, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+  </div>
+
+  <div>
+    <%= form.label :bio, "Artist Bio", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :bio, rows: 4, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+  </div>
+
+  <div>
+    <%= form.label :links, "Links (one per line)", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :links, rows: 3, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <%= form.label :ticket_price_cents, "Ticket Price (cents)", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :ticket_price_cents, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+
+    <div>
+      <%= form.label :capacity, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.number_field :capacity, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+
+    <div>
+      <%= form.label :ticket_url, "Ticket URL", class: "block text-sm font-medium text-gray-700" %>
+      <%= form.url_field :ticket_url, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= form.label :venue_name, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :venue_name, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+
+    <div>
+      <%= form.label :venue_address, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_area :venue_address, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    </div>
+  </div>
+
+  <div class="flex items-center justify-end gap-4">
+    <%= link_to "Cancel", events_path, class: "text-gray-600 hover:text-gray-800" %>
+    <%= form.submit class: "bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+  </div>
+<% end %>

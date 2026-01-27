@@ -1,0 +1,11 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-8">Edit Event</h1>
+
+  <% unless @event.published? %>
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
+      This event is currently a draft and not visible to the public.
+    </div>
+  <% end %>
+
+  <%= render "form", event: @event %>
+</div>

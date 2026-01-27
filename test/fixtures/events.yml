@@ -1,0 +1,15 @@
+# Event fixtures for testing
+
+draft_event:
+  title: Draft Concert
+  starts_at: <%= 1.week.from_now %>
+  description: A draft event waiting for approval
+  published: false
+  user: viewer
+
+published_event:
+  title: Published Workshop
+  starts_at: <%= 2.weeks.from_now %>
+  description: A published event visible to all
+  published: true
+  user: editor
