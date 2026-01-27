@@ -15,6 +15,16 @@
     <%= form.text_field :title, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
   </div>
 
+  <div>
+    <%= form.label :image, "Event Image/Poster", class: "block text-sm font-medium text-gray-700" %>
+    <% if event.image.attached? %>
+      <div class="mt-2 mb-2">
+        <%= image_tag event.image, class: "max-w-xs rounded" %>
+      </div>
+    <% end %>
+    <%= form.file_field :image, accept: "image/*", class: "mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100" %>
+  </div>
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div>
       <%= form.label :starts_at, class: "block text-sm font-medium text-gray-700" %>

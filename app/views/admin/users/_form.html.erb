@@ -1,0 +1,37 @@
+<%= form_with model: [:admin, user], class: "space-y-6" do |form| %>
+  <% if user.errors.any? %>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <h2 class="font-bold"><%= pluralize(user.errors.count, "error") %> prohibited this user from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% user.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :email_address, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.email_field :email_address, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500", autocomplete: "off" %>
+  </div>
+
+  <div>
+    <%= form.label :password, user.persisted? ? "Password (leave blank to keep current)" : "Password", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.password_field :password, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500", autocomplete: "new-password", required: user.new_record? %>
+  </div>
+
+  <div>
+    <%= form.label :role, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.select :role, User.roles.keys.map { |r| [r.capitalize, r] }, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+    <p class="mt-1 text-sm text-gray-500">
+      <strong>Viewer:</strong> Can view content and create their own events<br>
+      <strong>Editor:</strong> Can edit all content and publish events<br>
+      <strong>Owner:</strong> Full administrative access
+    </p>
+  </div>
+
+  <div class="flex items-center justify-end gap-4">
+    <%= link_to "Cancel", admin_users_path, class: "text-gray-600 hover:text-gray-800" %>
+    <%= form.submit class: "bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+  </div>
+<% end %>

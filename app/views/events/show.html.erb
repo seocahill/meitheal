@@ -11,6 +11,12 @@
 
   <h1 class="text-4xl font-bold mb-4"><%= @event.title %></h1>
 
+  <% if @event.image.attached? %>
+    <div class="mb-6">
+      <%= image_tag @event.image, class: "w-full max-w-2xl rounded-lg shadow-lg" %>
+    </div>
+  <% end %>
+
   <div class="text-gray-600 mb-6">
     <p class="text-xl">
       <time datetime="<%= @event.starts_at.iso8601 %>">

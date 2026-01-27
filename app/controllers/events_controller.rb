@@ -69,7 +69,7 @@ class EventsController < ApplicationController
     params.require(:event).permit(
       :title, :starts_at, :ends_at, :doors_at, :description, :bio,
       :links, :ticket_price_cents, :ticket_url, :capacity,
-      :venue_name, :venue_address, :published
+      :venue_name, :venue_address, :published, :image
     )
   end
 
