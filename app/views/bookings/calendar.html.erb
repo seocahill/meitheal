@@ -1,0 +1,101 @@
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Space Calendar</h1>
+    <% if authenticated? %>
+      <%= link_to "Book Space", new_booking_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+    <% end %>
+  </div>
+
+  <!-- Month Navigation -->
+  <div class="flex justify-between items-center mb-6">
+    <%= link_to "← Previous", calendar_path(month: (@month - 1.month).strftime("%Y-%m")), class: "text-pink-600 hover:text-pink-800" %>
+    <h2 class="text-2xl font-semibold"><%= @month.strftime("%B %Y") %></h2>
+    <%= link_to "Next →", calendar_path(month: (@month + 1.month).strftime("%Y-%m")), class: "text-pink-600 hover:text-pink-800" %>
+  </div>
+
+  <!-- Calendar Grid -->
+  <div class="bg-white rounded-lg shadow overflow-hidden">
+    <!-- Day headers -->
+    <div class="grid grid-cols-7 bg-gray-50 border-b">
+      <% %w[Sun Mon Tue Wed Thu Fri Sat].each do |day| %>
+        <div class="p-2 text-center text-sm font-medium text-gray-500"><%= day %></div>
+      <% end %>
+    </div>
+
+    <!-- Calendar days -->
+    <div class="grid grid-cols-7">
+      <% # Calculate the first day to show (might be from previous month) %>
+      <% start_date = @month.beginning_of_month.beginning_of_week(:sunday) %>
+      <% end_date = @month.end_of_month.end_of_week(:sunday) %>
+
+      <% (start_date..end_date).each do |date| %>
+        <% day_bookings = @bookings.select { |b| b.starts_at.to_date == date } %>
+        <div class="min-h-[100px] border-b border-r p-2 <%= 'bg-gray-50' unless date.month == @month.month %>">
+          <div class="text-sm <%= date == Date.current ? 'bg-pink-600 text-white rounded-full w-6 h-6 flex items-center justify-center' : 'text-gray-500' %>">
+            <%= date.day %>
+          </div>
+          <div class="mt-1 space-y-1">
+            <% day_bookings.each do |booking| %>
+              <div class="text-xs p-1 rounded bg-pink-100 text-pink-800 truncate" title="<%= booking.title %> - <%= booking.space.name %>">
+                <span class="font-medium"><%= booking.starts_at.strftime("%H:%M") %></span>
+                <%= booking.title %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Upcoming Bookings List -->
+  <div class="mt-8">
+    <h2 class="text-2xl font-bold mb-4">Upcoming Bookings</h2>
+    <% upcoming = @bookings.select { |b| b.starts_at > Time.current }.first(5) %>
+    <% if upcoming.empty? %>
+      <p class="text-gray-600">No upcoming bookings this month.</p>
+    <% else %>
+      <div class="space-y-4">
+        <% upcoming.each do |booking| %>
+          <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+            <div>
+              <h3 class="font-semibold"><%= booking.title %></h3>
+              <p class="text-sm text-gray-600">
+                <%= booking.starts_at.strftime("%A, %B %d at %l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %>
+              </p>
+              <p class="text-sm text-gray-500"><%= booking.space.name %></p>
+            </div>
+            <% if authenticated? && booking.editable_by?(Current.user) %>
+              <div class="flex gap-2">
+                <%= link_to "Edit", edit_booking_path(booking), class: "text-gray-600 hover:text-gray-800" %>
+                <% if Current.user.can_edit? && booking.pending? %>
+                  <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-800" %>
+                <% end %>
+                <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-800" %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Spaces List -->
+  <% if @spaces.any? %>
+    <div class="mt-8">
+      <h2 class="text-2xl font-bold mb-4">Available Spaces</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @spaces.each do |space| %>
+          <div class="bg-white rounded-lg shadow p-4">
+            <h3 class="font-semibold"><%= space.name %></h3>
+            <% if space.capacity.present? %>
+              <p class="text-sm text-gray-500">Capacity: <%= space.capacity %></p>
+            <% end %>
+            <% if space.description.present? %>
+              <p class="text-sm text-gray-600 mt-2"><%= space.description %></p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

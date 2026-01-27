@@ -1,0 +1,19 @@
+# Booking fixtures
+
+upcoming_booking:
+  space: main_hall
+  user: editor
+  title: Art Workshop
+  description: Weekly art workshop session
+  starts_at: <%= 1.day.from_now %>
+  ends_at: <%= 1.day.from_now + 2.hours %>
+  status: 1
+
+pending_booking:
+  space: studio
+  user: viewer
+  title: Practice Session
+  description: Studio practice
+  starts_at: <%= 2.weeks.from_now %>
+  ends_at: <%= 2.weeks.from_now + 3.hours %>
+  status: 0

@@ -18,6 +18,15 @@ Rails.application.routes.draw do
   get "my_profile", to: "profiles#show_my_profile", as: :my_profile
   post "my_profile", to: "profiles#create"
   patch "my_profile", to: "profiles#update"
+
+  # Space bookings
+  get "calendar", to: "bookings#calendar", as: :calendar
+  resources :bookings, except: [ :index, :show ] do
+    member do
+      patch :confirm
+      patch :cancel
+    end
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

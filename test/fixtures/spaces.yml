@@ -1,0 +1,13 @@
+# Space fixtures
+
+main_hall:
+  name: Main Hall
+  description: Large room for events and exhibitions
+  capacity: 50
+  active: true
+
+studio:
+  name: Studio
+  description: Smaller space for workshops
+  capacity: 15
+  active: true
