@@ -1,0 +1,54 @@
+class FundingOpportunitiesController < ApplicationController
+  allow_unauthenticated_access only: [ :index, :show ]
+  before_action :require_editor, except: [ :index, :show ]
+  before_action :set_funding_opportunity, only: [ :show, :edit, :update, :destroy ]
+
+  def index
+    @funding_opportunities = FundingOpportunity.upcoming
+    if params[:category].present?
+      @funding_opportunities = @funding_opportunities.by_category(params[:category])
+    end
+  end
+
+  def show
+  end
+
+  def new
+    @funding_opportunity = FundingOpportunity.new
+  end
+
+  def create
+    @funding_opportunity = FundingOpportunity.new(funding_opportunity_params)
+    if @funding_opportunity.save
+      redirect_to @funding_opportunity, notice: "Funding opportunity created."
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+  end
+
+  def update
+    if @funding_opportunity.update(funding_opportunity_params)
+      redirect_to @funding_opportunity, notice: "Funding opportunity updated."
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @funding_opportunity.destroy
+    redirect_to funding_opportunities_path, notice: "Funding opportunity deleted."
+  end
+
+  private
+
+  def set_funding_opportunity
+    @funding_opportunity = FundingOpportunity.find(params[:id])
+  end
+
+  def funding_opportunity_params
+    params.require(:funding_opportunity).permit(:title, :organization, :description, :deadline, :amount, :url, :categories)
+  end
+end

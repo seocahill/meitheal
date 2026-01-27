@@ -1,0 +1,74 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <%= link_to "← Back to all opportunities", funding_opportunities_path, class: "text-pink-600 hover:text-pink-800" %>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900"><%= @funding_opportunity.title %></h1>
+        <p class="text-lg text-gray-600 mt-1"><%= @funding_opportunity.organization %></p>
+      </div>
+      <% if current_user_can_edit? %>
+        <div class="flex gap-2">
+          <%= link_to "Edit", edit_funding_opportunity_path(@funding_opportunity), class: "bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Deadline</dt>
+        <dd class="mt-1 text-lg text-gray-900">
+          <%= @funding_opportunity.deadline.strftime("%d %B %Y") %>
+          <% if @funding_opportunity.closed? %>
+            <span class="ml-2 px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">Closed</span>
+          <% else %>
+            <% days_left = (@funding_opportunity.deadline - Date.current).to_i %>
+            <span class="ml-2 text-sm text-gray-500">(<%= days_left %> days left)</span>
+          <% end %>
+        </dd>
+      </div>
+
+      <% if @funding_opportunity.amount.present? %>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Amount</dt>
+          <dd class="mt-1 text-lg text-gray-900">Up to &euro;<%= number_with_delimiter(@funding_opportunity.amount) %></dd>
+        </div>
+      <% end %>
+
+      <% if @funding_opportunity.url.present? %>
+        <div class="md:col-span-2">
+          <dt class="text-sm font-medium text-gray-500">More Information</dt>
+          <dd class="mt-1">
+            <%= link_to @funding_opportunity.url, @funding_opportunity.url, target: "_blank", rel: "noopener", class: "text-pink-600 hover:text-pink-800 break-all" %>
+          </dd>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @funding_opportunity.description.present? %>
+      <div class="prose max-w-none">
+        <h2 class="text-xl font-semibold mb-3">Description</h2>
+        <%= simple_format(@funding_opportunity.description) %>
+      </div>
+    <% end %>
+
+    <% if @funding_opportunity.categories.present? %>
+      <div class="mt-6">
+        <h3 class="text-sm font-medium text-gray-500 mb-2">Categories</h3>
+        <div class="flex flex-wrap gap-2">
+          <% @funding_opportunity.categories_list.each do |cat| %>
+            <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-700"><%= cat %></span>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if current_user_can_edit? %>
+    <div class="mt-6">
+      <%= button_to "Delete Opportunity", @funding_opportunity, method: :delete, class: "text-red-600 hover:text-red-900", data: { turbo_confirm: "Are you sure you want to delete this funding opportunity?" } %>
+    </div>
+  <% end %>
+</div>

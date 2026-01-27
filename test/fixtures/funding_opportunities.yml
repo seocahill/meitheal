@@ -1,0 +1,19 @@
+# Funding opportunity fixtures
+
+arts_council_grant:
+  title: Arts Council Project Award
+  organization: Arts Council Ireland
+  description: Funding for individual artists and collaborative projects
+  deadline: <%= 1.month.from_now.to_date %>
+  amount: 15000
+  url: https://www.artscouncil.ie
+  categories: visual art, music, theatre
+
+expired_grant:
+  title: Creative Ireland Fund
+  organization: Department of Tourism
+  description: Support for creative projects
+  deadline: <%= 1.month.ago.to_date %>
+  amount: 5000
+  url: https://www.creativeireland.gov.ie
+  categories: community, heritage

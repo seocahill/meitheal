@@ -22,6 +22,9 @@ Rails.application.routes.draw do
   post "my_profile", to: "profiles#create"
   patch "my_profile", to: "profiles#update"
 
+  # Funding opportunities
+  resources :funding_opportunities
+
   # Space bookings
   get "calendar", to: "bookings#calendar", as: :calendar
   resources :bookings, except: [ :index, :show ] do

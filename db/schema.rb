@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_27_224205) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_27_224701) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -75,6 +75,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_224205) do
     t.index ["published"], name: "index_events_on_published"
     t.index ["starts_at"], name: "index_events_on_starts_at"
     t.index ["user_id"], name: "index_events_on_user_id"
+  end
+
+  create_table "funding_opportunities", force: :cascade do |t|
+    t.integer "amount"
+    t.string "categories"
+    t.datetime "created_at", null: false
+    t.date "deadline", null: false
+    t.text "description"
+    t.string "organization", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.string "url"
+    t.index ["deadline"], name: "index_funding_opportunities_on_deadline"
   end
 
   create_table "memberships", force: :cascade do |t|
