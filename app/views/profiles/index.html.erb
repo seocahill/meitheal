@@ -1,0 +1,64 @@
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Member Directory</h1>
+    <% if authenticated? %>
+      <%= link_to "My Profile", my_profile_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+    <% end %>
+  </div>
+
+  <!-- Search and Filter -->
+  <div class="bg-gray-50 rounded-lg p-4 mb-8">
+    <%= form_with url: profiles_path, method: :get, class: "flex flex-wrap gap-4" do |form| %>
+      <div class="flex-1 min-w-[200px]">
+        <%= form.text_field :q, value: params[:q], placeholder: "Search by name...", class: "w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+      </div>
+      <div class="flex-1 min-w-[200px]">
+        <%= form.text_field :skill, value: params[:skill], placeholder: "Filter by skill...", class: "w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+      </div>
+      <%= form.submit "Search", class: "bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% if params[:q].present? || params[:skill].present? %>
+        <%= link_to "Clear", profiles_path, class: "text-gray-600 hover:text-gray-800 py-2" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @profiles.empty? %>
+    <p class="text-gray-600">No members found.</p>
+  <% else %>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <% @profiles.each do |profile| %>
+        <div class="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6">
+          <div class="flex items-start gap-4">
+            <% if profile.avatar.attached? %>
+              <%= image_tag profile.avatar, class: "w-16 h-16 rounded-full object-cover" %>
+            <% else %>
+              <div class="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 text-xl font-bold">
+                <%= profile.name.first.upcase %>
+              </div>
+            <% end %>
+            <div class="flex-1">
+              <h2 class="text-lg font-semibold">
+                <%= link_to profile.name, profile, class: "hover:text-pink-600" %>
+              </h2>
+              <% if profile.location.present? %>
+                <p class="text-sm text-gray-500"><%= profile.location %></p>
+              <% end %>
+            </div>
+          </div>
+
+          <% if profile.bio.present? %>
+            <p class="mt-4 text-gray-600 text-sm line-clamp-3"><%= truncate(profile.bio, length: 150) %></p>
+          <% end %>
+
+          <% if profile.skills.present? %>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <% profile.skills_list.first(4).each do |skill| %>
+                <%= link_to skill, profiles_path(skill: skill), class: "inline-block bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded hover:bg-gray-200" %>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_27_222359) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_27_222849) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -61,6 +61,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_222359) do
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
+  create_table "profiles", force: :cascade do |t|
+    t.text "bio"
+    t.datetime "created_at", null: false
+    t.string "location"
+    t.string "name", null: false
+    t.string "skills"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.boolean "visible", default: true, null: false
+    t.string "website"
+    t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "ip_address"
@@ -82,5 +95,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_222359) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "events", "users"
+  add_foreign_key "profiles", "users"
   add_foreign_key "sessions", "users"
 end

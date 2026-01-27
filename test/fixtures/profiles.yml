@@ -1,0 +1,16 @@
+# Profile fixtures - note that users in tests may create profiles dynamically
+# so we keep this minimal to avoid conflicts
+
+owner_profile:
+  user: owner
+  name: Admin User
+  bio: Site administrator
+  skills: administration, management
+  visible: true
+
+editor_profile:
+  user: editor
+  name: Editor User
+  bio: Content editor
+  skills: editing, publishing
+  visible: true
