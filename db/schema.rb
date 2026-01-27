@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_27_223403) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_27_224205) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -77,6 +77,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_223403) do
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
+  create_table "memberships", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.date "expires_on"
+    t.integer "membership_type", null: false
+    t.text "notes"
+    t.date "starts_on", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.integer "membership_id", null: false
+    t.text "notes"
+    t.date "paid_on", null: false
+    t.integer "payment_method", null: false
+    t.datetime "updated_at", null: false
+    t.index ["membership_id"], name: "index_payments_on_membership_id"
+  end
+
   create_table "profiles", force: :cascade do |t|
     t.text "bio"
     t.datetime "created_at", null: false
@@ -122,6 +144,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_223403) do
   add_foreign_key "bookings", "spaces"
   add_foreign_key "bookings", "users"
   add_foreign_key "events", "users"
+  add_foreign_key "memberships", "users"
+  add_foreign_key "payments", "memberships"
   add_foreign_key "profiles", "users"
   add_foreign_key "sessions", "users"
 end

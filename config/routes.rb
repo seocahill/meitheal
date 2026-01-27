@@ -11,6 +11,9 @@ Rails.application.routes.draw do
 
   namespace :admin do
     resources :users
+    resources :memberships do
+      resources :payments, only: [ :create, :destroy ]
+    end
   end
 
   # Member directory

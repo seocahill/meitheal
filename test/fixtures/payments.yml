@@ -1,0 +1,15 @@
+# Payment fixtures
+
+recent_payment:
+  membership: active_membership
+  amount_cents: 2000
+  paid_on: <%= 1.week.ago.to_date %>
+  payment_method: 0
+  notes: Annual fee
+
+old_payment:
+  membership: expired_membership
+  amount_cents: 1500
+  paid_on: <%= 6.months.ago.to_date %>
+  payment_method: 1
+  notes: Concession fee paid by transfer
