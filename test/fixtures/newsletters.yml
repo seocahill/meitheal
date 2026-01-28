@@ -1,0 +1,11 @@
+# Newsletter fixtures
+
+monthly_update:
+  subject: January Monthly Update
+  status: 0
+  sent_at:
+
+sent_newsletter:
+  subject: December Newsletter
+  status: 1
+  sent_at: <%= 1.month.ago %>

@@ -1,0 +1,29 @@
+<%= form_with model: newsletter, class: "space-y-6" do |form| %>
+  <% if newsletter.errors.any? %>
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+      <h2 class="font-bold"><%= pluralize(newsletter.errors.count, "error") %> prohibited this newsletter from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% newsletter.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :subject, class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :subject, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500", placeholder: "January Monthly Update" %>
+  </div>
+
+  <div>
+    <%= form.label :content, class: "block text-sm font-medium text-gray-700 mb-2" %>
+    <%= form.rich_text_area :content %>
+  </div>
+
+  <div class="flex items-center justify-between">
+    <div class="flex gap-4">
+      <%= link_to "Cancel", newsletters_path, class: "text-gray-600 hover:text-gray-800" %>
+    </div>
+    <%= form.submit class: "bg-pink-600 text-white px-6 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+  </div>
+<% end %>

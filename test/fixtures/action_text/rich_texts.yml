@@ -1,4 +1,21 @@
-# one:
-#   record: name_of_fixture (ClassOfFixture)
-#   name: content
-#   body: <p>In a <i>million</i> stars!</p>
+# Newsletter content
+monthly_update_content:
+  record: monthly_update (Newsletter)
+  name: content
+  body: <p>Welcome to our January update...</p>
+
+sent_newsletter_content:
+  record: sent_newsletter (Newsletter)
+  name: content
+  body: <p>December was a great month for the collective...</p>
+
+# Page content
+about_page_content:
+  record: about_page (Page)
+  name: content
+  body: <p>About NCF...</p>
+
+draft_page_content:
+  record: draft_page (Page)
+  name: content
+  body: <p>Draft page content...</p>

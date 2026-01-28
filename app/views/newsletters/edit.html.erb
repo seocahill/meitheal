@@ -1,0 +1,73 @@
+<div class="max-w-4xl mx-auto px-4">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Newsletter</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+      <%= render "form", newsletter: @newsletter %>
+    </div>
+
+    <div class="lg:col-span-1">
+      <div class="bg-gray-50 rounded-lg p-6 sticky top-8" data-controller="ai-compose">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Composition Assistant</h2>
+
+        <div class="space-y-4">
+          <div>
+            <label for="ai-prompt" class="block text-sm font-medium text-gray-700 mb-1">
+              What would you like help with?
+            </label>
+            <textarea
+              id="ai-prompt"
+              data-ai-compose-target="prompt"
+              rows="4"
+              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 text-sm"
+              placeholder="e.g., Write an introduction about our upcoming exhibition opening on March 15th featuring local artists..."></textarea>
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <button
+              type="button"
+              data-action="click->ai-compose#compose"
+              data-newsletter-id="<%= @newsletter.id %>"
+              class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
+              data-ai-compose-target="button">
+              Generate with AI
+            </button>
+
+            <div data-ai-compose-target="status" class="text-sm text-gray-500 hidden">
+              Generating...
+            </div>
+          </div>
+
+          <div data-ai-compose-target="result" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Generated Content</label>
+            <div
+              data-ai-compose-target="output"
+              class="bg-white border rounded-md p-3 text-sm max-h-64 overflow-y-auto prose prose-sm">
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              Copy and paste this into the editor above, or continue refining with more prompts.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">Suggestions</h3>
+          <div class="space-y-2 text-sm">
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-left text-indigo-600 hover:text-indigo-800 block">
+              Write an introduction
+            </button>
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-left text-indigo-600 hover:text-indigo-800 block">
+              Summarize events
+            </button>
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-left text-indigo-600 hover:text-indigo-800 block">
+              Add call to action
+            </button>
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Make the content more concise and scannable" class="text-left text-indigo-600 hover:text-indigo-800 block">
+              Make more concise
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

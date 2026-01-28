@@ -31,6 +31,13 @@ Rails.application.routes.draw do
   post "my_profile", to: "profiles#create"
   patch "my_profile", to: "profiles#update"
 
+  # Newsletters (editor-only)
+  resources :newsletters do
+    member do
+      post :compose_with_ai
+    end
+  end
+
   # Funding opportunities
   resources :funding_opportunities
 

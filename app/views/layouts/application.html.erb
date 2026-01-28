@@ -22,7 +22,6 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
-    <%= javascript_importmap_tags %>
   </head>
 
   <body class="bg-gray-50 min-h-screen">
@@ -38,6 +37,10 @@
           </div>
           <div class="flex items-center space-x-4">
             <% if authenticated? %>
+              <% if current_user_can_edit? %>
+                <%= link_to "Newsletters", newsletters_path, class: "text-gray-600 hover:text-pink-600" %>
+                <%= link_to "Pages", admin_pages_path, class: "text-gray-600 hover:text-pink-600" %>
+              <% end %>
               <% if current_user_can_manage? %>
                 <%= link_to "Users", admin_users_path, class: "text-gray-600 hover:text-pink-600" %>
                 <%= link_to "Memberships", admin_memberships_path, class: "text-gray-600 hover:text-pink-600" %>
