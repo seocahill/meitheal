@@ -168,3 +168,98 @@ FundingOpportunity.find_or_create_by!(title: "Tech for Good", organization: "Loc
   f.categories = "tech, social impact, innovation"
   f.url = "https://example.com/tech-for-good"
 end
+
+# --- Email groups ---
+members_group = EmailGroup.find_or_create_by!(local_part: "members") do |g|
+  g.name = "Members"
+  g.description = "All current members. Used for space updates and general announcements."
+  g.active = true
+end
+
+newsletter_group = EmailGroup.find_or_create_by!(local_part: "newsletter") do |g|
+  g.name = "Newsletter"
+  g.description = "Newsletter subscribers. Receives monthly updates and event highlights."
+  g.active = true
+end
+
+board_group = EmailGroup.find_or_create_by!(local_part: "board") do |g|
+  g.name = "Board"
+  g.description = "Board members only. Internal coordination."
+  g.active = true
+end
+
+# --- Email group memberships ---
+[ [ board_group, admin ], [ newsletter_group, admin ], [ members_group, admin ],
+  [ newsletter_group, editor ], [ members_group, editor ],
+  [ members_group, member ] ].each do |group, user|
+  EmailGroupMembership.find_or_create_by!(email_group: group, user: user)
+end
+
+# --- Archived emails (sample traffic) ---
+ArchivedEmail.find_or_create_by!(
+  email_group: newsletter_group,
+  subject: "January digest – Open Night and Woodwork intro",
+  received_at: 2.weeks.ago
+) do |e|
+  e.from_address = "editor@meitheal.example"
+  e.body = "Hi everyone,\n\nQuick recap of what's coming up:\n\n– Open Night next week. Bring friends.\n– Intro to Woodwork in two weeks. Limited places.\n\nSee you in the space."
+end
+
+ArchivedEmail.find_or_create_by!(
+  email_group: members_group,
+  subject: "Workshop closure Tuesday 14th",
+  received_at: 1.week.ago
+) do |e|
+  e.from_address = "admin@meitheal.example"
+  e.body = "The main workshop will be closed 9am–1pm next Tuesday for maintenance. Meeting room and studio unchanged."
+end
+
+# --- Pages (CMS) ---
+Page.find_or_create_by!(slug: "about") do |p|
+  p.title = "About us"
+  p.published = true
+  p.content = "<p>We're a community makerspace in Dublin. Members get access to the workshop, tools, and each other.</p><p>Drop in on Open Night or <a href=\"/pages/contact\">get in touch</a>.</p>"
+end
+
+Page.find_or_create_by!(slug: "contact") do |p|
+  p.title = "Contact"
+  p.published = true
+  p.content = "<p>Email: <a href=\"mailto:hello@thencf.art\">hello@thencf.art</a></p><p>Open Night is every second Thursday, 6–9pm. No booking needed for a look around.</p>"
+end
+
+Page.find_or_create_by!(slug: "code-of-conduct") do |p|
+  p.title = "Code of conduct"
+  p.published = true
+  p.content = "<p>Be respectful. Look after the space and the tools. No harassment, no discrimination. We aim for a welcoming environment for everyone.</p><p>Reports: talk to a board member or email board@thencf.art.</p>"
+end
+
+Page.find_or_create_by!(slug: "draft-page") do |p|
+  p.title = "Draft page (unpublished)"
+  p.published = false
+  p.content = "<p>This page is not published and will not appear on the site.</p>"
+end
+
+# --- Model (for AI/chat features) ---
+default_model = Model.find_or_create_by!(provider: "openai", model_id: "gpt-4o-mini") do |m|
+  m.name = "GPT-4o mini"
+  m.context_window = 128_000
+  m.max_output_tokens = 16_384
+  m.family = "gpt-4o"
+  m.pricing = {}
+  m.capabilities = []
+  m.modalities = {}
+  m.metadata = {}
+end
+
+# --- Newsletters ---
+Newsletter.find_or_create_by!(subject: "Welcome to Meitheal – January") do |n|
+  n.status = :sent
+  n.sent_at = 3.days.ago
+  n.content = "<p>Hi,</p><p>Welcome to the first newsletter of the year. We've got Open Night coming up and an Intro to Woodwork workshop later in the month.</p><p>See you in the space.</p>"
+end
+
+Newsletter.find_or_create_by!(subject: "February draft – events and callouts") do |n|
+  n.status = :draft
+  n.sent_at = nil
+  n.content = "<p>Draft placeholder. Add February events and any calls for help or proposals here.</p>"
+end
