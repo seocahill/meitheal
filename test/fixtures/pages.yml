@@ -1,0 +1,11 @@
+# Page fixtures
+
+about_page:
+  title: About NCF
+  slug: about
+  published: true
+
+draft_page:
+  title: Draft Page
+  slug: draft
+  published: false

@@ -14,7 +14,16 @@ Rails.application.routes.draw do
     resources :memberships do
       resources :payments, only: [ :create, :destroy ]
     end
+    resources :pages do
+      member do
+        patch :publish
+        patch :unpublish
+      end
+    end
   end
+
+  # Static pages (must be near end to catch /:slug)
+  get "pages/:slug", to: "pages#show", as: :page
 
   # Member directory
   resources :profiles, only: [ :index, :show ]

@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_27_224701) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_28_001356) do
+  create_table "action_text_rich_texts", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.bigint "record_id", null: false
+    t.string "record_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["record_type", "record_id", "name"], name: "index_action_text_rich_texts_uniqueness", unique: true
+  end
+
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -99,6 +109,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_27_224701) do
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.index ["user_id"], name: "index_memberships_on_user_id"
+  end
+
+  create_table "pages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "published", default: false, null: false
+    t.string "slug", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_pages_on_slug", unique: true
   end
 
   create_table "payments", force: :cascade do |t|
