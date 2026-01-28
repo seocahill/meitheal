@@ -1,0 +1,13 @@
+# Email group fixtures
+
+all_members:
+  name: All Members
+  local_part: all
+  description: Email list for all members
+  active: true
+
+artists:
+  name: Artists
+  local_part: artists
+  description: Email list for artists
+  active: true

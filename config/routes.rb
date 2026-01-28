@@ -20,6 +20,12 @@ Rails.application.routes.draw do
         patch :unpublish
       end
     end
+    resources :email_groups do
+      member do
+        post :add_member
+        delete :remove_member
+      end
+    end
   end
 
   # Static pages (must be near end to catch /:slug)

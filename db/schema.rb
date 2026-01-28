@@ -10,7 +10,16 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_28_002201) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_28_003203) do
+  create_table "action_mailbox_inbound_emails", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "message_checksum", null: false
+    t.string "message_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id", "message_checksum"], name: "index_action_mailbox_inbound_emails_uniqueness", unique: true
+  end
+
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.text "body"
     t.datetime "created_at", null: false
@@ -49,6 +58,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_002201) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "archived_emails", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.integer "email_group_id", null: false
+    t.string "from_address", null: false
+    t.datetime "received_at", null: false
+    t.string "subject", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email_group_id"], name: "index_archived_emails_on_email_group_id"
+    t.index ["received_at"], name: "index_archived_emails_on_received_at"
+  end
+
   create_table "bookings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -70,6 +91,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_002201) do
     t.integer "model_id"
     t.datetime "updated_at", null: false
     t.index ["model_id"], name: "index_chats_on_model_id"
+  end
+
+  create_table "email_group_memberships", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "email_group_id", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["email_group_id", "user_id"], name: "index_email_group_memberships_on_email_group_id_and_user_id", unique: true
+    t.index ["email_group_id"], name: "index_email_group_memberships_on_email_group_id"
+    t.index ["user_id"], name: "index_email_group_memberships_on_user_id"
+  end
+
+  create_table "email_groups", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "local_part", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["local_part"], name: "index_email_groups_on_local_part", unique: true
   end
 
   create_table "events", force: :cascade do |t|
@@ -245,9 +286,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_002201) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "archived_emails", "email_groups"
   add_foreign_key "bookings", "spaces"
   add_foreign_key "bookings", "users"
   add_foreign_key "chats", "models"
+  add_foreign_key "email_group_memberships", "email_groups"
+  add_foreign_key "email_group_memberships", "users"
   add_foreign_key "events", "users"
   add_foreign_key "memberships", "users"
   add_foreign_key "messages", "chats"
