@@ -48,6 +48,12 @@ gem "lexxy"
 # Unified LLM API for OpenAI, Anthropic, etc [https://github.com/crmne/ruby_llm]
 gem "ruby_llm"
 
+# Pagination [https://github.com/ddnexus/pagy]
+gem "pagy"
+
+# HTTP client for API requests
+gem "faraday"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

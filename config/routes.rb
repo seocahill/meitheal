@@ -32,6 +32,7 @@ Rails.application.routes.draw do
         post :reject
       end
     end
+    resources :inbox, only: [ :index, :show ]
   end
 
   # Static pages (must be near end to catch /:slug)

@@ -1,0 +1,74 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <div class="mb-6">
+    <%= link_to "← Back to Inbox", admin_inbox_index_path(folder_id: params[:folder_id]), class: "text-gray-500 hover:text-gray-700 text-sm" %>
+  </div>
+
+  <div class="card">
+    <!-- Email header -->
+    <div class="p-6 border-b border-gray-100">
+      <h1 class="text-xl font-semibold text-gray-900 mb-4">
+        <%= @email_metadata&.dig("subject") || "(No subject)" %>
+      </h1>
+
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+          <%= (@email_metadata&.dig("fromAddress") || "?").first.upcase %>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-gray-900">
+            <%= @email_metadata&.dig("fromAddress") || @email_metadata&.dig("sender") %>
+          </p>
+          <p class="text-sm text-gray-500">
+            To: <%= @email_metadata&.dig("toAddress") %>
+          </p>
+          <% if @email_metadata&.dig("ccAddress").present? %>
+            <p class="text-sm text-gray-500">
+              Cc: <%= @email_metadata["ccAddress"] %>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="text-right text-sm text-gray-500 flex-shrink-0">
+          <%= format_zoho_datetime(@email_metadata&.dig("receivedTime")) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email body -->
+    <div class="p-6">
+      <% if @email_content&.dig("content").present? %>
+        <div class="prose prose-sm max-w-none email-content">
+          <%= sanitize(@email_content["content"], tags: %w[p br div span a img h1 h2 h3 h4 h5 h6 ul ol li table tr td th thead tbody strong em b i u blockquote pre code hr], attributes: %w[href src alt class style]) %>
+        </div>
+      <% else %>
+        <p class="text-gray-500 italic">No content available.</p>
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center gap-4">
+      <button type="button" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium" disabled>
+        Add to Newsletter
+      </button>
+      <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50" disabled>
+        Forward to Group
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .email-content img {
+    max-width: 100%;
+    height: auto;
+  }
+  .email-content a {
+    color: #9333ea;
+  }
+  .email-content blockquote {
+    border-left: 3px solid #e5e7eb;
+    padding-left: 1rem;
+    color: #6b7280;
+  }
+</style>

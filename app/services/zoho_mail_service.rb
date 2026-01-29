@@ -1,0 +1,138 @@
+class ZohoMailService
+  class ApiError < StandardError; end
+  class AuthenticationError < ApiError; end
+
+  # Zoho data centers - EU for Ireland
+  REGIONS = {
+    us: "https://mail.zoho.com",
+    eu: "https://mail.zoho.eu",
+    in: "https://mail.zoho.in",
+    au: "https://mail.zoho.com.au",
+    jp: "https://mail.zoho.jp"
+  }.freeze
+
+  OAUTH_REGIONS = {
+    us: "https://accounts.zoho.com",
+    eu: "https://accounts.zoho.eu",
+    in: "https://accounts.zoho.in",
+    au: "https://accounts.zoho.com.au",
+    jp: "https://accounts.zoho.jp"
+  }.freeze
+
+  def initialize
+    @region = (ENV["ZOHO_REGION"] || Rails.application.credentials.dig(:zoho, :region) || "eu").to_sym
+    @client_id = ENV["ZOHO_CLIENT_ID"] || Rails.application.credentials.dig(:zoho, :client_id)
+    @client_secret = ENV["ZOHO_CLIENT_SECRET"] || Rails.application.credentials.dig(:zoho, :client_secret)
+    @refresh_token = ENV["ZOHO_REFRESH_TOKEN"] || Rails.application.credentials.dig(:zoho, :refresh_token)
+    @account_id = ENV["ZOHO_ACCOUNT_ID"] || Rails.application.credentials.dig(:zoho, :account_id)
+  end
+
+  def configured?
+    @client_id.present? && @client_secret.present? && @refresh_token.present? && @account_id.present?
+  end
+
+  def folders
+    response = get("/api/accounts/#{@account_id}/folders")
+    response["data"] || []
+  end
+
+  def emails(folder_id:, limit: 25, start: 0)
+    params = {
+      limit: limit,
+      start: start,
+      sortBy: "receivedTime",
+      sortOrder: "false" # descending
+    }
+
+    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/view", params)
+    response["data"] || []
+  end
+
+  def search_emails(query:, limit: 25, received_time: nil)
+    params = {
+      searchKey: query,
+      limit: limit
+    }
+    params[:receivedTime] = received_time if received_time
+
+    response = get("/api/accounts/#{@account_id}/messages/search", params)
+    response["data"] || []
+  end
+
+  def email(folder_id:, message_id:)
+    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}/content")
+    response["data"]
+  end
+
+  def email_metadata(folder_id:, message_id:)
+    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}")
+    response["data"]
+  end
+
+  private
+
+  def base_url
+    REGIONS[@region] || REGIONS[:eu]
+  end
+
+  def oauth_url
+    OAUTH_REGIONS[@region] || OAUTH_REGIONS[:eu]
+  end
+
+  def access_token
+    @access_token ||= fetch_access_token
+  end
+
+  def fetch_access_token
+    response = Faraday.post("#{oauth_url}/oauth/v2/token") do |req|
+      req.params = {
+        refresh_token: @refresh_token,
+        client_id: @client_id,
+        client_secret: @client_secret,
+        grant_type: "refresh_token"
+      }
+    end
+
+    body = JSON.parse(response.body)
+
+    if body["error"]
+      Rails.logger.error("Zoho OAuth error: #{body['error']}")
+      raise AuthenticationError, body["error"]
+    end
+
+    body["access_token"]
+  end
+
+  def get(path, params = {})
+    response = connection.get(path) do |req|
+      req.params = params
+    end
+
+    handle_response(response)
+  end
+
+  def connection
+    @connection ||= Faraday.new(url: base_url) do |f|
+      f.request :json
+      f.response :json
+      f.headers["Authorization"] = "Zoho-oauthtoken #{access_token}"
+      f.headers["Accept"] = "application/json"
+    end
+  end
+
+  def handle_response(response)
+    case response.status
+    when 200
+      response.body
+    when 401
+      @access_token = nil
+      @connection = nil
+      raise AuthenticationError, "Invalid or expired token"
+    when 429
+      raise ApiError, "Rate limit exceeded"
+    else
+      error_message = response.body.is_a?(Hash) ? response.body["status"]&.dig("description") : response.body
+      raise ApiError, "Zoho API error (#{response.status}): #{error_message}"
+    end
+  end
+end
