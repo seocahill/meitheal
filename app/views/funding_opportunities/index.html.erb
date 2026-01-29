@@ -1,46 +1,49 @@
-<div class="max-w-6xl mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold">Funding Opportunities</h1>
+<div class="max-w-6xl mx-auto px-4 sm:px-6">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Funding</h1>
     <% if current_user_can_edit? %>
-      <%= link_to "Add Opportunity", new_funding_opportunity_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+      <%= link_to "Add Opportunity", new_funding_opportunity_path, class: "btn-primary text-white px-5 py-2.5 rounded-xl font-medium" %>
     <% end %>
   </div>
 
   <% if @funding_opportunities.any? %>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <% @funding_opportunities.each do |opportunity| %>
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-2">
-            <%= link_to opportunity.title, opportunity, class: "hover:text-pink-600" %>
-          </h2>
-          <p class="text-sm text-gray-600 mb-2"><%= opportunity.organization %></p>
-
-          <div class="flex items-center gap-2 mb-3">
-            <span class="text-sm text-gray-500">
-              Deadline: <%= opportunity.deadline.strftime("%d %b %Y") %>
-            </span>
+        <div class="card p-6 flex flex-col">
+          <div class="flex-1">
             <% days_left = (opportunity.deadline - Date.current).to_i %>
-            <% if days_left <= 7 %>
-              <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                <%= days_left %> days left
-              </span>
-            <% elsif days_left <= 30 %>
-              <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                <%= days_left %> days left
-              </span>
+            <div class="flex items-center gap-2 mb-3">
+              <% if days_left <= 7 %>
+                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-700">
+                  <%= days_left %> days left
+                </span>
+              <% elsif days_left <= 30 %>
+                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">
+                  <%= days_left %> days left
+                </span>
+              <% else %>
+                <span class="text-sm text-gray-500">
+                  Due <%= opportunity.deadline.strftime("%d %b") %>
+                </span>
+              <% end %>
+            </div>
+
+            <h2 class="text-lg font-semibold text-gray-900 mb-1">
+              <%= link_to opportunity.title, opportunity, class: "hover:text-purple-600 transition-colors" %>
+            </h2>
+            <p class="text-sm text-gray-500 mb-3"><%= opportunity.organization %></p>
+
+            <% if opportunity.amount.present? %>
+              <p class="text-purple-600 font-semibold">
+                Up to &euro;<%= number_with_delimiter(opportunity.amount) %>
+              </p>
             <% end %>
           </div>
 
-          <% if opportunity.amount.present? %>
-            <p class="text-sm text-gray-700 mb-2">
-              <strong>Up to &euro;<%= number_with_delimiter(opportunity.amount) %></strong>
-            </p>
-          <% end %>
-
           <% if opportunity.categories.present? %>
-            <div class="flex flex-wrap gap-1 mt-3">
-              <% opportunity.categories_list.each do |cat| %>
-                <span class="px-2 py-0.5 text-xs rounded-full bg-gray-100 text-gray-600"><%= cat %></span>
+            <div class="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-gray-100">
+              <% opportunity.categories_list.first(3).each do |cat| %>
+                <span class="px-2.5 py-1 text-xs rounded-full bg-gray-100 text-gray-600"><%= cat %></span>
               <% end %>
             </div>
           <% end %>
@@ -48,8 +51,8 @@
       <% end %>
     </div>
   <% else %>
-    <div class="bg-white rounded-lg shadow p-8 text-center">
-      <p class="text-gray-500">No open funding opportunities at the moment.</p>
+    <div class="card p-12 text-center">
+      <p class="text-gray-500 text-lg">No open funding opportunities right now.</p>
       <p class="text-gray-400 text-sm mt-2">Check back soon for new opportunities.</p>
     </div>
   <% end %>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "THENCF - North Connacht Cultural Co-op" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="THENCF">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+
+      .homepage-bg {
+        background: linear-gradient(135deg,
+          #9b59b6 0%,
+          #e91e63 25%,
+          #00bcd4 50%,
+          #ff9800 75%,
+          #9b59b6 100%);
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+      }
+
+      @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      .menu-highlight {
+        background: rgba(59, 130, 246, 0.7);
+        padding: 0.1em 0.3em;
+        transition: all 0.2s ease;
+      }
+
+      .menu-highlight:hover {
+        background: rgba(236, 72, 153, 0.8);
+        transform: translateX(8px);
+      }
+
+      .logo-highlight {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(147, 51, 234, 0.85));
+        padding: 0.2em 0.4em;
+      }
+
+      .font-display {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="homepage-bg min-h-screen font-display">
+    <%= yield %>
+  </body>
+</html>
