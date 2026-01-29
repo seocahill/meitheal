@@ -1,0 +1,21 @@
+<div class="max-w-3xl mx-auto px-4">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Edit Proposal</h1>
+    <p class="mt-2 text-gray-600">
+      <%= @funding_opportunity.title %> &middot; <%= @funding_opportunity.organization %>
+    </p>
+  </div>
+
+  <div class="bg-white shadow rounded-lg p-6">
+    <%= render "form" %>
+  </div>
+
+  <% if @proposal.draft? %>
+    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+      <p class="text-blue-800">
+        <strong>Ready to submit?</strong> Once you're happy with your proposal, you can submit it for review.
+      </p>
+      <%= button_to "Submit Proposal", submit_funding_opportunity_proposal_path(@funding_opportunity, @proposal), method: :post, class: "mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700" %>
+    </div>
+  <% end %>
+</div>

@@ -23,6 +23,7 @@ class NewslettersController < ApplicationController
   end
 
   def edit
+    @archived_emails = ArchivedEmail.recent.includes(:email_group).limit(20)
   end
 
   def update

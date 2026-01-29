@@ -1,7 +1,7 @@
 class Payment < ApplicationRecord
   belongs_to :membership
 
-  enum :payment_method, { cash: 0, bank_transfer: 1, other: 2 }
+  enum :payment_method, { cash: 0, bank_transfer: 1, other: 2, sumup: 3 }
 
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :paid_on, presence: true

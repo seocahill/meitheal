@@ -44,6 +44,7 @@
               <% if current_user_can_manage? %>
                 <%= link_to "Users", admin_users_path, class: "text-gray-600 hover:text-pink-600" %>
                 <%= link_to "Memberships", admin_memberships_path, class: "text-gray-600 hover:text-pink-600" %>
+                <%= link_to "Proposals", admin_proposals_path, class: "text-gray-600 hover:text-pink-600" %>
                 <%= link_to "Email Groups", admin_email_groups_path, class: "text-gray-600 hover:text-pink-600" %>
               <% end %>
               <%= link_to "My Profile", my_profile_path, class: "text-gray-600 hover:text-pink-600" %>

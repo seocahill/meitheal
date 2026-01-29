@@ -64,6 +64,32 @@
         </div>
       </div>
     <% end %>
+
+    <% if authenticated? && !@funding_opportunity.closed? %>
+      <% user_proposal = @funding_opportunity.proposals.find_by(user: Current.user) %>
+      <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+        <% if user_proposal.nil? %>
+          <p class="text-blue-800 mb-3">Interested in applying for this funding opportunity?</p>
+          <%= link_to "Start Application", new_funding_opportunity_proposal_path(@funding_opportunity), class: "inline-block px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700" %>
+        <% elsif user_proposal.draft? %>
+          <p class="text-blue-800 mb-3">You have a draft proposal for this opportunity.</p>
+          <%= link_to "Continue Editing", edit_funding_opportunity_proposal_path(@funding_opportunity, user_proposal), class: "inline-block px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700" %>
+        <% elsif user_proposal.submitted? %>
+          <p class="text-green-800"><strong>Your proposal has been submitted</strong> and is awaiting review.</p>
+        <% elsif user_proposal.approved? %>
+          <p class="text-green-800"><strong>Congratulations!</strong> Your proposal has been approved.</p>
+        <% elsif user_proposal.rejected? %>
+          <p class="text-red-800"><strong>Your proposal was not approved.</strong></p>
+          <% if user_proposal.admin_notes.present? %>
+            <p class="text-red-700 mt-2 text-sm"><%= user_proposal.admin_notes %></p>
+          <% end %>
+        <% end %>
+      </div>
+    <% elsif !authenticated? && !@funding_opportunity.closed? %>
+      <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+        <p class="text-gray-700"><%= link_to "Sign in", new_session_path, class: "text-pink-600 hover:text-pink-800" %> to apply for this funding opportunity.</p>
+      </div>
+    <% end %>
   </div>
 
   <% if current_user_can_edit? %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_28_003203) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_29_002950) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -227,6 +227,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_003203) do
     t.text "notes"
     t.date "paid_on", null: false
     t.integer "payment_method", null: false
+    t.string "sumup_checkout_id"
+    t.string "sumup_transaction_id"
     t.datetime "updated_at", null: false
     t.index ["membership_id"], name: "index_payments_on_membership_id"
   end
@@ -242,6 +244,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_003203) do
     t.boolean "visible", default: true, null: false
     t.string "website"
     t.index ["user_id"], name: "index_profiles_on_user_id", unique: true
+  end
+
+  create_table "proposals", force: :cascade do |t|
+    t.text "admin_notes"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "funding_opportunity_id", null: false
+    t.datetime "reviewed_at"
+    t.integer "status", default: 0, null: false
+    t.datetime "submitted_at"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["funding_opportunity_id"], name: "index_proposals_on_funding_opportunity_id"
+    t.index ["user_id", "funding_opportunity_id"], name: "index_proposals_on_user_id_and_funding_opportunity_id", unique: true
+    t.index ["user_id"], name: "index_proposals_on_user_id"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -300,6 +318,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_28_003203) do
   add_foreign_key "newsletters", "chats"
   add_foreign_key "payments", "memberships"
   add_foreign_key "profiles", "users"
+  add_foreign_key "proposals", "funding_opportunities"
+  add_foreign_key "proposals", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "tool_calls", "messages"
 end

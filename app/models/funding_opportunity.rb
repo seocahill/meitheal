@@ -1,4 +1,6 @@
 class FundingOpportunity < ApplicationRecord
+  has_many :proposals, dependent: :destroy
+
   validates :title, presence: true
   validates :organization, presence: true
   validates :deadline, presence: true

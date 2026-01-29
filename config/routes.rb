@@ -26,6 +26,12 @@ Rails.application.routes.draw do
         delete :remove_member
       end
     end
+    resources :proposals, only: [ :index, :show ] do
+      member do
+        post :approve
+        post :reject
+      end
+    end
   end
 
   # Static pages (must be near end to catch /:slug)
@@ -37,6 +43,14 @@ Rails.application.routes.draw do
   post "my_profile", to: "profiles#create"
   patch "my_profile", to: "profiles#update"
 
+  # Membership payments (SumUp)
+  resources :memberships, only: [] do
+    resource :payment, controller: "membership_payments", only: [ :new ] do
+      post :create_checkout
+      get :complete
+    end
+  end
+
   # Newsletters (editor-only)
   resources :newsletters do
     member do
@@ -45,7 +59,13 @@ Rails.application.routes.draw do
   end
 
   # Funding opportunities
-  resources :funding_opportunities
+  resources :funding_opportunities do
+    resources :proposals, only: [ :new, :create, :edit, :update ] do
+      member do
+        post :submit
+      end
+    end
+  end
 
   # Space bookings
   get "calendar", to: "bookings#calendar", as: :calendar

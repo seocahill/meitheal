@@ -56,7 +56,7 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@owner)
     get my_profile_path
     assert_response :success
-    assert_includes response.body, "Edit Your Profile"
+    assert_includes response.body, "My Account"
   end
 
   test "user can create their profile" do

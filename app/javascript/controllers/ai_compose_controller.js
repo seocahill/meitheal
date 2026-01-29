@@ -44,8 +44,28 @@ export default class extends Controller {
     this.promptTarget.focus()
   }
 
+  useEmail(event) {
+    const subject = event.currentTarget.dataset.emailSubject
+    const body = event.currentTarget.dataset.emailBody
+    const from = event.currentTarget.dataset.emailFrom
+    const newsletterId = event.currentTarget.dataset.newsletterId
+
+    // Find the main AI compose form on the page
+    const mainComposer = document.querySelector('[data-controller="ai-compose"] textarea[data-ai-compose-target="prompt"]')
+    if (mainComposer) {
+      const prompt = `Transform this email into newsletter content:\n\nFrom: ${from}\nSubject: ${subject}\n\n${body || '(no body)'}\n\nMake it suitable for a community newsletter - engaging, clear, and well-formatted.`
+      mainComposer.value = prompt
+      mainComposer.focus()
+      mainComposer.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
   setLoading(loading) {
-    this.buttonTarget.disabled = loading
-    this.statusTarget.classList.toggle("hidden", !loading)
+    if (this.hasButtonTarget) {
+      this.buttonTarget.disabled = loading
+    }
+    if (this.hasStatusTarget) {
+      this.statusTarget.classList.toggle("hidden", !loading)
+    }
   }
 }

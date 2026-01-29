@@ -1,73 +1,99 @@
-<div class="max-w-4xl mx-auto px-4">
+<div class="max-w-7xl mx-auto px-4">
   <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Newsletter</h1>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
-      <%= render "form", newsletter: @newsletter %>
+      <div class="bg-white shadow rounded-lg p-6">
+        <%= render "form", newsletter: @newsletter %>
+      </div>
     </div>
 
-    <div class="lg:col-span-1">
-      <div class="bg-gray-50 rounded-lg p-6 sticky top-8" data-controller="ai-compose">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Composition Assistant</h2>
+    <div class="lg:col-span-1 space-y-6">
+      <div class="bg-white shadow rounded-lg p-6" data-controller="ai-compose">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Assistant</h2>
 
         <div class="space-y-4">
           <div>
             <label for="ai-prompt" class="block text-sm font-medium text-gray-700 mb-1">
-              What would you like help with?
+              Describe what you need
             </label>
             <textarea
               id="ai-prompt"
               data-ai-compose-target="prompt"
-              rows="4"
+              rows="3"
               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 text-sm"
-              placeholder="e.g., Write an introduction about our upcoming exhibition opening on March 15th featuring local artists..."></textarea>
+              placeholder="e.g., Write about our upcoming exhibition..."></textarea>
           </div>
 
-          <div class="flex flex-col gap-2">
-            <button
-              type="button"
-              data-action="click->ai-compose#compose"
-              data-newsletter-id="<%= @newsletter.id %>"
-              class="bg-indigo-600 text-white px-4 py-2 rounded text-sm hover:bg-indigo-700 disabled:opacity-50"
-              data-ai-compose-target="button">
-              Generate with AI
-            </button>
+          <button
+            type="button"
+            data-action="click->ai-compose#compose"
+            data-newsletter-id="<%= @newsletter.id %>"
+            class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50"
+            data-ai-compose-target="button">
+            Generate with AI
+          </button>
 
-            <div data-ai-compose-target="status" class="text-sm text-gray-500 hidden">
-              Generating...
-            </div>
+          <div data-ai-compose-target="status" class="text-sm text-gray-500 text-center hidden">
+            Generating...
           </div>
 
           <div data-ai-compose-target="result" class="hidden">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Generated Content</label>
-            <div
-              data-ai-compose-target="output"
-              class="bg-white border rounded-md p-3 text-sm max-h-64 overflow-y-auto prose prose-sm">
+            <div class="border-t pt-4 mt-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
+              <div
+                data-ai-compose-target="output"
+                class="bg-gray-50 border rounded-md p-3 text-sm max-h-48 overflow-y-auto prose prose-sm">
+              </div>
+              <p class="text-xs text-gray-500 mt-2">Copy and paste into the editor above.</p>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
-              Copy and paste this into the editor above, or continue refining with more prompts.
-            </p>
           </div>
         </div>
 
-        <div class="mt-6 pt-4 border-t border-gray-200">
-          <h3 class="text-sm font-medium text-gray-700 mb-2">Suggestions</h3>
-          <div class="space-y-2 text-sm">
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-left text-indigo-600 hover:text-indigo-800 block">
-              Write an introduction
+        <div class="mt-4 pt-4 border-t border-gray-200">
+          <h3 class="text-sm font-medium text-gray-700 mb-2">Quick Prompts</h3>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              Introduction
             </button>
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-left text-indigo-600 hover:text-indigo-800 block">
-              Summarize events
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              Events summary
             </button>
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-left text-indigo-600 hover:text-indigo-800 block">
-              Add call to action
-            </button>
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Make the content more concise and scannable" class="text-left text-indigo-600 hover:text-indigo-800 block">
-              Make more concise
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+              Call to action
             </button>
           </div>
         </div>
       </div>
+
+      <% if @archived_emails.any? %>
+        <div class="bg-white shadow rounded-lg p-6" data-controller="ai-compose">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Emails</h2>
+          <p class="text-sm text-gray-500 mb-4">Click to use email content with AI.</p>
+
+          <ul class="space-y-3 max-h-96 overflow-y-auto">
+            <% @archived_emails.each do |email| %>
+              <li class="border-b border-gray-100 pb-3 last:border-0">
+                <button
+                  type="button"
+                  data-action="click->ai-compose#useEmail"
+                  data-email-subject="<%= email.subject %>"
+                  data-email-body="<%= email.body&.truncate(500) %>"
+                  data-email-from="<%= email.from_address %>"
+                  data-newsletter-id="<%= @newsletter.id %>"
+                  class="text-left w-full group">
+                  <p class="text-sm font-medium text-gray-900 group-hover:text-pink-600 truncate">
+                    <%= email.subject %>
+                  </p>
+                  <p class="text-xs text-gray-500 mt-1">
+                    <%= email.email_group.name %> &middot; <%= time_ago_in_words(email.received_at) %> ago
+                  </p>
+                </button>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

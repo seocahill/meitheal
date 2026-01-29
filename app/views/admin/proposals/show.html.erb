@@ -1,0 +1,103 @@
+<div class="max-w-4xl mx-auto px-4">
+  <div class="flex justify-between items-start mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900"><%= @proposal.title %></h1>
+      <p class="mt-2 text-gray-600">
+        for <%= @proposal.funding_opportunity.title %>
+      </p>
+    </div>
+    <%= link_to "Back to Proposals", admin_proposals_path, class: "text-gray-600 hover:text-gray-800" %>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Proposal Details</h2>
+        <div class="prose max-w-none">
+          <%= simple_format(@proposal.description) %>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Status</h3>
+        <% case @proposal.status %>
+        <% when "draft" %>
+          <span class="px-3 py-1 text-sm rounded-full bg-gray-100 text-gray-800">Draft</span>
+        <% when "submitted" %>
+          <span class="px-3 py-1 text-sm rounded-full bg-yellow-100 text-yellow-800">Pending Review</span>
+        <% when "approved" %>
+          <span class="px-3 py-1 text-sm rounded-full bg-green-100 text-green-800">Approved</span>
+        <% when "rejected" %>
+          <span class="px-3 py-1 text-sm rounded-full bg-red-100 text-red-800">Rejected</span>
+        <% end %>
+
+        <dl class="mt-4 space-y-2 text-sm">
+          <div>
+            <dt class="text-gray-500">Applicant</dt>
+            <dd class="font-medium"><%= @proposal.user.email_address %></dd>
+          </div>
+          <% if @proposal.submitted_at %>
+            <div>
+              <dt class="text-gray-500">Submitted</dt>
+              <dd class="font-medium"><%= @proposal.submitted_at.strftime("%d %B %Y at %H:%M") %></dd>
+            </div>
+          <% end %>
+          <% if @proposal.reviewed_at %>
+            <div>
+              <dt class="text-gray-500">Reviewed</dt>
+              <dd class="font-medium"><%= @proposal.reviewed_at.strftime("%d %B %Y at %H:%M") %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <div class="bg-white shadow rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Opportunity</h3>
+        <dl class="space-y-2 text-sm">
+          <div>
+            <dt class="text-gray-500">Title</dt>
+            <dd class="font-medium"><%= @proposal.funding_opportunity.title %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Organization</dt>
+            <dd class="font-medium"><%= @proposal.funding_opportunity.organization %></dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Deadline</dt>
+            <dd class="font-medium"><%= @proposal.funding_opportunity.deadline.strftime("%d %B %Y") %></dd>
+          </div>
+          <% if @proposal.funding_opportunity.amount %>
+            <div>
+              <dt class="text-gray-500">Amount</dt>
+              <dd class="font-medium">&euro;<%= number_with_delimiter(@proposal.funding_opportunity.amount) %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+
+      <% if @proposal.submitted? %>
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Review Actions</h3>
+
+          <div class="space-y-4">
+            <%= button_to "Approve", approve_admin_proposal_path(@proposal), method: :post, class: "w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700" %>
+
+            <%= form_with url: reject_admin_proposal_path(@proposal), method: :post, class: "space-y-3" do |f| %>
+              <%= text_area_tag "proposal[admin_notes]", nil, placeholder: "Reason for rejection (optional)", rows: 3, class: "w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 text-sm" %>
+              <%= submit_tag "Reject", class: "w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 cursor-pointer" %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @proposal.admin_notes.present? %>
+        <div class="bg-white shadow rounded-lg p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Admin Notes</h3>
+          <p class="text-sm text-gray-700"><%= @proposal.admin_notes %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
