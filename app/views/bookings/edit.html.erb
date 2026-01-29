@@ -1,20 +1,22 @@
-<div class="max-w-2xl mx-auto">
-  <h1 class="text-2xl font-bold text-gray-900 mb-6">Edit Booking</h1>
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Booking</h1>
 
-  <%= render "form", booking: @booking %>
+  <div class="card p-6">
+    <%= render "form", booking: @booking %>
+  </div>
 
   <% if @booking.pending? && current_user_can_edit? %>
-    <div class="mt-6 pt-6 border-t border-gray-200">
-      <h2 class="text-lg font-medium text-gray-900 mb-4">Booking Actions</h2>
+    <div class="card p-6 mt-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Booking Actions</h2>
       <div class="flex gap-4">
-        <%= button_to "Confirm Booking", confirm_booking_path(@booking), method: :patch, class: "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" %>
+        <%= button_to "Confirm Booking", confirm_booking_path(@booking), method: :patch, class: "btn-primary text-white px-5 py-2.5 rounded-xl font-medium" %>
       </div>
     </div>
   <% end %>
 
   <% if @booking.confirmed? %>
-    <div class="mt-6 pt-6 border-t border-gray-200">
-      <%= button_to "Cancel Booking", cancel_booking_path(@booking), method: :patch, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700", data: { turbo_confirm: "Are you sure you want to cancel this booking?" } %>
+    <div class="card p-6 mt-6">
+      <%= button_to "Cancel Booking", cancel_booking_path(@booking), method: :patch, class: "bg-rose-600 text-white px-5 py-2.5 rounded-xl font-medium hover:bg-rose-700", data: { turbo_confirm: "Are you sure you want to cancel this booking?" } %>
     </div>
   <% end %>
 </div>

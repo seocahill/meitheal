@@ -1,8 +1,8 @@
-<div class="max-w-2xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-8">My Account</h1>
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">My Account</h1>
 
   <% if @membership %>
-    <div class="bg-white shadow rounded-lg p-6 mb-8">
+    <div class="card p-6 mb-8">
       <h2 class="text-xl font-semibold text-gray-900 mb-4">Membership</h2>
 
       <dl class="space-y-3">
@@ -14,9 +14,9 @@
           <dt class="text-gray-600">Status</dt>
           <dd>
             <% if @membership.expired? %>
-              <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Expired</span>
+              <span class="px-2.5 py-1 text-xs rounded-full bg-rose-100 text-rose-800 font-medium">Expired</span>
             <% else %>
-              <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Active</span>
+              <span class="px-2.5 py-1 text-xs rounded-full bg-emerald-100 text-emerald-800 font-medium">Active</span>
             <% end %>
           </dd>
         </div>
@@ -29,8 +29,8 @@
       </dl>
 
       <% if @membership.expired? || (@membership.expires_on && @membership.expires_on < 60.days.from_now) %>
-        <div class="mt-6 pt-4 border-t border-gray-200">
-          <%= link_to new_membership_payment_path(@membership), class: "inline-flex items-center px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700" do %>
+        <div class="mt-6 pt-4 border-t border-gray-100">
+          <%= link_to new_membership_payment_path(@membership), class: "inline-flex items-center btn-primary text-white px-5 py-2.5 rounded-xl font-medium" do %>
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
             </svg>
@@ -45,7 +45,7 @@
     </div>
   <% end %>
 
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="card p-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-6">Profile</h2>
     <%= render "form", profile: @profile %>
   </div>

@@ -1,27 +1,27 @@
-<div class="max-w-7xl mx-auto px-4">
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
   <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Newsletter</h1>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2">
-      <div class="bg-white shadow rounded-lg p-6">
+      <div class="card p-6">
         <%= render "form", newsletter: @newsletter %>
       </div>
     </div>
 
     <div class="lg:col-span-1 space-y-6">
-      <div class="bg-white shadow rounded-lg p-6" data-controller="ai-compose">
+      <div class="card p-6" data-controller="ai-compose">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Assistant</h2>
 
         <div class="space-y-4">
           <div>
-            <label for="ai-prompt" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="ai-prompt" class="form-label">
               Describe what you need
             </label>
             <textarea
               id="ai-prompt"
               data-ai-compose-target="prompt"
               rows="3"
-              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500 text-sm"
+              class="form-input"
               placeholder="e.g., Write about our upcoming exhibition..."></textarea>
           </div>
 
@@ -29,7 +29,7 @@
             type="button"
             data-action="click->ai-compose#compose"
             data-newsletter-id="<%= @newsletter.id %>"
-            class="w-full bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-indigo-700 disabled:opacity-50"
+            class="w-full btn-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50"
             data-ai-compose-target="button">
             Generate with AI
           </button>
@@ -40,26 +40,26 @@
 
           <div data-ai-compose-target="result" class="hidden">
             <div class="border-t pt-4 mt-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2">Generated Content</label>
+              <label class="form-label mb-2">Generated Content</label>
               <div
                 data-ai-compose-target="output"
-                class="bg-gray-50 border rounded-md p-3 text-sm max-h-48 overflow-y-auto prose prose-sm">
+                class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm max-h-48 overflow-y-auto prose prose-sm">
               </div>
-              <p class="text-xs text-gray-500 mt-2">Copy and paste into the editor above.</p>
+              <p class="form-hint mt-2">Copy and paste into the editor above.</p>
             </div>
           </div>
         </div>
 
-        <div class="mt-4 pt-4 border-t border-gray-200">
+        <div class="mt-4 pt-4 border-t border-gray-100">
           <h3 class="text-sm font-medium text-gray-700 mb-2">Quick Prompts</h3>
           <div class="flex flex-wrap gap-2">
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
               Introduction
             </button>
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
               Events summary
             </button>
-            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200">
+            <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
               Call to action
             </button>
           </div>
@@ -67,7 +67,7 @@
       </div>
 
       <% if @archived_emails.any? %>
-        <div class="bg-white shadow rounded-lg p-6" data-controller="ai-compose">
+        <div class="card p-6" data-controller="ai-compose">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent Emails</h2>
           <p class="text-sm text-gray-500 mb-4">Click to use email content with AI.</p>
 
@@ -82,7 +82,7 @@
                   data-email-from="<%= email.from_address %>"
                   data-newsletter-id="<%= @newsletter.id %>"
                   class="text-left w-full group">
-                  <p class="text-sm font-medium text-gray-900 group-hover:text-pink-600 truncate">
+                  <p class="text-sm font-medium text-gray-900 group-hover:text-purple-600 truncate transition-colors">
                     <%= email.subject %>
                   </p>
                   <p class="text-xs text-gray-500 mt-1">

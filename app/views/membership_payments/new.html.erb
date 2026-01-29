@@ -1,7 +1,7 @@
-<div class="max-w-lg mx-auto px-4" data-controller="sumup-payment">
+<div class="max-w-lg mx-auto px-4 sm:px-6" data-controller="sumup-payment">
   <h1 class="text-3xl font-bold text-gray-900 mb-8">Pay Membership</h1>
 
-  <div class="bg-white shadow rounded-lg p-6 mb-6">
+  <div class="card p-6 mb-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Membership Details</h2>
 
     <dl class="space-y-3">
@@ -22,7 +22,7 @@
     </dl>
   </div>
 
-  <div class="bg-white shadow rounded-lg p-6">
+  <div class="card p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment</h2>
 
     <div
@@ -34,14 +34,14 @@
       </div>
     </div>
 
-    <div data-sumup-payment-target="error" class="hidden mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700"></div>
+    <div data-sumup-payment-target="error" class="hidden mt-4 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700"></div>
 
     <button
       type="button"
       data-action="click->sumup-payment#initiatePayment"
       data-sumup-payment-target="payButton"
       data-membership-id="<%= @membership.id %>"
-      class="mt-6 w-full bg-pink-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed">
+      class="mt-6 w-full btn-primary text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed">
       Pay &euro;<%= number_with_precision(@amount_cents / 100.0, precision: 2) %>
     </button>
 
@@ -50,7 +50,7 @@
     </p>
   </div>
 
-  <%= link_to "Cancel", my_profile_path, class: "block mt-6 text-center text-gray-600 hover:text-gray-800" %>
+  <%= link_to "Cancel", my_profile_path, class: "block mt-6 text-center text-gray-600 hover:text-purple-600 transition-colors" %>
 </div>
 
 <script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script>
