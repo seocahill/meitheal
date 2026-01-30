@@ -38,13 +38,14 @@ class ZohoMailService
 
   def emails(folder_id:, limit: 25, start: 0)
     params = {
+      folderId: folder_id,
       limit: limit,
       start: start,
-      sortBy: "receivedTime",
-      sortOrder: "false" # descending
+      sortBy: "date",
+      sortorder: "false" # descending
     }
 
-    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/view", params)
+    response = get("/api/accounts/#{@account_id}/messages/view", params)
     response["data"] || []
   end
 
@@ -65,7 +66,7 @@ class ZohoMailService
   end
 
   def email_metadata(folder_id:, message_id:)
-    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}")
+    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}/details")
     response["data"]
   end
 
@@ -80,7 +81,14 @@ class ZohoMailService
   end
 
   def access_token
-    @access_token ||= fetch_access_token
+    @access_token ||= cached_access_token
+  end
+
+  def cached_access_token
+    cache_key = "zoho_access_token_#{@account_id}"
+    Rails.cache.fetch(cache_key, expires_in: 55.minutes) do
+      fetch_access_token
+    end
   end
 
   def fetch_access_token
@@ -101,6 +109,12 @@ class ZohoMailService
     end
 
     body["access_token"]
+  end
+
+  def clear_cached_token
+    Rails.cache.delete("zoho_access_token_#{@account_id}")
+    @access_token = nil
+    @connection = nil
   end
 
   def get(path, params = {})
@@ -125,8 +139,7 @@ class ZohoMailService
     when 200
       response.body
     when 401
-      @access_token = nil
-      @connection = nil
+      clear_cached_token
       raise AuthenticationError, "Invalid or expired token"
     when 429
       raise ApiError, "Rate limit exceeded"
