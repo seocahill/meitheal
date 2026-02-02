@@ -531,7 +531,7 @@
     padding-bottom: 0.375rem;
   }
   .thredded--navigation-breadcrumbs li:last-child:not(:first-child) a::before, .thredded--navigation-breadcrumbs li:last-child:not(:first-child).thredded--navigation-breadcrumbs--item-no-link::before {
-    background: asset-data-url("thredded/breadcrumb-chevron.svg") no-repeat center center;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 7 11' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.96.19a.47.47 0 0 0-.685 0L.592.91a.52.52 0 0 0 0 .715L3.887 5.03.564 8.462a.52.52 0 0 0 0 .716l.684.717a.47.47 0 0 0 .684 0l4.35-4.508a.528.528 0 0 0 0-.717L1.958.19' fill='%23B0AEBC' fill-rule='evenodd'/%3E%3C/svg%3E") no-repeat center center;
     content: "";
     display: inline-block;
     height: 10px;
@@ -551,7 +551,7 @@
     padding: 0.75rem 0;
   }
   .thredded--navigation-breadcrumbs li::after {
-    background: asset-data-url("thredded/breadcrumb-chevron.svg") no-repeat center center;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 7 11' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1.96.19a.47.47 0 0 0-.685 0L.592.91a.52.52 0 0 0 0 .715L3.887 5.03.564 8.462a.52.52 0 0 0 0 .716l.684.717a.47.47 0 0 0 .684 0l4.35-4.508a.528.528 0 0 0 0-.717L1.958.19' fill='%23B0AEBC' fill-rule='evenodd'/%3E%3C/svg%3E") no-repeat center center;
     content: "";
     display: inline-block;
     height: 10px;
@@ -1671,34 +1671,34 @@ aside.onebox.wikipedia .source > a::before, aside.onebox.twitterstatus .source >
   margin-right: 0.4em;
 }
 aside.onebox.amazon .source > a::before {
-  background-image: image-url("favicons/amazon.png");
+  background-image: url("/assets/favicons/amazon.png");
 }
 aside.onebox.githubblob .source > a::before {
-  background-image: image-url("favicons/github.png");
+  background-image: url("/assets/favicons/github.png");
 }
 aside.onebox.githubcommit .source > a::before {
-  background-image: image-url("favicons/github.png");
+  background-image: url("/assets/favicons/github.png");
 }
 aside.onebox.githubgist .source > a::before {
-  background-image: image-url("favicons/github.png");
+  background-image: url("/assets/favicons/github.png");
 }
 aside.onebox.githubissue .source > a::before {
-  background-image: image-url("favicons/github.png");
+  background-image: url("/assets/favicons/github.png");
 }
 aside.onebox.githubpullrequest .source > a::before {
-  background-image: image-url("favicons/github.png");
+  background-image: url("/assets/favicons/github.png");
 }
 aside.onebox.googledocs .source > a::before {
-  background-image: image-url("favicons/google_branding/logo_drive_48px.png");
+  background-image: url("/assets/favicons/google_branding/logo_drive_48px.png");
 }
 aside.onebox.stackexchange .source > a::before {
-  background-image: image-url("favicons/stackexchange.png");
+  background-image: url("/assets/favicons/stackexchange.png");
 }
 aside.onebox.twitterstatus .source > a::before {
-  background-image: image-url("favicons/twitter.png");
+  background-image: url("/assets/favicons/twitter.png");
 }
 aside.onebox.wikipedia .source > a::before {
-  background-image: image-url("favicons/wikipedia.png");
+  background-image: url("/assets/favicons/wikipedia.png");
 }
 aside.onebox header a[href] {
   color: rgba(0, 0, 0, 0.54);
@@ -1735,22 +1735,22 @@ aside.onebox .onebox-body .tweet-images img.tweet-image {
   float: left;
 }
 .googledocs-onebox-logo.g-docs-logo {
-  background: image-url("favicons/google_branding/logo_docs_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_docs_48px.png") no-repeat;
 }
 .googledocs-onebox-logo.g-forms-logo {
-  background: image-url("favicons/google_branding/logo_forms_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_forms_48px.png") no-repeat;
 }
 .googledocs-onebox-logo.g-sheets-logo {
-  background: image-url("favicons/google_branding/logo_sheets_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_sheets_48px.png") no-repeat;
 }
 .googledocs-onebox-logo.g-slides-logo {
-  background: image-url("favicons/google_branding/logo_slides_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_slides_48px.png") no-repeat;
 }
 .googledocs-onebox-logo.g-calendar-logo {
-  background: image-url("favicons/google_branding/logo_calendar_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_calendar_48px.png") no-repeat;
 }
 .googledocs-onebox-logo.g-drive-logo {
-  background: image-url("favicons/google_branding/logo_drive_48px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_drive_48px.png") no-repeat;
 }
 
 .gdocs-onebox-splash {
@@ -1764,7 +1764,7 @@ aside.onebox .onebox-body .tweet-images img.tweet-image {
   height: 128px;
 }
 .gdocs-onebox-splash .gdocs-onebox-logo.g-calendar-logo {
-  background: image-url("favicons/google_branding/logo_calendar_128px.png") no-repeat;
+  background: url("/assets/favicons/google_branding/logo_calendar_128px.png") no-repeat;
 }
 
 aside.onebox .onebox-body .onebox-avatar {
