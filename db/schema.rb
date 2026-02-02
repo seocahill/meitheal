@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_02_212859) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_02_213527) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -56,6 +56,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_212859) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admin_todos", force: :cascade do |t|
+    t.boolean "completed", default: false, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.date "due_date"
+    t.integer "position"
+    t.integer "priority", default: 0, null: false
+    t.integer "source_id"
+    t.string "source_type"
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["completed"], name: "index_admin_todos_on_completed"
+    t.index ["due_date"], name: "index_admin_todos_on_due_date"
+    t.index ["position"], name: "index_admin_todos_on_position"
+    t.index ["source_type", "source_id"], name: "index_admin_todos_on_source"
   end
 
   create_table "archived_emails", force: :cascade do |t|

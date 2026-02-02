@@ -33,6 +33,15 @@ Rails.application.routes.draw do
       end
     end
     resources :inbox, only: [ :index, :show ]
+    resources :todos do
+      member do
+        patch :toggle
+      end
+      collection do
+        post :batch_complete
+        post :batch_delete
+      end
+    end
   end
 
   # Static pages (must be near end to catch /:slug)

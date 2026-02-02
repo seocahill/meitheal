@@ -1,0 +1,52 @@
+<%= form_with model: todo, url: todo.persisted? ? admin_todo_path(todo) : admin_todos_path, class: "space-y-6" do |form| %>
+  <% if todo.errors.any? %>
+    <div class="form-error">
+      <h2><%= pluralize(todo.errors.count, "error") %> prohibited this todo from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% todo.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, class: "form-label" %>
+    <%= form.text_field :title, class: "form-input", placeholder: "What needs to be done?" %>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "form-label" %>
+    <%= form.text_area :description, class: "form-input", rows: 3, placeholder: "Additional details (optional)" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div>
+      <%= form.label :due_date, class: "form-label" %>
+      <%= form.date_field :due_date, class: "form-input" %>
+      <p class="form-hint">When should this be completed?</p>
+    </div>
+
+    <div>
+      <%= form.label :priority, class: "form-label" %>
+      <%= form.select :priority, [
+        ["Low", :low],
+        ["Normal", :normal],
+        ["High", :high],
+        ["Urgent", :urgent]
+      ], {}, class: "form-input" %>
+    </div>
+  </div>
+
+  <% if todo.persisted? %>
+    <div>
+      <%= form.check_box :completed, class: "form-checkbox w-4 h-4 text-purple-600 rounded" %>
+      <%= form.label :completed, "Mark as completed", class: "ml-2 text-gray-700" %>
+    </div>
+  <% end %>
+
+  <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
+    <%= link_to "Cancel", admin_todos_path, class: "text-gray-600 hover:text-gray-900" %>
+    <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+  </div>
+<% end %>
