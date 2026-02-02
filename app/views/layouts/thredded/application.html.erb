@@ -51,93 +51,99 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       }
 
-      /* Thredded theme overrides for NCF branding */
-      :root {
-        --thredded-brand: #9333ea;
-        --thredded-brand-dark: #7c3aed;
-        --thredded-link-color: #9333ea;
-        --thredded-link-hover-color: #ec4899;
-      }
-
+      /* Thredded - let default styles handle layout, just override colors */
       .thredded--main-container {
         font-family: 'Space Grotesk', system-ui, sans-serif;
+        max-width: none;
+        padding: 0;
       }
 
+      /* Brand color overrides */
+      .thredded--link,
+      .thredded--topics--title a,
       .thredded--navigation--main-link,
       .thredded--navigation--sub-link {
-        color: #9333ea !important;
+        color: #9333ea;
       }
 
+      .thredded--link:hover,
+      .thredded--topics--title a:hover,
       .thredded--navigation--main-link:hover,
       .thredded--navigation--sub-link:hover {
-        color: #ec4899 !important;
+        color: #ec4899;
       }
 
       .thredded--navigation--main-link.is-current,
       .thredded--navigation--sub-link.is-current {
-        border-bottom-color: #9333ea !important;
+        border-bottom-color: #9333ea;
       }
 
       .thredded--button,
       .thredded--form--submit {
-        background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%) !important;
-        border: none !important;
-        border-radius: 0.75rem !important;
-        padding: 0.5rem 1.25rem !important;
-        font-weight: 500 !important;
-        transition: all 0.2s ease !important;
+        background: #9333ea;
       }
 
       .thredded--button:hover,
-      .thredded--form--submit:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+      .thredded--button:focus,
+      .thredded--form--submit:hover,
+      .thredded--form--submit:focus {
+        background: #7c3aed;
       }
 
-      .thredded--topics--topic,
-      .thredded--messageboards--messageboard {
-        border-radius: 0.75rem !important;
-        margin-bottom: 0.5rem !important;
-        border: 1px solid #e5e7eb !important;
+      /* Make messageboards full width and borders more visible */
+      .thredded--messageboards-group {
+        display: block;
       }
 
-      .thredded--topics--topic:hover,
-      .thredded--messageboards--messageboard:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      .thredded--messageboard {
+        flex-basis: 100%;
+        border-color: #d1d5db;
       }
 
-      .thredded--post {
-        border-radius: 0.75rem !important;
-        border: 1px solid #e5e7eb !important;
+      /* Topics list - visible borders, keep absolute positioning for badge/icon */
+      .thredded--topics--topic {
+        border: 1px solid #d1d5db;
+        padding: 1rem 2.5rem 1rem 3.5rem;
+        margin-bottom: 0;
+        position: relative;
       }
 
-      .thredded--form--input,
-      .thredded--form--textarea {
-        border-radius: 0.75rem !important;
-        border: 1px solid #d1d5db !important;
-        font-family: 'Space Grotesk', system-ui, sans-serif !important;
+      .thredded--topics--topic + .thredded--topics--topic {
+        border-top: none;
       }
 
-      .thredded--form--input:focus,
-      .thredded--form--textarea:focus {
-        border-color: #9333ea !important;
-        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1) !important;
+      /* Posts count badge - positioned inside border */
+      .thredded--topics--posts-count {
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
       }
 
-      .thredded--flash {
-        border-radius: 0.75rem !important;
+      /* Follow icon - positioned inside border */
+      .thredded--topics--follow-icon {
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
       }
 
-      /* Avatar styling */
-      .thredded--user-avatar {
-        border-radius: 50% !important;
+      /* Fix navigation alignment */
+      .thredded--user-navigation {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem 1rem;
       }
 
-      /* Tags/categories */
-      .thredded--topic--category {
-        background: linear-gradient(135deg, #f3e8ff 0%, #fce7f3 100%) !important;
-        color: #7c3aed !important;
-        border-radius: 0.5rem !important;
+      .thredded--user-navigation--item {
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .thredded--unread-topics--followed-count,
+      .thredded--user-navigation--unread-topics--followed-count {
+        display: inline-flex;
+        align-items: center;
+        vertical-align: middle;
       }
     </style>
   </head>

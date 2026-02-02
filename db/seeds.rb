@@ -341,4 +341,107 @@ if defined?(Thredded::Messageboard)
     mb.description = "Discuss funding applications, residencies, and opportunities"
     mb.position = 5
   end
+
+  # --- Forum Topics and Posts ---
+  general = Thredded::Messageboard.find_by(slug: "general")
+  projects = Thredded::Messageboard.find_by(slug: "projects")
+  events_board = Thredded::Messageboard.find_by(slug: "events-workshops")
+
+  if general && !Thredded::Topic.exists?(title: "Welcome to the NCF Forum!")
+    topic = Thredded::Topic.create!(
+      messageboard: general,
+      user: admin,
+      title: "Welcome to the NCF Forum!",
+      slug: "welcome-to-the-ncf-forum"
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: general,
+      user: admin,
+      content: <<~CONTENT
+        Welcome to the North Connacht Cultural Co-op forum!
+
+        This is a space for members to connect, share ideas, and collaborate. A few quick notes:
+
+        - **Be respectful** - our [ethics code](/pages/ethics) applies here
+        - **Share freely** - knowledge, resources, and opportunities
+        - **Ask questions** - no question is too basic
+
+        Looking forward to seeing what we build together!
+      CONTENT
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: general,
+      user: editor,
+      content: "Great to see the forum up and running! I'll be posting workshop updates in the Events & Workshops board."
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: general,
+      user: member,
+      content: "Hello everyone! New member here. Looking forward to getting involved. Anyone working on electronics projects?"
+    )
+  end
+
+  if projects && !Thredded::Topic.exists?(title: "What are you working on?")
+    topic = Thredded::Topic.create!(
+      messageboard: projects,
+      user: editor,
+      title: "What are you working on?",
+      slug: "what-are-you-working-on"
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: projects,
+      user: editor,
+      content: <<~CONTENT
+        Share what you're currently making or planning! Looking for feedback, collaborators, or just want to show off your progress? Post it here.
+
+        I'm currently working on a series of laser-cut wooden sculptures that incorporate small LED circuits. Happy to share the design files when they're ready.
+      CONTENT
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: projects,
+      user: member,
+      content: "Building a small weather station with a Raspberry Pi. Planning to display it on a screen in the workshop. Could use some help with the enclosure if anyone has woodworking skills!"
+    )
+  end
+
+  if events_board && !Thredded::Topic.exists?(title: "Workshop idea: Intro to screen printing")
+    topic = Thredded::Topic.create!(
+      messageboard: events_board,
+      user: member,
+      title: "Workshop idea: Intro to screen printing",
+      slug: "workshop-idea-intro-to-screen-printing"
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: events_board,
+      user: member,
+      content: <<~CONTENT
+        Would anyone be interested in a screen printing workshop? I've done a bit of it before and could put together a beginner session.
+
+        We'd need:
+        - A screen and squeegee (I have one)
+        - Inks (need to buy)
+        - Some fabric or paper to print on
+
+        Thinking a Saturday afternoon, 2-3 hours. Let me know if you'd come!
+      CONTENT
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: events_board,
+      user: admin,
+      content: "This sounds great! We can probably cover materials from the workshop budget. Let's chat about dates - maybe after the next Open Night?"
+    )
+    Thredded::Post.create!(
+      postable: topic,
+      messageboard: events_board,
+      user: editor,
+      content: "Count me in! I've wanted to learn screen printing for ages. Saturday works well for me."
+    )
+  end
 end
