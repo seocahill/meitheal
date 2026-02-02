@@ -24,4 +24,24 @@ class User < ApplicationRecord
   def can_manage?
     owner?
   end
+
+  # Thredded compatibility methods
+  def name
+    profile&.name || email_address.split("@").first
+  end
+
+  # Alias for Gravatar compatibility
+  def email
+    email_address
+  end
+
+  # Thredded admin/moderator check
+  def admin
+    owner?
+  end
+  alias_method :admin?, :admin
+
+  def thredded_can_moderate_messageboard?(_messageboard)
+    can_edit?
+  end
 end

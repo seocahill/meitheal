@@ -239,6 +239,52 @@ Page.find_or_create_by!(slug: "draft-page") do |p|
   p.content = "<p>This page is not published and will not appear on the site.</p>"
 end
 
+Page.find_or_create_by!(slug: "ethics") do |p|
+  p.title = "Ethics Code"
+  p.published = true
+  p.content = <<~HTML
+    <h2>NCF Ethics Code</h2>
+    <p>As members of the North Connacht Cultural Co-op, we commit to the following principles:</p>
+
+    <h3>Respect & Inclusion</h3>
+    <ul>
+      <li>We welcome all people regardless of background, identity, or experience level</li>
+      <li>We listen with openness and speak with kindness</li>
+      <li>We make space for diverse perspectives and creative approaches</li>
+    </ul>
+
+    <h3>Collaboration & Solidarity</h3>
+    <ul>
+      <li>We share knowledge, resources, and opportunities generously</li>
+      <li>We support fellow artists and makers in their work</li>
+      <li>We credit and acknowledge contributions fairly</li>
+    </ul>
+
+    <h3>Sustainability & Care</h3>
+    <ul>
+      <li>We consider environmental impact in our practice</li>
+      <li>We care for shared spaces and tools</li>
+      <li>We prioritise wellbeing over productivity</li>
+    </ul>
+
+    <h3>Integrity & Accountability</h3>
+    <ul>
+      <li>We act honestly and transparently</li>
+      <li>We take responsibility for our actions and their impact</li>
+      <li>We address conflicts constructively and in good faith</li>
+    </ul>
+
+    <h3>Creative Freedom & Responsibility</h3>
+    <ul>
+      <li>We support artistic expression and experimentation</li>
+      <li>We consider the impact of our work on communities</li>
+      <li>We do not tolerate work that promotes hatred or discrimination</li>
+    </ul>
+
+    <p><em>This ethics code guides our forum discussions and all co-op activities. Forum posts that violate these principles may be moderated.</em></p>
+  HTML
+end
+
 # --- Model (for AI/chat features) ---
 default_model = Model.find_or_create_by!(provider: "openai", model_id: "gpt-4o-mini") do |m|
   m.name = "GPT-4o mini"
@@ -262,4 +308,37 @@ Newsletter.find_or_create_by!(subject: "February draft – events and callouts")
   n.status = :draft
   n.sent_at = nil
   n.content = "<p>Draft placeholder. Add February events and any calls for help or proposals here.</p>"
+end
+
+# --- Forum Messageboards (Thredded) ---
+if defined?(Thredded::Messageboard)
+  Thredded::Messageboard.find_or_create_by!(name: "General") do |mb|
+    mb.slug = "general"
+    mb.description = "General discussion, announcements, and community chat"
+    mb.position = 1
+  end
+
+  Thredded::Messageboard.find_or_create_by!(name: "Projects & Collaborations") do |mb|
+    mb.slug = "projects"
+    mb.description = "Share projects, find collaborators, and discuss works in progress"
+    mb.position = 2
+  end
+
+  Thredded::Messageboard.find_or_create_by!(name: "Events & Workshops") do |mb|
+    mb.slug = "events-workshops"
+    mb.description = "Discuss upcoming events, workshops, and propose new ones"
+    mb.position = 3
+  end
+
+  Thredded::Messageboard.find_or_create_by!(name: "Resources & Tips") do |mb|
+    mb.slug = "resources"
+    mb.description = "Share useful resources, tutorials, and tips for fellow artists and makers"
+    mb.position = 4
+  end
+
+  Thredded::Messageboard.find_or_create_by!(name: "Funding & Opportunities") do |mb|
+    mb.slug = "funding"
+    mb.description = "Discuss funding applications, residencies, and opportunities"
+    mb.position = 5
+  end
 end

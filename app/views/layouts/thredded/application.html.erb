@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Forum - THENCF" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="THENCF Forum">
+    <meta name="mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "thredded", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+      body {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+      }
+
+      .nav-gradient {
+        background: linear-gradient(135deg, #9333ea 0%, #ec4899 50%, #f97316 100%);
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+      }
+
+      .card {
+        background: white;
+        border-radius: 1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        transition: all 0.2s ease;
+      }
+
+      .card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+
+      /* Thredded theme overrides for NCF branding */
+      :root {
+        --thredded-brand: #9333ea;
+        --thredded-brand-dark: #7c3aed;
+        --thredded-link-color: #9333ea;
+        --thredded-link-hover-color: #ec4899;
+      }
+
+      .thredded--main-container {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+      }
+
+      .thredded--navigation--main-link,
+      .thredded--navigation--sub-link {
+        color: #9333ea !important;
+      }
+
+      .thredded--navigation--main-link:hover,
+      .thredded--navigation--sub-link:hover {
+        color: #ec4899 !important;
+      }
+
+      .thredded--navigation--main-link.is-current,
+      .thredded--navigation--sub-link.is-current {
+        border-bottom-color: #9333ea !important;
+      }
+
+      .thredded--button,
+      .thredded--form--submit {
+        background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%) !important;
+        border: none !important;
+        border-radius: 0.75rem !important;
+        padding: 0.5rem 1.25rem !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .thredded--button:hover,
+      .thredded--form--submit:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(147, 51, 234, 0.4);
+      }
+
+      .thredded--topics--topic,
+      .thredded--messageboards--messageboard {
+        border-radius: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
+        border: 1px solid #e5e7eb !important;
+      }
+
+      .thredded--topics--topic:hover,
+      .thredded--messageboards--messageboard:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      }
+
+      .thredded--post {
+        border-radius: 0.75rem !important;
+        border: 1px solid #e5e7eb !important;
+      }
+
+      .thredded--form--input,
+      .thredded--form--textarea {
+        border-radius: 0.75rem !important;
+        border: 1px solid #d1d5db !important;
+        font-family: 'Space Grotesk', system-ui, sans-serif !important;
+      }
+
+      .thredded--form--input:focus,
+      .thredded--form--textarea:focus {
+        border-color: #9333ea !important;
+        box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1) !important;
+      }
+
+      .thredded--flash {
+        border-radius: 0.75rem !important;
+      }
+
+      /* Avatar styling */
+      .thredded--user-avatar {
+        border-radius: 50% !important;
+      }
+
+      /* Tags/categories */
+      .thredded--topic--category {
+        background: linear-gradient(135deg, #f3e8ff 0%, #fce7f3 100%) !important;
+        color: #7c3aed !important;
+        border-radius: 0.5rem !important;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-50 min-h-screen">
+    <nav class="nav-gradient">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex justify-between h-14">
+          <div class="flex items-center gap-6">
+            <%= link_to main_app.root_path, class: "text-xl font-bold text-white hover:text-white/90" do %>
+              THENCF
+            <% end %>
+            <div class="hidden md:flex items-center gap-4">
+              <%= link_to "Events", main_app.events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              <%= link_to "Members", main_app.profiles_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              <%= link_to "Forum", thredded.root_path, class: "text-white hover:text-white text-sm font-medium border-b-2 border-white/50" %>
+              <%= link_to "Funding", main_app.funding_opportunities_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              <%= link_to "Calendar", main_app.calendar_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <% if current_user %>
+              <% if current_user.can_edit? %>
+                <div class="hidden lg:flex items-center gap-3">
+                  <%= link_to "Newsletters", main_app.newsletters_path, class: "text-white/80 hover:text-white text-sm" %>
+                </div>
+              <% end %>
+              <% if current_user.can_manage? %>
+                <div class="relative" data-controller="dropdown">
+                  <button data-action="click->dropdown#toggle" class="text-white/80 hover:text-white text-sm font-medium">
+                    Admin ▾
+                  </button>
+                  <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                    <%= link_to "Inbox", main_app.admin_inbox_index_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                    <%= link_to "Users", main_app.admin_users_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                    <%= link_to "Memberships", main_app.admin_memberships_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                    <%= link_to "Proposals", main_app.admin_proposals_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                    <%= link_to "Email Groups", main_app.admin_email_groups_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                  </div>
+                </div>
+              <% end %>
+              <%= link_to "Account", main_app.my_profile_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              <%= button_to "Out", main_app.session_path, method: :delete, class: "text-white/70 hover:text-white text-sm" %>
+            <% else %>
+              <%= link_to "Sign In", main_app.new_session_path, class: "text-white font-medium text-sm px-3 py-1 bg-white/20 rounded-lg hover:bg-white/30" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <% if notice.present? %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 px-4 py-3 rounded-r-lg">
+          <%= notice %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+        <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 px-4 py-3 rounded-r-lg">
+          <%= alert %>
+        </div>
+      </div>
+    <% end %>
+
+    <main class="py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <%= yield %>
+      </div>
+    </main>
+
+    <footer class="border-t border-gray-200 mt-16 py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-gray-500 text-sm">
+            THENCF &middot; North Connacht Cultural Co-op &middot; Ballina, Co. Mayo
+          </p>
+          <div class="flex gap-4 text-sm">
+            <%= link_to "Ethics Code", main_app.page_path("ethics"), class: "text-gray-500 hover:text-purple-600" %>
+            <%= link_to "About", main_app.page_path("about"), class: "text-gray-500 hover:text-purple-600" %>
+            <%= link_to "Contact", main_app.page_path("contact"), class: "text-gray-500 hover:text-purple-600" %>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
