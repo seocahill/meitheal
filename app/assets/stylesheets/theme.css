@@ -1,16 +1,16 @@
 /* THENCF Theme Styles */
 
 /* Google Fonts - Space Grotesk */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap'); */
 
 /* Base typography */
-body {
+/* body {
   font-family: 'Space Grotesk', system-ui, sans-serif;
 }
 
 .font-display {
   font-family: 'Space Grotesk', system-ui, sans-serif;
-}
+} */
 
 /* Navigation gradient */
 .nav-gradient {
@@ -195,7 +195,7 @@ select.form-input {
 
 /* Thredded forum overrides */
 .thredded--main-container {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
+  /* font-family: 'Space Grotesk', system-ui, sans-serif; */
   max-width: none;
   padding: 0;
 }
