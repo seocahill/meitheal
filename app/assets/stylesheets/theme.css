@@ -171,20 +171,10 @@ select.form-input {
 
 /* Homepage specific */
 .homepage-bg {
-  background: linear-gradient(135deg,
-    #9b59b6 0%,
-    #e91e63 25%,
-    #00bcd4 50%,
-    #ff9800 75%,
-    #9b59b6 100%);
-  background-size: 400% 400%;
-  animation: gradient-shift 15s ease infinite;
-}
-
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  background-color: #1a1a2e;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
 }
 
 .menu-highlight {
