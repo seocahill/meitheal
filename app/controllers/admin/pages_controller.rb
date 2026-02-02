@@ -40,12 +40,12 @@ class Admin::PagesController < ApplicationController
   end
 
   def publish
-    @page.update!(published: true)
+    @page.update!(visibility: :published)
     redirect_to page_path(@page.slug), notice: "Page published."
   end
 
   def unpublish
-    @page.update!(published: false)
+    @page.update!(visibility: :draft)
     redirect_to admin_pages_path, notice: "Page unpublished."
   end
 
@@ -56,6 +56,6 @@ class Admin::PagesController < ApplicationController
   end
 
   def page_params
-    params.require(:page).permit(:title, :slug, :content, :published)
+    params.require(:page).permit(:title, :slug, :content, :visibility, :nav_location)
   end
 end

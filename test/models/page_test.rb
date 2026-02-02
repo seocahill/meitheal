@@ -44,10 +44,10 @@ class PageTest < ActiveSupport::TestCase
   end
 
   test "published scope returns only published pages" do
-    published = Page.create!(title: "Published", slug: "scope-test-published", content: "Yes", published: true)
-    draft = Page.create!(title: "Draft", slug: "scope-test-draft", content: "No", published: false)
+    published_page = Page.create!(title: "Published", slug: "scope-test-published", content: "Yes", visibility: :published)
+    draft = Page.create!(title: "Draft", slug: "scope-test-draft", content: "No", visibility: :draft)
 
-    assert_includes Page.published, published
+    assert_includes Page.published, published_page
     assert_not_includes Page.published, draft
   end
 
@@ -60,5 +60,81 @@ class PageTest < ActiveSupport::TestCase
   test "has rich text content" do
     page = Page.create!(title: "Rich", slug: "rich-content-test", content: "<p>Rich content</p>")
     assert page.content.present?
+  end
+
+  # Nav location tests
+  test "nav_location defaults to hidden" do
+    page = Page.new(title: "Test", slug: "nav-default-test")
+    assert_equal "hidden", page.nav_location
+  end
+
+  test "nav_location can be set to hidden, nav, footer, or dropdown" do
+    %w[hidden nav footer dropdown].each do |location|
+      page = Page.new(title: "Test", slug: "nav-#{location}-test", nav_location: location)
+      assert page.valid?, "Expected nav_location #{location} to be valid"
+      assert_equal location, page.nav_location
+    end
+  end
+
+  test "scopes for nav locations" do
+    nav_page = Page.create!(title: "Nav", slug: "nav-scope-nav", nav_location: :nav, visibility: :published)
+    footer_page = Page.create!(title: "Footer", slug: "nav-scope-footer", nav_location: :footer, visibility: :published)
+    dropdown_page = Page.create!(title: "Dropdown", slug: "nav-scope-dropdown", nav_location: :dropdown, visibility: :published)
+    hidden_page = Page.create!(title: "Hidden", slug: "nav-scope-hidden", nav_location: :hidden, visibility: :published)
+
+    assert_includes Page.in_nav, nav_page
+    assert_not_includes Page.in_nav, footer_page
+
+    assert_includes Page.in_footer, footer_page
+    assert_not_includes Page.in_footer, nav_page
+
+    assert_includes Page.in_dropdown, dropdown_page
+    assert_not_includes Page.in_dropdown, nav_page
+  end
+
+  # Visibility tests
+  test "visibility defaults to draft" do
+    page = Page.new(title: "Test", slug: "vis-default-test")
+    assert_equal "draft", page.visibility
+  end
+
+  test "visibility can be set to draft, published, or members_only" do
+    { "draft" => "draft", "published" => "pub", "members_only" => "members" }.each do |vis, slug_suffix|
+      page = Page.new(title: "Test", slug: "vis-#{slug_suffix}-test", visibility: vis)
+      assert page.valid?, "Expected visibility #{vis} to be valid: #{page.errors.full_messages.join(", ")}"
+      assert_equal vis, page.visibility
+    end
+  end
+
+  test "visible_to scope for public pages" do
+    public_page = Page.create!(title: "Public", slug: "vis-scope-public", visibility: :published)
+    members_page = Page.create!(title: "Members", slug: "vis-scope-members", visibility: :members_only)
+    draft_page = Page.create!(title: "Draft", slug: "vis-scope-draft", visibility: :draft)
+
+    # Non-authenticated user sees only published
+    assert_includes Page.visible_to(nil), public_page
+    assert_not_includes Page.visible_to(nil), members_page
+    assert_not_includes Page.visible_to(nil), draft_page
+  end
+
+  test "visible_to scope for members" do
+    public_page = Page.create!(title: "Public", slug: "vis-member-public", visibility: :published)
+    members_page = Page.create!(title: "Members", slug: "vis-member-members", visibility: :members_only)
+    draft_page = Page.create!(title: "Draft", slug: "vis-member-draft", visibility: :draft)
+
+    member = users(:viewer)
+
+    # Member sees published and members_only
+    assert_includes Page.visible_to(member), public_page
+    assert_includes Page.visible_to(member), members_page
+    assert_not_includes Page.visible_to(member), draft_page
+  end
+
+  test "published? returns true for published visibility" do
+    page = Page.new(visibility: :published)
+    assert page.published?
+
+    page.visibility = :draft
+    assert_not page.published?
   end
 end

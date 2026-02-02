@@ -5,7 +5,7 @@ class ForumModerationServiceTest < ActiveSupport::TestCase
     # Create ethics page
     Page.find_or_create_by!(slug: "ethics") do |p|
       p.title = "Ethics Code"
-      p.published = true
+      p.visibility = :published
       p.content = <<~HTML
         <h2>NCF Ethics Code</h2>
         <ul>

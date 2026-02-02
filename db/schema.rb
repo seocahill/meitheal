@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_02_011753) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_02_212859) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -225,10 +225,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_011753) do
 
   create_table "pages", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.boolean "published", default: false, null: false
+    t.integer "nav_location", default: 0, null: false
     t.string "slug", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
+    t.integer "visibility", default: 0, null: false
     t.index ["slug"], name: "index_pages_on_slug", unique: true
   end
 

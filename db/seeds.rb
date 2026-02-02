@@ -217,31 +217,36 @@ end
 # --- Pages (CMS) ---
 Page.find_or_create_by!(slug: "about") do |p|
   p.title = "About us"
-  p.published = true
+  p.visibility = :published
+  p.nav_location = :footer
   p.content = "<p>We're a community makerspace in Dublin. Members get access to the workshop, tools, and each other.</p><p>Drop in on Open Night or <a href=\"/pages/contact\">get in touch</a>.</p>"
 end
 
 Page.find_or_create_by!(slug: "contact") do |p|
   p.title = "Contact"
-  p.published = true
+  p.visibility = :published
+  p.nav_location = :footer
   p.content = "<p>Email: <a href=\"mailto:hello@thencf.art\">hello@thencf.art</a></p><p>Open Night is every second Thursday, 6–9pm. No booking needed for a look around.</p>"
 end
 
 Page.find_or_create_by!(slug: "code-of-conduct") do |p|
   p.title = "Code of conduct"
-  p.published = true
+  p.visibility = :published
+  p.nav_location = :dropdown
   p.content = "<p>Be respectful. Look after the space and the tools. No harassment, no discrimination. We aim for a welcoming environment for everyone.</p><p>Reports: talk to a board member or email board@thencf.art.</p>"
 end
 
 Page.find_or_create_by!(slug: "draft-page") do |p|
   p.title = "Draft page (unpublished)"
-  p.published = false
+  p.visibility = :draft
+  p.nav_location = :hidden
   p.content = "<p>This page is not published and will not appear on the site.</p>"
 end
 
 Page.find_or_create_by!(slug: "ethics") do |p|
   p.title = "Ethics Code"
-  p.published = true
+  p.visibility = :published
+  p.nav_location = :footer
   p.content = <<~HTML
     <h2>NCF Ethics Code</h2>
     <p>As members of the North Connacht Cultural Co-op, we commit to the following principles:</p>

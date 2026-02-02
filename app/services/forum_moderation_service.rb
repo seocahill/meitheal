@@ -46,7 +46,7 @@ class ForumModerationService
 
   def ethics_code
     @ethics_code ||= begin
-      page = Page.find_by(slug: ETHICS_CODE_SLUG, published: true)
+      page = Page.find_by(slug: ETHICS_CODE_SLUG, visibility: :published)
       if page&.content.present?
         # Strip HTML tags for cleaner prompt
         ActionController::Base.helpers.strip_tags(page.content.to_s)
