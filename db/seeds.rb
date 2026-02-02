@@ -243,6 +243,75 @@ Page.find_or_create_by!(slug: "draft-page") do |p|
   p.content = "<p>This page is not published and will not appear on the site.</p>"
 end
 
+Page.find_or_create_by!(slug: "faq") do |p|
+  p.title = "Frequently Asked Questions"
+  p.visibility = :published
+  p.nav_location = :dropdown
+  p.content = <<~HTML
+    <h2>About THENCF</h2>
+
+    <h3>What is THENCF?</h3>
+    <p>THENCF (The North Connacht Cultural Co-op) is a member-owned cooperative dedicated to supporting artists, makers, and creative practitioners in the northwest of Ireland. Based in Ballina, Co. Mayo, we provide workspace, resources, and a supportive community for creative work.</p>
+
+    <h3>Who can join?</h3>
+    <p>Anyone with an interest in arts, making, or creative practice is welcome. You don't need to be a professional artist - we welcome hobbyists, learners, and curious people of all skill levels.</p>
+
+    <h3>Where are you located?</h3>
+    <p>We're based in Ballina, County Mayo. The full address and directions are available on our <a href="/pages/contact">contact page</a>.</p>
+
+    <h2>Membership</h2>
+
+    <h3>How much does membership cost?</h3>
+    <p>Membership rates vary by type. We offer standard memberships and concession rates for students, unwaged, and those on limited income. Contact us for current pricing.</p>
+
+    <h3>What do I get as a member?</h3>
+    <ul>
+      <li>Access to the workshop and studio spaces during opening hours</li>
+      <li>Use of shared tools and equipment</li>
+      <li>Access to the members' forum and community</li>
+      <li>Discounts on workshops and events</li>
+      <li>Storage space (subject to availability)</li>
+      <li>A say in how the co-op is run</li>
+    </ul>
+
+    <h3>How do I become a member?</h3>
+    <p>Come along to an Open Night to see the space and meet current members. If you'd like to join, we'll help you sign up on the spot or you can apply online through your account.</p>
+
+    <h2>The Space</h2>
+
+    <h3>What spaces and equipment do you have?</h3>
+    <p>We have a main workshop for woodwork, metalwork, and general making; a studio space for cleaner work; and a meeting room for gatherings and small events. Specific equipment lists are available to members.</p>
+
+    <h3>Can I book the space for private events?</h3>
+    <p>Members can book spaces through the calendar on this site. For larger events or non-member bookings, please <a href="/pages/contact">get in touch</a> to discuss.</p>
+
+    <h3>What are your opening hours?</h3>
+    <p>Opening hours vary - check the calendar for current availability. Open Nights are held regularly and are open to everyone.</p>
+
+    <h2>Events & Workshops</h2>
+
+    <h3>Do I need to be a member to attend events?</h3>
+    <p>Most of our events are open to everyone. Some member-only events are marked as such. Open Night is always open to all.</p>
+
+    <h3>Can I propose a workshop or event?</h3>
+    <p>Absolutely! We welcome members proposing and running workshops. Post your idea in the forum or speak to any board member.</p>
+
+    <h3>How do I stay updated about events?</h3>
+    <p>Join our newsletter for regular updates, or check the events page on this site. Members can also follow discussions in the forum.</p>
+
+    <h2>Getting Involved</h2>
+
+    <h3>How is the co-op run?</h3>
+    <p>We're a member-owned cooperative. Major decisions are made collectively at general meetings. Day-to-day operations are handled by the board, who are elected by members.</p>
+
+    <h3>Can I help out?</h3>
+    <p>Yes! We're always looking for help with maintenance, events, outreach, and more. Speak to any board member or post in the forum if you'd like to get involved.</p>
+
+    <h3>I have another question</h3>
+    <p>Drop us a line at <a href="mailto:hello@thencf.art">hello@thencf.art</a> or ask on the forum. We're happy to help.</p>
+  HTML
+end
+
 Page.find_or_create_by!(slug: "ethics") do |p|
   p.title = "Ethics Code"
   p.visibility = :published
