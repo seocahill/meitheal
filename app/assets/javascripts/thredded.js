@@ -296,6 +296,7 @@ window.Thredded = window.Thredded || {};
 (() => {
   const isTurbolinks = 'Turbolinks' in window && window.Turbolinks.supported;
   const isTurbolinks5 = isTurbolinks && 'clearCache' in window.Turbolinks;
+  const isTurbo = 'Turbo' in window;
 
   let onPageLoadFiredOnce = false;
   const pageLoadCallbacks = [];
@@ -306,22 +307,27 @@ window.Thredded = window.Thredded || {};
     onPageLoadFiredOnce = true;
   };
 
-  // Fires the callback on DOMContentLoaded or a Turbolinks page load.
-  // If called from an async script on the first page load, and the DOMContentLoad event
-  // has already fired, will execute the callback immediately.
+  // Fires the callback on DOMContentLoaded or a Turbo/Turbolinks page load.
   window.Thredded.onPageLoad = (callback) => {
     pageLoadCallbacks.push(callback);
     // With async script loading, a callback may be added after the DOMContentLoaded event has already triggered.
-    // This means we will receive neither a DOMContentLoaded event, nor a turbolinks:load event on Turbolinks 5.
     if (!onPageLoadFiredOnce && window.Thredded.DOMContentLoadedFired) {
       callback();
     }
   };
 
-  if (isTurbolinks5) {
-    // In Turbolinks 5.0.1, turbolinks:load may have already fired (before DOMContentLoaded).
-    // If so, add our own DOMContentLoaded listener:
-    // See: https://github.com/turbolinks/turbolinks/commit/69d353ea73d10ee6b25c2866fc5706879ba403e3
+  // Hotwire Turbo support
+  if (isTurbo) {
+    document.addEventListener('DOMContentLoaded', () => {
+      triggerOnPageLoad();
+    });
+    document.addEventListener('turbo:load', () => {
+      triggerOnPageLoad();
+    });
+    document.addEventListener('turbo:frame-load', () => {
+      triggerOnPageLoad();
+    });
+  } else if (isTurbolinks5) {
     if (window.Turbolinks.controller.lastRenderedLocation) {
       document.addEventListener('DOMContentLoaded', () => {
         triggerOnPageLoad();
@@ -331,7 +337,7 @@ window.Thredded = window.Thredded || {};
       triggerOnPageLoad();
     });
   } else {
-    // Turbolinks Classic (with or without jQuery.Turbolinks), or no Turbolinks:
+    // No Turbo/Turbolinks:
     if (!window.Thredded.DOMContentLoadedFired) {
       document.addEventListener('DOMContentLoaded', () => {
         triggerOnPageLoad();
@@ -452,7 +458,7 @@ window.Thredded.serializeForm = (form) => {
 (() => {
   const COMPONENT_SELECTOR = '[data-thredded-flash-message]';
 
-  document.addEventListener('turbolinks:before-cache', () => {
+  document.addEventListener('turbo:before-cache', () => {
     Array.prototype.forEach.call(document.querySelectorAll(COMPONENT_SELECTOR), (node) => {
       node.parentNode.removeChild(node);
     });
@@ -532,7 +538,7 @@ window.ThreddedMentionAutocompletion = ThreddedMentionAutocompletion;
     });
   });
 
-  document.addEventListener('turbolinks:before-cache', () => {
+  document.addEventListener('turbo:before-cache', () => {
     Array.prototype.forEach.call(document.querySelectorAll(COMPONENT_SELECTOR), (node) => {
       destroyPostForm(node);
     });
@@ -726,7 +732,7 @@ window.ThreddedMentionAutocompletion = ThreddedMentionAutocompletion;
         document.querySelectorAll(COMPONENT_SELECTOR),
         threddedContainer.getAttribute('data-thredded-locale').replace('-', '_'));
     });
-    document.addEventListener('turbolinks:before-cache', () => {
+    document.addEventListener('turbo:before-cache', () => {
       timeago.cancel();
     });
   } else if ('jQuery' in window && 'timeago' in jQuery.fn) {
@@ -827,7 +833,7 @@ window.ThreddedMentionAutocompletion = ThreddedMentionAutocompletion;
     });
   });
 
-  document.addEventListener('turbolinks:before-cache', () => {
+  document.addEventListener('turbo:before-cache', () => {
     Array.prototype.forEach.call(document.querySelectorAll(COMPONENT_SELECTOR), (node) => {
       destroyTopicForm(node);
     });
@@ -1044,7 +1050,7 @@ window.ThreddedMentionAutocompletion = ThreddedMentionAutocompletion;
     }
   };
 
-  document.addEventListener('turbolinks:before-cache', () => {
+  document.addEventListener('turbo:before-cache', () => {
     Array.prototype.forEach.call(
       document.getElementsByClassName(Thredded.UserTextcomplete.DROPDOWN_CLASS_NAME), (node) => {
         node.parentNode.removeChild(node);
@@ -1171,7 +1177,7 @@ window.ThreddedMentionAutocompletion = ThreddedMentionAutocompletion;
     });
   });
 
-  document.addEventListener('turbolinks:before-cache', () => {
+  document.addEventListener('turbo:before-cache', () => {
     Array.prototype.forEach.call(document.querySelectorAll(COMPONENT_SELECTOR), (node) => {
       destroyUsersSelect(node);
     });
