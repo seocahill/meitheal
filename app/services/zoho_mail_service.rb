@@ -70,6 +70,33 @@ class ZohoMailService
     response["data"]
   end
 
+  def attachments(folder_id:, message_id:)
+    response = get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}/attachmentinfo")
+    response["data"]&.dig("attachments") || []
+  rescue ApiError
+    # Return empty array if no attachments or error
+    []
+  end
+
+  def download_attachment(folder_id:, message_id:, attachment_id:)
+    # First get attachment info for filename and content type
+    attachments_list = attachments(folder_id: folder_id, message_id: message_id)
+    attachment_info = attachments_list.find { |a| a["attachmentId"] == attachment_id }
+
+    # Download the attachment binary
+    response = raw_connection.get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}/attachments/#{attachment_id}")
+
+    if response.status != 200
+      raise ApiError, "Could not download attachment"
+    end
+
+    {
+      content: response.body,
+      filename: attachment_info&.dig("attachmentName") || "attachment",
+      content_type: attachment_info&.dig("contentType") || "application/octet-stream"
+    }
+  end
+
   private
 
   def base_url
@@ -131,6 +158,12 @@ class ZohoMailService
       f.response :json
       f.headers["Authorization"] = "Zoho-oauthtoken #{access_token}"
       f.headers["Accept"] = "application/json"
+    end
+  end
+
+  def raw_connection
+    @raw_connection ||= Faraday.new(url: base_url) do |f|
+      f.headers["Authorization"] = "Zoho-oauthtoken #{access_token}"
     end
   end
 

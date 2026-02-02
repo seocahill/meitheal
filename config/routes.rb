@@ -32,7 +32,14 @@ Rails.application.routes.draw do
         post :reject
       end
     end
-    resources :inbox, only: [ :index, :show ]
+    resources :inbox, only: [ :index, :show ] do
+      member do
+        post :create_todo
+        post :create_newsletter
+        post :create_funding
+        get "attachments/:attachment_id", action: :attachment, as: :attachment
+      end
+    end
     resources :todos do
       member do
         patch :toggle
