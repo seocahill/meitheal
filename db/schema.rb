@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_02_213527) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_03_235824) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -152,6 +152,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_213527) do
     t.index ["user_id"], name: "index_events_on_user_id"
   end
 
+  create_table "faqs", force: :cascade do |t|
+    t.boolean "active"
+    t.datetime "created_at", null: false
+    t.integer "order"
+    t.string "question"
+    t.datetime "updated_at", null: false
+  end
+
   create_table "friendly_id_slugs", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.string "scope"
@@ -261,6 +269,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_213527) do
     t.string "sumup_transaction_id"
     t.datetime "updated_at", null: false
     t.index ["membership_id"], name: "index_payments_on_membership_id"
+  end
+
+  create_table "posts", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "excerpt"
+    t.boolean "published"
+    t.datetime "published_at"
+    t.string "slug"
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["slug"], name: "index_posts_on_slug", unique: true
+    t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
   create_table "profiles", force: :cascade do |t|
@@ -576,6 +597,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_02_213527) do
   add_foreign_key "messages", "tool_calls"
   add_foreign_key "newsletters", "chats"
   add_foreign_key "payments", "memberships"
+  add_foreign_key "posts", "users"
   add_foreign_key "profiles", "users"
   add_foreign_key "proposals", "funding_opportunities"
   add_foreign_key "proposals", "users"

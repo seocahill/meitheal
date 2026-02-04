@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  resources :posts, param: :slug do
+    member do
+      patch :publish
+      patch :unpublish
+    end
+  end
+
   resource :session
   resources :passwords, param: :token
 
@@ -9,7 +16,15 @@ Rails.application.routes.draw do
     end
   end
 
+  get "faq", to: "faqs#index", as: :faq
+
   namespace :admin do
+    resources :faqs do
+      member do
+        patch :move_up
+        patch :move_down
+      end
+    end
     resources :users
     resources :memberships do
       resources :payments, only: [ :create, :destroy ]

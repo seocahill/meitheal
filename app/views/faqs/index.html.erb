@@ -1,0 +1,18 @@
+<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+  <div class="prose lg:prose-xl">
+    <h2>Frequently Asked Questions</h2>
+
+    <% if @faqs.empty? %>
+      <p class="text-gray-500">No FAQs available yet.</p>
+    <% else %>
+      <% @faqs.each do |faq| %>
+        <details class="mb-4 border-b pb-4">
+          <summary class="cursor-pointer font-semibold text-xl hover:text-blue-600"><%= faq.question %></summary>
+          <div class="mt-4">
+            <%= faq.answer %>
+          </div>
+        </details>
+      <% end %>
+    <% end %>
+  </div>
+</div>

@@ -12,6 +12,95 @@
   font-family: 'Space Grotesk', system-ui, sans-serif;
 } */
 
+/* Prose styling for content pages */
+.prose {
+  color: #374151;
+  max-width: 65ch;
+}
+
+.prose h2 {
+  color: #1f2937;
+  font-weight: 800;
+  font-size: 1.5em;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  line-height: 1.3333333;
+}
+
+.prose h3 {
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 1.25em;
+  margin-top: 1.6em;
+  margin-bottom: 0.6em;
+  line-height: 1.6;
+}
+
+.prose a {
+  color: #6366f1;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.prose a:hover {
+  color: #4f46e5;
+}
+
+.prose p {
+  margin-top: 1.25em;
+  margin-bottom: 1.25em;
+}
+
+.prose img {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose article {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+.prose.lg\:prose-xl {
+  font-size: 1.125rem;
+  line-height: 1.7777778;
+}
+
+.prose.lg\:prose-xl h2 {
+  font-size: 1.8em;
+  margin-top: 1.5555556em;
+  margin-bottom: 0.8888889em;
+  line-height: 1.1111111;
+}
+
+.prose.lg\:prose-xl h3 {
+  font-size: 1.5em;
+  margin-top: 1.6em;
+  margin-bottom: 0.6666667em;
+  line-height: 1.3333333;
+}
+
+@media (min-width: 1024px) {
+  .lg\:prose-xl {
+    font-size: 1.125rem;
+    line-height: 1.7777778;
+  }
+
+  .lg\:prose-xl h2 {
+    font-size: 1.8em;
+    margin-top: 1.5555556em;
+    margin-bottom: 0.8888889em;
+    line-height: 1.1111111;
+  }
+
+  .lg\:prose-xl h3 {
+    font-size: 1.5em;
+    margin-top: 1.6em;
+    margin-bottom: 0.6666667em;
+    line-height: 1.3333333;
+  }
+}
+
 /* Navigation gradient */
 .nav-gradient {
   background: linear-gradient(135deg, #9333ea 0%, #ec4899 50%, #f97316 100%);

@@ -1,11 +1,13 @@
 class EventsController < ApplicationController
+  include Pagy::Method
+
   allow_unauthenticated_access only: [ :index, :show ]
   before_action :set_event, only: [ :show, :edit, :update, :destroy, :publish, :unpublish ]
   before_action :require_editable, only: [ :edit, :update, :destroy ]
   before_action :require_publishable, only: [ :publish, :unpublish ]
 
   def index
-    @events = Event.published.upcoming
+    @pagy, @events = pagy(Event.published.upcoming, items: 5)
   end
 
   def show
