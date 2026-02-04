@@ -2,7 +2,7 @@ class Admin::InboxController < ApplicationController
   before_action :require_owner
   before_action :set_zoho_service
 
-  PER_PAGE = 10
+  PER_PAGE = 5
 
   def index
     unless @zoho.configured?
