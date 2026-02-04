@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :email_group_memberships, dependent: :destroy
   has_many :email_groups, through: :email_group_memberships
   has_many :proposals, dependent: :destroy
+  has_many :posts, dependent: :nullify
   has_one :profile, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }

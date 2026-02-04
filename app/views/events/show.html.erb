@@ -1,93 +1,85 @@
-<div class="max-w-3xl mx-auto px-4 py-6">
+<div class="max-w-2xl mx-auto px-4 py-8">
   <% unless @event.published? %>
     <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
       <strong>Draft:</strong> This event is not yet published.
     </div>
   <% end %>
 
-  <div class="mb-6">
-    <%= link_to "← Back to Events", events_path, class: "text-pink-600 hover:text-pink-800" %>
-  </div>
+  <article class="prose prose-lg max-w-none">
+    <h1 class="text-3xl font-bold mb-6"><%= @event.title %></h1>
 
-  <article>
-    <h1 class="text-3xl font-bold mb-4"><%= @event.title %></h1>
+    <% if @event.image.attached? %>
+      <%= image_tag @event.image, alt: @event.title, class: "w-full mb-8 not-prose" %>
+    <% end %>
 
-    <p class="text-gray-600 mb-4">
-      <time datetime="<%= @event.starts_at.iso8601 %>">
-        <%= @event.starts_at.strftime("%A, %B %d, %Y") %>
-      </time>
+    <p class="font-semibold text-gray-800">
+      <%= @event.starts_at.strftime("%A %B %d") %>
+      <% if @event.doors_at.present? %>
+        / Doors: <%= @event.doors_at.strftime("%-l.%M%P") %>
+      <% end %>
       <% if @event.starts_at.present? %>
-        at <%= @event.starts_at.strftime('%l:%M %p') %>
+        / Start: <%= @event.starts_at.strftime("%-l%P") %>
       <% end %>
     </p>
 
-    <% if @event.doors_at.present? %>
-      <p class="text-gray-600 mb-4">Doors: <%= @event.doors_at.strftime("%l:%M %p") %></p>
-    <% end %>
-
-    <% if @event.image.attached? %>
-      <%= image_tag @event.image, alt: @event.title, class: "w-full mb-6" %>
-    <% end %>
-
     <% if @event.description.present? %>
-      <div class="prose max-w-none mb-6">
+      <div class="mt-6">
         <%= sanitize(@event.description) %>
       </div>
     <% end %>
 
     <% if @event.bio.present? %>
-      <h2 class="text-2xl font-bold mb-2 mt-6">Bio</h2>
-      <div class="mb-6">
+      <div class="mt-6">
         <%= simple_format(@event.bio) %>
       </div>
     <% end %>
 
     <% if @event.links.present? %>
-      <h2 class="text-2xl font-bold mb-2 mt-6">Links</h2>
-      <div class="mb-6">
+      <div class="mt-6">
         <%= simple_format(@event.links) %>
       </div>
     <% end %>
 
-    <% if @event.ticket_price_cents.present? || @event.ticket_url.present? || @event.capacity.present? %>
-      <div class="bg-gray-50 p-4 my-6">
-        <h2 class="text-2xl font-bold mb-3">Booking Info</h2>
-        <ul class="space-y-1">
-          <% if @event.capacity.present? %>
-            <li>Capacity: <%= @event.capacity %> tickets</li>
-          <% end %>
-          <% if @event.ticket_price_cents.present? %>
-            <li>Price: €<%= @event.ticket_price_cents / 100.0 %></li>
-          <% end %>
-          <% if @event.ticket_url.present? %>
-            <li><%= link_to "Buy Tickets", @event.ticket_url, class: "text-pink-600 hover:text-pink-800", target: "_blank" %></li>
-          <% end %>
-        </ul>
+    <% if @event.ticket_price_cents.present? || @event.ticket_url.present? %>
+      <div class="mt-8 p-4 bg-gray-50 rounded not-prose">
+        <p class="font-semibold text-lg mb-2">Tickets</p>
+        <% if @event.ticket_price_cents.present? && @event.ticket_price_cents > 0 %>
+          <p class="text-gray-700">Price: €<%= @event.ticket_price_cents / 100.0 %></p>
+        <% elsif @event.ticket_price_cents == 0 %>
+          <p class="text-gray-700">Free admission</p>
+        <% end %>
+        <% if @event.ticket_url.present? %>
+          <p class="mt-2">
+            <%= link_to "Buy Tickets →", @event.ticket_url, class: "underline font-medium", target: "_blank", rel: "noopener" %>
+          </p>
+        <% end %>
       </div>
     <% end %>
 
     <% if @event.venue_name.present? || @event.venue_address.present? %>
-      <h2 class="text-2xl font-bold mb-2 mt-6">Location</h2>
-      <% if @event.venue_name.present? %>
-        <p class="font-semibold"><%= @event.venue_name %></p>
-      <% end %>
-      <% if @event.venue_address.present? %>
-        <%= simple_format(@event.venue_address) %>
-      <% end %>
+      <div class="mt-8">
+        <p class="font-semibold">Location</p>
+        <% if @event.venue_name.present? %>
+          <p><%= @event.venue_name %></p>
+        <% end %>
+        <% if @event.venue_address.present? %>
+          <p class="text-gray-600"><%= @event.venue_address %></p>
+        <% end %>
+      </div>
     <% end %>
   </article>
 
   <% if @event.editable_by?(Current.user) %>
-    <div class="flex gap-4 mt-8 pt-8 border-t">
-      <%= link_to "Edit", edit_event_path(@event), class: "bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" %>
+    <div class="flex flex-wrap gap-4 mt-12 pt-8 border-t border-gray-200">
+      <%= link_to "Edit", edit_event_path(@event), class: "px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm" %>
       <% if @event.publishable_by?(Current.user) %>
         <% if @event.published? %>
-          <%= button_to "Unpublish", unpublish_event_path(@event), method: :patch, class: "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700" %>
+          <%= button_to "Unpublish", unpublish_event_path(@event), method: :patch, class: "px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm" %>
         <% else %>
-          <%= button_to "Publish", publish_event_path(@event), method: :patch, class: "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" %>
+          <%= button_to "Publish", publish_event_path(@event), method: :patch, class: "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm" %>
         <% end %>
       <% end %>
-      <%= button_to "Delete", event_path(@event), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" %>
+      <%= button_to "Delete", event_path(@event), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm" %>
     </div>
   <% end %>
 </div>

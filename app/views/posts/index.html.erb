@@ -1,39 +1,40 @@
-<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
-  <div class="prose lg:prose-xl">
-    <div class="flex justify-between items-center mb-8">
-      <h2>News & Updates</h2>
-      <% if authenticated? %>
-        <%= link_to "New Post", new_post_path, class: "text-sm btn-primary text-white px-4 py-2 rounded-lg font-medium no-underline" %>
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <header class="mb-8">
+    <h1 class="text-2xl font-bold tracking-wide uppercase">News & Updates</h1>
+    <% if authenticated? %>
+      <p class="mt-2">
+        <%= link_to "New Post", new_post_path, class: "text-sm text-gray-600 hover:text-gray-900 underline" %>
+      </p>
+    <% end %>
+  </header>
+
+  <% if @posts.empty? %>
+    <p class="text-gray-500">No posts yet.</p>
+  <% else %>
+    <div class="space-y-12">
+      <% @posts.each do |post| %>
+        <article>
+          <% if post.featured_image.attached? %>
+            <%= link_to post_path(post.slug) do %>
+              <%= image_tag post.featured_image, alt: post.title, class: "w-full aspect-[4/3] object-cover mb-4" %>
+            <% end %>
+          <% end %>
+
+          <h2 class="text-xl font-semibold mb-1">
+            <%= link_to post.title, post_path(post.slug), class: "underline hover:text-gray-600" %>
+          </h2>
+
+          <p class="text-gray-500 text-sm mb-2">
+            <%= post.published_at&.strftime('%B %d, %Y') %>
+          </p>
+
+          <%= link_to "Read more", post_path(post.slug), class: "text-sm underline hover:text-gray-600" %>
+        </article>
       <% end %>
     </div>
 
-    <% if @posts.empty? %>
-      <p class="text-gray-500">No posts yet.</p>
-      <% if authenticated? %>
-        <p>
-          <%= link_to "Create the first post", new_post_path %>
-        </p>
-      <% end %>
-    <% else %>
-      <% @posts.each do |post| %>
-        <article class="mb-8">
-          <% if post.featured_image.attached? %>
-            <div class="mb-4">
-              <%= link_to post_path(post.slug) do %>
-                <%= image_tag post.featured_image, alt: post.title, class: "w-full h-64 object-cover rounded-lg" %>
-              <% end %>
-            </div>
-          <% end %>
-          <h3><%= link_to post.title, post_path(post.slug) %></h3>
-          <p class="text-gray-600 text-sm"><%= post.published_at&.strftime('%B %d, %Y') %></p>
-          <% if post.excerpt.present? %>
-            <p><%= post.excerpt %></p>
-          <% end %>
-          <%= link_to "Read more", post_path(post.slug) %>
-        </article>
-      <% end %>
-
+    <nav class="mt-12 text-center text-sm">
       <%== @pagy.series_nav if @pagy %>
-    <% end %>
-  </div>
+    </nav>
+  <% end %>
 </div>

@@ -61,9 +61,16 @@
     <p class="form-hint">You can select multiple images. New uploads will be added to existing ones.</p>
   </div>
 
-  <div class="flex items-center gap-3">
-    <%= form.check_box :visible, class: "form-checkbox" %>
-    <%= form.label :visible, "Show my profile in the public directory", class: "text-sm text-gray-700" %>
+  <div class="space-y-3">
+    <div class="flex items-center gap-3">
+      <%= form.check_box :visible, class: "form-checkbox" %>
+      <%= form.label :visible, "Show my profile in the members directory", class: "text-sm text-gray-700" %>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <%= form.check_box :public_gallery, class: "form-checkbox" %>
+      <%= form.label :public_gallery, "Feature my work in the public artist gallery", class: "text-sm text-gray-700" %>
+    </div>
   </div>
 
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">

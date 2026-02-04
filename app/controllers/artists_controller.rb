@@ -2,6 +2,6 @@ class ArtistsController < ApplicationController
   allow_unauthenticated_access
 
   def index
-    @profiles = Profile.where(visible: true).order(:name)
+    @profiles = Profile.in_public_gallery.order(:name)
   end
 end

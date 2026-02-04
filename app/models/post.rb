@@ -12,6 +12,10 @@ class Post < ApplicationRecord
   scope :draft, -> { where(published_at: nil) }
   scope :recent, -> { order(published_at: :desc) }
 
+  def to_param
+    slug
+  end
+
   def published?
     published_at.present? && published_at <= Time.current
   end

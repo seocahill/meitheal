@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_03_235824) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_04_215312) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -153,11 +153,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_03_235824) do
   end
 
   create_table "faqs", force: :cascade do |t|
-    t.boolean "active"
+    t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.integer "order"
-    t.string "question"
+    t.string "question", null: false
     t.datetime "updated_at", null: false
+    t.index ["active"], name: "index_faqs_on_active"
+    t.index ["order"], name: "index_faqs_on_order"
   end
 
   create_table "friendly_id_slugs", force: :cascade do |t|
@@ -274,12 +276,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_03_235824) do
   create_table "posts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "excerpt"
-    t.boolean "published"
+    t.boolean "published", default: false, null: false
     t.datetime "published_at"
-    t.string "slug"
-    t.string "title"
+    t.string "slug", null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["published_at"], name: "index_posts_on_published_at"
     t.index ["slug"], name: "index_posts_on_slug", unique: true
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
@@ -289,6 +292,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_03_235824) do
     t.datetime "created_at", null: false
     t.string "location"
     t.string "name", null: false
+    t.boolean "public_gallery", default: false, null: false
     t.string "skills"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false

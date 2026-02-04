@@ -1,33 +1,48 @@
 require "test_helper"
 
 class Admin::FaqsControllerTest < ActionDispatch::IntegrationTest
-  test "should get index" do
-    get admin_faqs_index_url
+  setup do
+    @owner = users(:owner)
+    @faq = faqs(:one)
+  end
+
+  test "should get index when owner" do
+    sign_in_as(@owner)
+    get admin_faqs_url
     assert_response :success
   end
 
-  test "should get new" do
-    get admin_faqs_new_url
+  test "should get new when owner" do
+    sign_in_as(@owner)
+    get new_admin_faq_url
     assert_response :success
   end
 
-  test "should get create" do
-    get admin_faqs_create_url
+  test "should create faq when owner" do
+    sign_in_as(@owner)
+    assert_difference("Faq.count") do
+      post admin_faqs_url, params: { faq: { question: "New Question?", answer: "New Answer" } }
+    end
+    assert_redirected_to admin_faqs_url
+  end
+
+  test "should get edit when owner" do
+    sign_in_as(@owner)
+    get edit_admin_faq_url(@faq)
     assert_response :success
   end
 
-  test "should get edit" do
-    get admin_faqs_edit_url
-    assert_response :success
+  test "should update faq when owner" do
+    sign_in_as(@owner)
+    patch admin_faq_url(@faq), params: { faq: { question: "Updated Question?" } }
+    assert_redirected_to admin_faqs_url
   end
 
-  test "should get update" do
-    get admin_faqs_update_url
-    assert_response :success
-  end
-
-  test "should get destroy" do
-    get admin_faqs_destroy_url
-    assert_response :success
+  test "should destroy faq when owner" do
+    sign_in_as(@owner)
+    assert_difference("Faq.count", -1) do
+      delete admin_faq_url(@faq)
+    end
+    assert_redirected_to admin_faqs_url
   end
 end
