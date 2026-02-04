@@ -207,7 +207,8 @@ namespace :import do
           name: member['name'],
           bio: member['alt'],
           website: member['link'],
-          visible: true
+          visible: true,
+          public_gallery: true
         )
 
         if profile.save
