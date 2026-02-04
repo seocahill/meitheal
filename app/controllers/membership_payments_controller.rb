@@ -11,24 +11,35 @@ class MembershipPaymentsController < ApplicationController
   end
 
   def create_checkout
-    amount_cents = MEMBERSHIP_PRICES[@membership.membership_type.to_sym]
+    membership_fee_cents = MEMBERSHIP_PRICES[@membership.membership_type.to_sym]
+    donation_cents = (params[:donation_cents] || 0).to_i
+    donation_cents = 0 if donation_cents < 0  # Prevent negative donations
+    total_amount_cents = membership_fee_cents + donation_cents
+
     checkout_reference = "membership-#{@membership.id}-#{Time.current.to_i}"
+
+    description = if donation_cents > 0
+      "NCF #{@membership.membership_type.humanize} Membership + €#{donation_cents / 100.0} Donation"
+    else
+      "NCF #{@membership.membership_type.humanize} Membership"
+    end
 
     begin
       checkout = SumupCheckoutService.new.create_checkout(
-        amount_cents: amount_cents,
-        description: "NCF #{@membership.membership_type.humanize} Membership",
+        amount_cents: total_amount_cents,
+        description: description,
         checkout_reference: checkout_reference,
         return_url: membership_payment_complete_url(@membership)
       )
 
-      # Store pending payment
+      # Store pending payment with donation details
+      notes = donation_cents > 0 ? "Pending - includes €#{donation_cents / 100.0} donation" : "Pending - checkout created"
       @payment = @membership.payments.create!(
-        amount_cents: amount_cents,
+        amount_cents: total_amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
         sumup_checkout_id: checkout["id"],
-        notes: "Pending - checkout created"
+        notes: notes
       )
 
       render json: { checkout_id: checkout["id"] }
@@ -50,9 +61,15 @@ class MembershipPaymentsController < ApplicationController
           checkout = SumupCheckoutService.new.get_checkout(checkout_id)
 
           if checkout["status"] == "PAID"
+            # Preserve donation info in notes if present
+            completed_notes = if payment.notes&.include?("donation")
+              payment.notes.sub("Pending - ", "Completed - ")
+            else
+              "Payment completed"
+            end
             payment.update!(
               sumup_transaction_id: checkout["transaction_id"],
-              notes: "Payment completed"
+              notes: completed_notes
             )
 
             # Extend membership

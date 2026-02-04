@@ -39,25 +39,61 @@ export default class extends Controller {
     }
   }
 
+  async importEmail(event) {
+    const button = event.currentTarget
+    const newsletterId = button.dataset.newsletterId
+    const messageId = button.dataset.messageId
+    const folderId = button.dataset.folderId
+
+    // Disable button and show loading state
+    const originalText = button.innerHTML
+    button.disabled = true
+    button.innerHTML = '<span class="animate-pulse">Importing...</span>'
+
+    try {
+      const response = await fetch(`/newsletters/${newsletterId}/import_email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ message_id: messageId, folder_id: folderId })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Find the Trix editor and append content
+        const trixEditor = document.querySelector('trix-editor')
+        if (trixEditor && trixEditor.editor) {
+          // Move cursor to end
+          trixEditor.editor.setSelectedRange([trixEditor.editor.getDocument().getLength() - 1, trixEditor.editor.getDocument().getLength() - 1])
+          // Insert a line break then the content
+          trixEditor.editor.insertHTML('<br><br>' + data.content)
+        }
+
+        // Mark as imported
+        button.innerHTML = '<span class="text-green-600">✓ Imported</span>'
+        button.classList.add('opacity-50')
+
+        // Show success message
+        this.showFlash('Email content imported to newsletter')
+      } else {
+        alert(data.error || "Failed to import email")
+        button.innerHTML = originalText
+        button.disabled = false
+      }
+    } catch (error) {
+      console.error("Email import error:", error)
+      alert("Failed to import email")
+      button.innerHTML = originalText
+      button.disabled = false
+    }
+  }
+
   useSuggestion(event) {
     this.promptTarget.value = event.target.dataset.prompt
     this.promptTarget.focus()
-  }
-
-  useEmail(event) {
-    const subject = event.currentTarget.dataset.emailSubject
-    const body = event.currentTarget.dataset.emailBody
-    const from = event.currentTarget.dataset.emailFrom
-    const newsletterId = event.currentTarget.dataset.newsletterId
-
-    // Find the main AI compose form on the page
-    const mainComposer = document.querySelector('[data-controller="ai-compose"] textarea[data-ai-compose-target="prompt"]')
-    if (mainComposer) {
-      const prompt = `Transform this email into newsletter content:\n\nFrom: ${from}\nSubject: ${subject}\n\n${body || '(no body)'}\n\nMake it suitable for a community newsletter - engaging, clear, and well-formatted.`
-      mainComposer.value = prompt
-      mainComposer.focus()
-      mainComposer.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
   }
 
   setLoading(loading) {
@@ -67,5 +103,18 @@ export default class extends Controller {
     if (this.hasStatusTarget) {
       this.statusTarget.classList.toggle("hidden", !loading)
     }
+  }
+
+  showFlash(message) {
+    // Create a temporary flash message
+    const flash = document.createElement('div')
+    flash.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity'
+    flash.textContent = message
+    document.body.appendChild(flash)
+
+    setTimeout(() => {
+      flash.style.opacity = '0'
+      setTimeout(() => flash.remove(), 300)
+    }, 3000)
   }
 }

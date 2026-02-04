@@ -1,10 +1,60 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["cardWidget", "loading", "error", "payButton"]
+  static targets = ["cardWidget", "loading", "error", "payButton", "donationOption", "customDonation", "donationDisplay", "totalDisplay", "buttonTotal"]
 
   connect() {
     this.checkoutId = null
+    this.donationCents = 0
+    this.baseAmountCents = parseInt(this.payButtonTarget.dataset.baseAmount) || 0
+    this.updateDisplays()
+
+    // Set "No donation" as active by default
+    const noDonationBtn = this.donationOptionTargets.find(btn => btn.dataset.amount === "0")
+    if (noDonationBtn) {
+      this.setActiveButton(noDonationBtn)
+    }
+  }
+
+  setDonation(event) {
+    const amount = parseInt(event.target.dataset.amount) || 0
+    this.donationCents = amount
+    this.customDonationTarget.value = ""
+    this.setActiveButton(event.target)
+    this.updateDisplays()
+  }
+
+  setCustomDonation(event) {
+    const euros = parseFloat(event.target.value) || 0
+    this.donationCents = Math.round(euros * 100)
+    this.clearActiveButtons()
+    this.updateDisplays()
+  }
+
+  setActiveButton(activeBtn) {
+    this.donationOptionTargets.forEach(btn => {
+      btn.classList.remove("border-purple-500", "text-purple-600", "bg-purple-50")
+      btn.classList.add("border-gray-300")
+    })
+    activeBtn.classList.remove("border-gray-300")
+    activeBtn.classList.add("border-purple-500", "text-purple-600", "bg-purple-50")
+  }
+
+  clearActiveButtons() {
+    this.donationOptionTargets.forEach(btn => {
+      btn.classList.remove("border-purple-500", "text-purple-600", "bg-purple-50")
+      btn.classList.add("border-gray-300")
+    })
+  }
+
+  updateDisplays() {
+    const donationEuros = (this.donationCents / 100).toFixed(2)
+    const totalCents = this.baseAmountCents + this.donationCents
+    const totalEuros = (totalCents / 100).toFixed(2)
+
+    this.donationDisplayTarget.textContent = `€${donationEuros}`
+    this.totalDisplayTarget.textContent = `€${totalEuros}`
+    this.buttonTotalTarget.textContent = totalEuros
   }
 
   async initiatePayment(event) {
@@ -13,13 +63,14 @@ export default class extends Controller {
     this.hideError()
 
     try {
-      // First create a checkout on our server
+      // First create a checkout on our server with donation amount
       const response = await fetch(`/memberships/${membershipId}/payment/create_checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
-        }
+        },
+        body: JSON.stringify({ donation_cents: this.donationCents })
       })
 
       const data = await response.json()
@@ -86,7 +137,7 @@ export default class extends Controller {
   setLoading(loading) {
     this.payButtonTarget.disabled = loading
     if (loading) {
-      this.payButtonTarget.textContent = "Processing..."
+      this.payButtonTarget.innerHTML = "Processing..."
     }
   }
 

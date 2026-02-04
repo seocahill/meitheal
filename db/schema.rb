@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_04_215312) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_04_230907) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -108,6 +108,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_215312) do
     t.integer "model_id"
     t.datetime "updated_at", null: false
     t.index ["model_id"], name: "index_chats_on_model_id"
+  end
+
+  create_table "email_archives", force: :cascade do |t|
+    t.datetime "archived_at", default: -> { "CURRENT_TIMESTAMP" }
+    t.datetime "created_at", null: false
+    t.string "folder_id"
+    t.string "message_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["message_id"], name: "index_email_archives_on_message_id", unique: true
   end
 
   create_table "email_group_memberships", force: :cascade do |t|

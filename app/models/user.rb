@@ -26,6 +26,10 @@ class User < ApplicationRecord
     owner?
   end
 
+  def has_active_membership?
+    memberships.active.exists?
+  end
+
   # Thredded compatibility methods
   def name
     profile&.name || email_address.split("@").first

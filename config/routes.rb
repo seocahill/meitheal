@@ -53,7 +53,12 @@ Rails.application.routes.draw do
         post :create_todo
         post :create_newsletter
         post :create_funding
+        post :archive
+        post :unarchive
         get "attachments/:attachment_id", action: :attachment, as: :attachment
+      end
+      collection do
+        post :batch_archive
       end
     end
     resources :todos do
@@ -88,6 +93,7 @@ Rails.application.routes.draw do
   resources :newsletters do
     member do
       post :compose_with_ai
+      post :import_email
     end
   end
 

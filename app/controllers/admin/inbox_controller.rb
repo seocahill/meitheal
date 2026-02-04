@@ -15,8 +15,19 @@ class Admin::InboxController < ApplicationController
       @current_folder = params[:folder_id] || inbox_folder_id
       @page = (params[:page] || 1).to_i
       @page = 1 if @page < 1
+      @show_archived = params[:show_archived] == "true"
 
-      @emails = @zoho.emails(folder_id: @current_folder, limit: PER_PAGE, start: (@page - 1) * PER_PAGE)
+      emails = @zoho.emails(folder_id: @current_folder, limit: PER_PAGE * 2, start: (@page - 1) * PER_PAGE)
+
+      # Filter out archived emails unless showing archived
+      archived_ids = EmailArchive.pluck(:message_id)
+      if @show_archived
+        @emails = emails.select { |e| archived_ids.include?(e["messageId"]) }
+      else
+        @emails = emails.reject { |e| archived_ids.include?(e["messageId"]) }
+      end
+
+      @emails = @emails.first(PER_PAGE)
       @has_more = @emails.size == PER_PAGE
     rescue ZohoMailService::AuthenticationError => e
       @auth_error = "Authentication failed: #{e.message}. Please check your Zoho credentials."
@@ -36,6 +47,7 @@ class Admin::InboxController < ApplicationController
       @email_content = @zoho.email(folder_id: @folder_id, message_id: params[:id])
       @email_metadata = @zoho.email_metadata(folder_id: @folder_id, message_id: params[:id])
       @attachments = @zoho.attachments(folder_id: @folder_id, message_id: params[:id])
+      @is_archived = EmailArchive.exists?(message_id: params[:id])
     rescue ZohoMailService::ApiError => e
       redirect_to admin_inbox_index_path, alert: "Could not load email: #{e.message}"
     end
@@ -61,6 +73,36 @@ class Admin::InboxController < ApplicationController
     rescue ZohoMailService::ApiError => e
       redirect_to admin_inbox_path(params[:id], folder_id: folder_id), alert: "Could not download attachment: #{e.message}"
     end
+  end
+
+  # Archive an email (local only)
+  def archive
+    folder_id = params[:folder_id] || inbox_folder_id
+    EmailArchive.find_or_create_by!(message_id: params[:id]) do |archive|
+      archive.folder_id = folder_id
+    end
+    redirect_to admin_inbox_index_path(folder_id: folder_id), notice: "Email archived."
+  rescue => e
+    redirect_to admin_inbox_index_path(folder_id: folder_id), alert: "Could not archive email: #{e.message}"
+  end
+
+  # Unarchive an email
+  def unarchive
+    folder_id = params[:folder_id] || inbox_folder_id
+    EmailArchive.find_by(message_id: params[:id])&.destroy
+    redirect_to admin_inbox_index_path(folder_id: folder_id, show_archived: true), notice: "Email unarchived."
+  end
+
+  # Batch archive multiple emails
+  def batch_archive
+    folder_id = params[:folder_id]
+    message_ids = params[:message_ids] || []
+    message_ids.each do |message_id|
+      EmailArchive.find_or_create_by!(message_id: message_id) do |archive|
+        archive.folder_id = folder_id
+      end
+    end
+    redirect_to admin_inbox_index_path(folder_id: folder_id), notice: "#{message_ids.size} emails archived."
   end
 
   # Create a todo from an email

@@ -4,14 +4,21 @@ class BookingsController < ApplicationController
   before_action :require_editable, only: [ :edit, :update, :destroy ]
   before_action :require_editor, only: [ :confirm ]
   before_action :require_cancellable, only: [ :cancel ]
+  before_action :require_active_membership, only: [ :new, :create ]
 
   def calendar
     @month = params[:month] ? Date.parse(params[:month] + "-01") : Date.current.beginning_of_month
-    @bookings = Booking.confirmed
+    # Show both pending and confirmed bookings
+    @bookings = Booking.where(status: [ :pending, :confirmed ])
       .where("starts_at >= ? AND starts_at < ?", @month.beginning_of_month, @month.end_of_month.end_of_day)
       .includes(:space, :user)
       .order(:starts_at)
     @spaces = Space.active.order(:name)
+
+    # For admin: show pending bookings needing confirmation
+    if authenticated? && Current.user.can_edit?
+      @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)
+    end
   end
 
   def new
@@ -76,6 +83,12 @@ class BookingsController < ApplicationController
   def require_cancellable
     unless @booking.editable_by?(Current.user)
       redirect_to root_path, alert: "You don't have permission to do that."
+    end
+  end
+
+  def require_active_membership
+    unless Current.user&.has_active_membership?
+      redirect_to calendar_path, alert: "You need an active membership to book spaces. Please renew your membership."
     end
   end
 end

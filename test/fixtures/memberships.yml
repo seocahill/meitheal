@@ -7,6 +7,13 @@ active_membership:
   expires_on: <%= 11.months.from_now.to_date %>
   notes: Annual membership
 
+viewer_membership:
+  user: viewer
+  membership_type: 0
+  starts_on: <%= 1.month.ago.to_date %>
+  expires_on: <%= 11.months.from_now.to_date %>
+  notes: Active viewer membership
+
 expired_membership:
   user: editor
   membership_type: 1
