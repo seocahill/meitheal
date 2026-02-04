@@ -1,50 +1,44 @@
-<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
-  <div class="prose lg:prose-xl">
-    <div class="flex justify-between items-center mb-8">
-      <h2>Events</h2>
-      <% if authenticated? %>
-        <%= link_to "Create Event", new_event_path, class: "text-sm btn-primary text-white px-4 py-2 rounded-lg font-medium no-underline" %>
+<div class="max-w-3xl mx-auto px-4 py-6">
+  <div class="mb-8">
+    <h1 class="text-5xl font-bold mb-2">Events</h1>
+    <% if authenticated? %>
+      <%= link_to "Create Event", new_event_path, class: "text-sm text-pink-600 hover:text-pink-800" %>
+    <% end %>
+  </div>
+
+  <% if @events.empty? %>
+    <p class="text-gray-500">No events yet.</p>
+  <% else %>
+    <div class="space-y-8">
+      <% @events.each do |event| %>
+        <article>
+          <% if event.image.attached? %>
+            <%= link_to event do %>
+              <%= image_tag event.image, alt: event.title, class: "w-full h-96 object-cover mb-4" %>
+            <% end %>
+          <% end %>
+
+          <h2 class="text-4xl font-bold mb-2">
+            <%= link_to event.title, event, class: "hover:text-pink-600" %>
+          </h2>
+
+          <p class="text-gray-600 text-lg mb-3">
+            <%= event.starts_at.strftime('%B %d, %Y') %>
+          </p>
+
+          <% if event.description.present? %>
+            <div class="text-gray-700 text-lg mb-3">
+              <%= sanitize(event.description.truncate(200, separator: ' ')) %>
+            </div>
+          <% end %>
+
+          <%= link_to "Read more →", event, class: "text-pink-600 hover:text-pink-800 text-lg" %>
+        </article>
       <% end %>
     </div>
 
-    <% if @events.empty? %>
-      <p class="text-gray-500">No upcoming events yet.</p>
-      <% if authenticated? %>
-        <p>
-          <%= link_to "Create the first event", new_event_path %>
-        </p>
-      <% end %>
-    <% else %>
-      <% @events.each do |event| %>
-        <article class="mb-8">
-          <% if event.image.attached? %>
-            <div class="mb-4">
-              <%= link_to event do %>
-                <%= image_tag event.image, alt: event.title, class: "w-full h-64 object-cover rounded-lg" %>
-              <% end %>
-            </div>
-          <% end %>
-          <h3><%= link_to event.title, event %></h3>
-          <p class="text-gray-600 text-sm"><%= event.starts_at.strftime('%B %d, %Y') %></p>
-          <%= link_to "Read more", event %>
-        </article>
-      <% end %>
-
-      <% if @pagy.pages > 1 %>
-        <div class="pagination flex justify-center space-x-4 mt-8">
-          <% if @pagy.prev %>
-            <%= link_to "&laquo; Previous".html_safe, events_path(page: @pagy.prev), class: "text-indigo-600 hover:text-indigo-800" %>
-          <% end %>
-
-          <span class="text-gray-600">
-            Page <%= @pagy.page %> of <%= @pagy.pages %>
-          </span>
-
-          <% if @pagy.next %>
-            <%= link_to "Next &raquo;".html_safe, events_path(page: @pagy.next), class: "text-indigo-600 hover:text-indigo-800" %>
-          <% end %>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
+    <div class="mt-8">
+      <%== @pagy.series_nav %>
+    </div>
+  <% end %>
 </div>

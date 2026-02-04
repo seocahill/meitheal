@@ -1,4 +1,45 @@
-<div>
-  <h1 class="font-bold text-4xl">Posts#show</h1>
-  <p>Find me in app/views/posts/show.html.erb</p>
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <% unless @post.published? %>
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
+      <strong>Draft:</strong> This post is not yet published.
+    </div>
+  <% end %>
+
+  <div class="mb-6">
+    <%= link_to "← Back to Posts", posts_path, class: "text-pink-600 hover:text-pink-800" %>
+  </div>
+
+  <article>
+    <h1 class="text-4xl font-bold mb-4"><%= @post.title %></h1>
+
+    <div class="text-gray-600 mb-8">
+      <time datetime="<%= @post.published_at&.iso8601 %>">
+        <%= @post.published_at&.strftime("%B %d, %Y") %>
+      </time>
+    </div>
+
+    <% if @post.featured_image.attached? %>
+      <div class="mb-8">
+        <%= image_tag @post.featured_image, class: "w-full rounded-lg shadow-lg" %>
+      </div>
+    <% end %>
+
+    <div class="prose lg:prose-xl max-w-none">
+      <%= @post.body %>
+    </div>
+  </article>
+
+  <% if @post.editable_by?(Current.user) %>
+    <div class="flex gap-4 mt-8 pt-8 border-t">
+      <%= link_to "Edit", edit_post_path(@post.slug), class: "bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700" %>
+      <% if @post.publishable_by?(Current.user) %>
+        <% if @post.published? %>
+          <%= button_to "Unpublish", unpublish_post_path(@post.slug), method: :patch, class: "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700" %>
+        <% else %>
+          <%= button_to "Publish", publish_post_path(@post.slug), method: :patch, class: "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" %>
+        <% end %>
+      <% end %>
+      <%= button_to "Delete", post_path(@post.slug), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" %>
+    </div>
+  <% end %>
 </div>

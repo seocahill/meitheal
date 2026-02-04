@@ -51,6 +51,9 @@ gem "ruby_llm"
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy"
 
+# Markdown to HTML conversion [https://github.com/vmg/redcarpet]
+gem "redcarpet"
+
 # HTTP client for API requests
 gem "faraday"
 

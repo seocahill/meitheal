@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="max-w-3xl mx-auto px-4 py-6">
   <% unless @event.published? %>
     <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
       <strong>Draft:</strong> This event is not yet published.
@@ -9,78 +9,73 @@
     <%= link_to "← Back to Events", events_path, class: "text-pink-600 hover:text-pink-800" %>
   </div>
 
-  <h1 class="text-4xl font-bold mb-4"><%= @event.title %></h1>
+  <article>
+    <h1 class="text-3xl font-bold mb-4"><%= @event.title %></h1>
 
-  <% if @event.image.attached? %>
-    <div class="mb-6">
-      <%= image_tag @event.image, class: "w-full max-w-2xl rounded-lg shadow-lg" %>
-    </div>
-  <% end %>
-
-  <div class="text-gray-600 mb-6">
-    <p class="text-xl">
+    <p class="text-gray-600 mb-4">
       <time datetime="<%= @event.starts_at.iso8601 %>">
         <%= @event.starts_at.strftime("%A, %B %d, %Y") %>
       </time>
+      <% if @event.starts_at.present? %>
+        at <%= @event.starts_at.strftime('%l:%M %p') %>
+      <% end %>
     </p>
+
     <% if @event.doors_at.present? %>
-      <p>Doors: <%= @event.doors_at.strftime("%l:%M %p") %></p>
+      <p class="text-gray-600 mb-4">Doors: <%= @event.doors_at.strftime("%l:%M %p") %></p>
     <% end %>
-    <p>Start: <%= @event.starts_at.strftime("%l:%M %p") %></p>
-  </div>
 
-  <% if @event.description.present? %>
-    <div class="prose max-w-none mb-8">
-      <%= simple_format(@event.description) %>
-    </div>
-  <% end %>
+    <% if @event.image.attached? %>
+      <%= image_tag @event.image, alt: @event.title, class: "w-full mb-6" %>
+    <% end %>
 
-  <% if @event.bio.present? %>
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold mb-4">Bio</h2>
-      <div class="prose max-w-none">
+    <% if @event.description.present? %>
+      <div class="prose max-w-none mb-6">
+        <%= sanitize(@event.description) %>
+      </div>
+    <% end %>
+
+    <% if @event.bio.present? %>
+      <h2 class="text-2xl font-bold mb-2 mt-6">Bio</h2>
+      <div class="mb-6">
         <%= simple_format(@event.bio) %>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% if @event.links.present? %>
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold mb-4">Links</h2>
-      <div class="prose max-w-none">
+    <% if @event.links.present? %>
+      <h2 class="text-2xl font-bold mb-2 mt-6">Links</h2>
+      <div class="mb-6">
         <%= simple_format(@event.links) %>
       </div>
-    </div>
-  <% end %>
+    <% end %>
 
-  <% if @event.ticket_price_cents.present? || @event.ticket_url.present? || @event.capacity.present? %>
-    <div class="bg-gray-50 rounded-lg p-6 mb-8">
-      <h2 class="text-2xl font-bold mb-4">Booking Info</h2>
-      <ul class="space-y-2">
-        <% if @event.capacity.present? %>
-          <li>Capacity: <%= @event.capacity %> tickets</li>
-        <% end %>
-        <% if @event.ticket_price_cents.present? %>
-          <li>Price: €<%= @event.ticket_price_cents / 100.0 %></li>
-        <% end %>
-        <% if @event.ticket_url.present? %>
-          <li><%= link_to "Buy Tickets", @event.ticket_url, class: "text-pink-600 hover:text-pink-800", target: "_blank" %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
+    <% if @event.ticket_price_cents.present? || @event.ticket_url.present? || @event.capacity.present? %>
+      <div class="bg-gray-50 p-4 my-6">
+        <h2 class="text-2xl font-bold mb-3">Booking Info</h2>
+        <ul class="space-y-1">
+          <% if @event.capacity.present? %>
+            <li>Capacity: <%= @event.capacity %> tickets</li>
+          <% end %>
+          <% if @event.ticket_price_cents.present? %>
+            <li>Price: €<%= @event.ticket_price_cents / 100.0 %></li>
+          <% end %>
+          <% if @event.ticket_url.present? %>
+            <li><%= link_to "Buy Tickets", @event.ticket_url, class: "text-pink-600 hover:text-pink-800", target: "_blank" %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
 
-  <% if @event.venue_name.present? || @event.venue_address.present? %>
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold mb-4">Location</h2>
+    <% if @event.venue_name.present? || @event.venue_address.present? %>
+      <h2 class="text-2xl font-bold mb-2 mt-6">Location</h2>
       <% if @event.venue_name.present? %>
         <p class="font-semibold"><%= @event.venue_name %></p>
       <% end %>
       <% if @event.venue_address.present? %>
-        <p class="text-gray-600"><%= simple_format(@event.venue_address) %></p>
+        <%= simple_format(@event.venue_address) %>
       <% end %>
-    </div>
-  <% end %>
+    <% end %>
+  </article>
 
   <% if @event.editable_by?(Current.user) %>
     <div class="flex gap-4 mt-8 pt-8 border-t">

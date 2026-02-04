@@ -8,7 +8,7 @@
       <% @faqs.each do |faq| %>
         <details class="mb-4 border-b pb-4">
           <summary class="cursor-pointer font-semibold text-xl hover:text-blue-600"><%= faq.question %></summary>
-          <div class="mt-4">
+          <div class="mt-4 prose max-w-none">
             <%= faq.answer %>
           </div>
         </details>
