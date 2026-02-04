@@ -376,3 +376,38 @@ select.form-input {
   align-items: center;
   vertical-align: middle;
 }
+
+/* Pagy pagination styling */
+.pagy.nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pagy.nav a,
+.pagy.nav span {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  text-decoration: none;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.pagy.nav a:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.pagy.nav .current {
+  background-color: #374151;
+  color: white;
+  border-color: #374151;
+}
+
+.pagy.nav .gap {
+  border: none;
+  padding: 0.5rem 0.25rem;
+}

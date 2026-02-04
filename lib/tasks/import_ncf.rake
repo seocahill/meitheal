@@ -62,6 +62,14 @@ namespace :import do
       markdown.render(text)
     end
 
+    # Strip img tags from HTML content
+    def strip_images(html)
+      return "" if html.blank?
+      doc = Nokogiri::HTML.fragment(html)
+      doc.css('img').remove
+      doc.to_html
+    end
+
     # Helper to parse markdown files with frontmatter
     def parse_markdown_file(file_path)
       content = File.read(file_path)
@@ -101,7 +109,7 @@ namespace :import do
         event = Event.find_or_initialize_by(title: fm['title'])
         event.assign_attributes(
           user: admin_user,
-          description: markdown_to_html(data[:body], markdown),
+          description: strip_images(markdown_to_html(data[:body], markdown)),
           starts_at: fm['date'] || Date.today,
           published: true
         )
@@ -239,6 +247,29 @@ namespace :import do
     def attach_image_from_source(record, attachment_name, image_path, use_local:, ncf_source_path:, old_site_url:)
       return if image_path.blank?
 
+      # Handle external URLs (already full URLs)
+      if image_path.to_s.start_with?('http://', 'https://')
+        if use_local
+          puts "  ⊘ Skipping external URL in local mode: #{image_path}"
+          return false
+        else
+          begin
+            URI.open(image_path) do |image|
+              record.public_send(attachment_name).attach(
+                io: image,
+                filename: File.basename(URI.parse(image_path).path),
+                content_type: content_type_for(image_path)
+              )
+            end
+            puts "  ✓ Attached external image: #{image_path}"
+            return true
+          rescue => e
+            puts "  ✗ Failed to fetch external image #{image_path}: #{e.message}"
+            return false
+          end
+        end
+      end
+
       # Normalize image path (remove leading slash, /images/ prefix, etc)
       clean_path = image_path.to_s.gsub(/^\//, '').gsub(/^images\//, '')
 
@@ -309,7 +340,7 @@ namespace :import do
     puts "\n=== Importing Event Images ==="
     events_path = NCF_SOURCE_PATH.join("events")
     if Dir.exist?(events_path)
-      Dir.glob(events_path.join("*.markdown")).each do |file|
+      Dir.glob(events_path.join("*.html.markdown")).each do |file|
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
@@ -325,7 +356,7 @@ namespace :import do
         end
 
         # Look for image in frontmatter
-        image_path = fm['image'] || fm['poster'] || fm['flyer']
+        image_path = fm['featured_image'] || fm['image'] || fm['poster'] || fm['flyer']
         if image_path
           attach_image_from_source(
             event, :image, image_path,
@@ -341,7 +372,7 @@ namespace :import do
     puts "\n=== Importing Post Featured Images ==="
     news_path = NCF_SOURCE_PATH.join("news")
     if Dir.exist?(news_path)
-      Dir.glob(news_path.join("*.markdown")).each do |file|
+      Dir.glob(news_path.join("*.html.markdown")).each do |file|
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
