@@ -7,7 +7,7 @@ class EventsController < ApplicationController
   before_action :require_publishable, only: [ :publish, :unpublish ]
 
   def index
-    @pagy, @events = pagy(Event.published.reverse_order.with_attached_image, items: 5)
+    @pagy, @events = pagy(Event.published.order(starts_at: :desc).with_attached_image, limit: 5)
   end
 
   def show
