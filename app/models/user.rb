@@ -32,6 +32,8 @@ class User < ApplicationRecord
 
   # Thredded compatibility methods
   def name
+    return unless approved?
+
     profile&.name || email_address.split("@").first
   end
 

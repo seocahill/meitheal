@@ -11,11 +11,13 @@
       <nav class="flex flex-col gap-2 text-xl md:text-2xl font-bold text-white">
         <%= link_to "About", page_path("about"), class: "menu-highlight inline-block" %>
         <%= link_to "Events", events_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Gallery", artists_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Members", profiles_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Membership", new_registration_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Art", artists_path, class: "menu-highlight inline-block" %>
+        <%= link_to "News", posts_path, class: "menu-highlight inline-block" %>
         <%= link_to "Forum", thredded_path, class: "menu-highlight inline-block" %>
         <%= link_to "Funding", funding_opportunities_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Calendar", calendar_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Bookings", calendar_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Shop", "https://thencf-cultural-cooperative.sumupstore.com/", class: "menu-highlight inline-block", target: "_blank" %>
         <% if authenticated? %>
           <%= link_to "My Account", my_profile_path, class: "menu-highlight inline-block" %>
         <% end %>
