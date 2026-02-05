@@ -62,7 +62,7 @@
                 </div>
               <% end %>
               <%= link_to "Account", my_profile_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= button_to "Out", session_path, method: :delete, class: "text-white/70 hover:text-white text-sm" %>
+              <%= button_to "Sign Out", session_path, method: :delete, class: "text-white/70 hover:text-white text-sm" %>
             <% else %>
               <%= link_to "Sign In", new_session_path, class: "text-white font-medium text-sm px-3 py-1 bg-white/20 rounded-lg hover:bg-white/30" %>
             <% end %>
