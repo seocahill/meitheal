@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_04_230907) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_05_005137) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -248,6 +248,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_04_230907) do
   end
 
   create_table "newsletters", force: :cascade do |t|
+    t.integer "brevo_campaign_id"
     t.integer "chat_id"
     t.datetime "created_at", null: false
     t.datetime "sent_at"

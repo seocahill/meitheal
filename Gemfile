@@ -57,6 +57,9 @@ gem "redcarpet"
 # HTTP client for API requests
 gem "faraday"
 
+# Brevo email marketing API [https://github.com/getbrevo/brevo-ruby]
+gem "brevo"
+
 # Forum engine [https://github.com/thredded/thredded]
 gem "thredded"
 

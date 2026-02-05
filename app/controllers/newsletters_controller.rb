@@ -1,6 +1,6 @@
 class NewslettersController < ApplicationController
   before_action :require_editor
-  before_action :set_newsletter, only: [ :show, :edit, :update, :destroy, :compose_with_ai, :import_email ]
+  before_action :set_newsletter, only: [ :show, :edit, :update, :destroy, :compose_with_ai, :import_email, :export_to_brevo ]
 
   def index
     @newsletters = Newsletter.order(updated_at: :desc)
@@ -100,6 +100,30 @@ class NewslettersController < ApplicationController
       render json: { content: strip_code_fences(response.content) }
     rescue RubyLLM::Error => e
       render json: { error: "AI service unavailable: #{e.message}" }, status: :service_unavailable
+    end
+  end
+
+  def export_to_brevo
+    brevo = BrevoService.new
+
+    unless brevo.configured?
+      redirect_to edit_newsletter_path(@newsletter), alert: "Brevo is not configured. Please add API credentials."
+      return
+    end
+
+    begin
+      if @newsletter.brevo_campaign_id.present?
+        # Update existing campaign
+        brevo.update_campaign(@newsletter.brevo_campaign_id, @newsletter)
+        redirect_to edit_newsletter_path(@newsletter), notice: "Newsletter updated in Brevo."
+      else
+        # Create new campaign
+        campaign_id = brevo.create_campaign(@newsletter)
+        @newsletter.update!(brevo_campaign_id: campaign_id)
+        redirect_to edit_newsletter_path(@newsletter), notice: "Newsletter exported to Brevo as draft."
+      end
+    rescue BrevoService::ApiError => e
+      redirect_to edit_newsletter_path(@newsletter), alert: "Brevo error: #{e.message}"
     end
   end
 
