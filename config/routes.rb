@@ -26,6 +26,7 @@ Rails.application.routes.draw do
 
   get "faq", to: "faqs#index", as: :faq
   get "artists", to: "artists#index", as: :artists
+  resource :contact, only: [ :show, :create ]
 
   namespace :admin do
     resources :faqs do

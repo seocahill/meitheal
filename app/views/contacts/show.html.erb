@@ -1,0 +1,29 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">Contact us</h1>
+
+  <div class="card p-6 mb-8">
+    <p class="text-gray-600 mb-6">Fill out the form below and we'll get back to you as soon as we can.</p>
+
+    <%= form_with url: contact_path, method: :post, class: "space-y-6" do |form| %>
+      <div>
+        <label class="form-label">Your email</label>
+        <%= form.email_field :email, required: true, placeholder: "your@email.com", value: @email, class: "form-input" %>
+      </div>
+
+      <div>
+        <label class="form-label">Message</label>
+        <%= form.text_area :message, required: true, rows: 6, placeholder: "How can we help?", value: @message, class: "form-input" %>
+      </div>
+
+      <div>
+        <%= form.submit "Send Message", class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Location</h2>
+    <p class="text-sm text-gray-600 mb-4">5 Pearse Street, Upstairs, Old Albany Store, Ballina, Co. Mayo, F26 F9T7</p>
+    <iframe class="w-full aspect-video rounded-lg" src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sie!4v1746657031198!5m2!1sen!2sie!6m8!1m7!1sEexL5XWMu2DK1PQy0bwkdQ!2m2!1d54.11495901623964!2d-9.153041428766286!3f304.79776!4f0!5f0.7820865974627469" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+</div>
