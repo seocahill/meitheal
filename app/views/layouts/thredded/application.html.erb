@@ -31,7 +31,9 @@
               THENCF
             <% end %>
             <div class="hidden md:flex items-center gap-4">
+              <%= link_to "News", main_app.posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               <%= link_to "Events", main_app.events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              <%= link_to "Gallery", main_app.artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               <%= link_to "Members", main_app.profiles_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               <%= link_to "Forum", thredded.root_path, class: "text-white hover:text-white text-sm font-medium border-b-2 border-white/50" %>
               <%= link_to "Funding", main_app.funding_opportunities_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
