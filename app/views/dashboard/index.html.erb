@@ -1,0 +1,270 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6">
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">
+      Welcome, <%= @user.profile&.name || @user.email_address.split("@").first %>
+    </h1>
+  </div>
+
+  <% if @user.can_manage? %>
+    <!-- Admin Section -->
+    <div class="mb-10">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+        Admin Actions
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Pending Users -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Pending Users</h3>
+            <% if @pending_users.any? %>
+              <span class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full"><%= @pending_users.size %></span>
+            <% end %>
+          </div>
+          <% if @pending_users.any? %>
+            <ul class="space-y-2 mb-4">
+              <% @pending_users.each do |user| %>
+                <li class="flex items-center justify-between text-sm">
+                  <span class="text-gray-700 truncate"><%= user.profile&.name || user.email_address %></span>
+                  <%= button_to "Approve", approve_admin_user_path(user), method: :post, class: "text-green-600 hover:text-green-800 text-xs font-medium" %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No pending approvals</p>
+          <% end %>
+          <%= link_to "View all users →", admin_users_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+        </div>
+
+        <!-- Pending Proposals -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Submitted Proposals</h3>
+            <% if @pending_proposals.any? %>
+              <span class="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded-full"><%= @pending_proposals.size %></span>
+            <% end %>
+          </div>
+          <% if @pending_proposals.any? %>
+            <ul class="space-y-2 mb-4">
+              <% @pending_proposals.each do |proposal| %>
+                <li class="text-sm">
+                  <%= link_to admin_proposal_path(proposal), class: "text-gray-700 hover:text-purple-600" do %>
+                    <span class="font-medium"><%= truncate(proposal.title, length: 30) %></span>
+                    <span class="text-gray-500">by <%= proposal.user.profile&.name || proposal.user.email_address.split("@").first %></span>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No proposals to review</p>
+          <% end %>
+          <%= link_to "View all proposals →", admin_proposals_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+        </div>
+
+        <!-- Admin Todos -->
+        <% if @admin_todos %>
+          <div class="card p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-semibold text-gray-900">Admin Todos</h3>
+              <% if @admin_todos.any? %>
+                <span class="bg-rose-100 text-rose-700 text-xs font-medium px-2 py-1 rounded-full"><%= @admin_todos.size %></span>
+              <% end %>
+            </div>
+            <% if @admin_todos.any? %>
+              <ul class="space-y-2 mb-4">
+                <% @admin_todos.take(5).each do |todo| %>
+                  <li class="text-sm text-gray-700 truncate"><%= todo.title %></li>
+                <% end %>
+              </ul>
+            <% else %>
+              <p class="text-sm text-gray-500">All caught up!</p>
+            <% end %>
+            <%= link_to "View all todos →", admin_todos_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @user.can_edit? %>
+    <!-- Editor Section -->
+    <div class="mb-10">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+        Editorial Actions
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Pending Bookings -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Pending Bookings</h3>
+            <% if @pending_bookings.any? %>
+              <span class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full"><%= @pending_bookings.size %></span>
+            <% end %>
+          </div>
+          <% if @pending_bookings.any? %>
+            <ul class="space-y-2 mb-4">
+              <% @pending_bookings.take(5).each do |booking| %>
+                <li class="flex items-center justify-between text-sm">
+                  <div class="truncate">
+                    <span class="text-gray-700"><%= booking.title %></span>
+                    <span class="text-gray-500 text-xs block"><%= booking.starts_at.strftime("%b %d, %H:%M") %></span>
+                  </div>
+                  <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-800 text-xs font-medium" %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No pending bookings</p>
+          <% end %>
+          <%= link_to "View calendar →", calendar_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+        </div>
+
+        <!-- Draft Events -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Draft Events</h3>
+            <% if @draft_events.any? %>
+              <span class="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full"><%= @draft_events.size %></span>
+            <% end %>
+          </div>
+          <% if @draft_events.any? %>
+            <ul class="space-y-2 mb-4">
+              <% @draft_events.take(5).each do |event| %>
+                <li class="flex items-center justify-between text-sm">
+                  <span class="text-gray-700 truncate"><%= event.title %></span>
+                  <%= link_to "Review", event_path(event), class: "text-purple-600 hover:text-purple-700 text-xs font-medium" %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No draft events</p>
+          <% end %>
+          <%= link_to "All events →", events_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+        </div>
+
+        <!-- Draft Newsletters -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-semibold text-gray-900">Draft Newsletters</h3>
+            <% if @draft_newsletters.any? %>
+              <span class="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full"><%= @draft_newsletters.size %></span>
+            <% end %>
+          </div>
+          <% if @draft_newsletters.any? %>
+            <ul class="space-y-2 mb-4">
+              <% @draft_newsletters.each do |newsletter| %>
+                <li class="text-sm">
+                  <%= link_to edit_newsletter_path(newsletter), class: "text-gray-700 hover:text-purple-600" do %>
+                    <%= truncate(newsletter.subject, length: 35) %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-gray-500">No drafts in progress</p>
+          <% end %>
+          <%= link_to "All newsletters →", newsletters_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Member Section (everyone sees this) -->
+  <div class="mb-10">
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+      Your Activity
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- My Bookings -->
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">My Upcoming Bookings</h3>
+        </div>
+        <% if @my_bookings.any? %>
+          <ul class="space-y-3 mb-4">
+            <% @my_bookings.each do |booking| %>
+              <li class="flex items-center justify-between text-sm">
+                <div>
+                  <span class="text-gray-900 font-medium"><%= booking.title %></span>
+                  <span class="text-gray-500 text-xs block"><%= booking.space.name %> · <%= booking.starts_at.strftime("%b %d, %H:%M") %></span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full <%= booking.confirmed? ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' %>">
+                  <%= booking.status.capitalize %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-gray-500 mb-4">No upcoming bookings</p>
+        <% end %>
+        <%= link_to "Book a space →", calendar_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+      </div>
+
+      <!-- My Proposals -->
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">My Funding Proposals</h3>
+        </div>
+        <% if @my_proposals.any? %>
+          <ul class="space-y-3 mb-4">
+            <% @my_proposals.each do |proposal| %>
+              <li class="flex items-center justify-between text-sm">
+                <div class="truncate">
+                  <span class="text-gray-900 font-medium"><%= truncate(proposal.title, length: 30) %></span>
+                  <span class="text-gray-500 text-xs block"><%= proposal.funding_opportunity.title.truncate(35) %></span>
+                </div>
+                <span class="text-xs px-2 py-1 rounded-full
+                  <%= case proposal.status
+                      when 'draft' then 'bg-gray-100 text-gray-700'
+                      when 'submitted' then 'bg-blue-100 text-blue-700'
+                      when 'approved' then 'bg-green-100 text-green-700'
+                      when 'rejected' then 'bg-rose-100 text-rose-700'
+                      end %>">
+                  <%= proposal.status.capitalize %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-gray-500 mb-4">No proposals yet</p>
+        <% end %>
+        <%= link_to "View funding opportunities →", funding_opportunities_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links -->
+  <div>
+    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+      <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
+      Explore
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <% if @upcoming_events.any? %>
+        <% @upcoming_events.take(2).each do |event| %>
+          <%= link_to event_path(event), class: "card p-4 hover:shadow-md transition-shadow" do %>
+            <p class="text-xs text-purple-600 font-medium mb-1">Upcoming Event</p>
+            <p class="font-semibold text-gray-900 truncate"><%= event.title %></p>
+            <p class="text-sm text-gray-500"><%= event.starts_at.strftime("%b %d, %Y") %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <% if @open_funding.any? %>
+        <% @open_funding.take(2).each do |opp| %>
+          <%= link_to funding_opportunity_path(opp), class: "card p-4 hover:shadow-md transition-shadow" do %>
+            <p class="text-xs text-green-600 font-medium mb-1">Funding Open</p>
+            <p class="font-semibold text-gray-900 truncate"><%= opp.title %></p>
+            <p class="text-sm text-gray-500">Deadline: <%= opp.deadline.strftime("%b %d") %></p>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

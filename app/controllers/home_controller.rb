@@ -3,6 +3,10 @@ class HomeController < ApplicationController
   layout "homepage"
 
   def index
-    @upcoming_events = Event.published.upcoming.limit(3)
+    if authenticated?
+      redirect_to dashboard_path
+    else
+      @upcoming_events = Event.published.upcoming.limit(3)
+    end
   end
 end
