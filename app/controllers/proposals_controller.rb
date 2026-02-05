@@ -40,8 +40,13 @@ class ProposalsController < ApplicationController
       return
     end
 
-    @proposal.submit!
-    redirect_to @funding_opportunity, notice: "Proposal submitted successfully."
+    if @proposal.valid?(:submit)
+      @proposal.submit!
+      redirect_to @funding_opportunity, notice: "Proposal submitted successfully."
+    else
+      flash.now[:alert] = "Please fill in all required fields before submitting."
+      render :edit, status: :unprocessable_entity
+    end
   end
 
   private
@@ -73,6 +78,6 @@ class ProposalsController < ApplicationController
   end
 
   def proposal_params
-    params.require(:proposal).permit(:title, :description)
+    params.require(:proposal).permit(:title, :description, :submission_deadline, :amount_requested, :organizer_fee)
   end
 end

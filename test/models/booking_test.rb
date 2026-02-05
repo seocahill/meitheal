@@ -12,7 +12,9 @@ class BookingTest < ActiveSupport::TestCase
       user: @user,
       title: "Art Workshop",
       starts_at: 1.week.from_now,
-      ends_at: 1.week.from_now + 2.hours
+      ends_at: 1.week.from_now + 2.hours,
+      agree_booking_rules: "1",
+      agree_ethics: "1"
     )
     assert booking.valid?
   end
@@ -65,24 +67,24 @@ class BookingTest < ActiveSupport::TestCase
   end
 
   test "scope confirmed returns only confirmed bookings" do
-    pending_booking = Booking.create!(space: @space, user: @user, title: "Pending", starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour, status: :pending)
-    confirmed = Booking.create!(space: @space, user: @user, title: "Confirmed", starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, status: :confirmed)
+    pending_booking = Booking.create!(space: @space, user: @user, title: "Pending", starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour, status: :pending, agree_booking_rules: "1", agree_ethics: "1")
+    confirmed = Booking.create!(space: @space, user: @user, title: "Confirmed", starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour, status: :confirmed, agree_booking_rules: "1", agree_ethics: "1")
 
     assert_includes Booking.confirmed, confirmed
     assert_not_includes Booking.confirmed, pending_booking
   end
 
   test "scope upcoming returns future bookings ordered by date" do
-    past = Booking.create!(space: @space, user: @user, title: "Past", starts_at: 1.day.ago, ends_at: 1.day.ago + 1.hour)
-    future = Booking.create!(space: @space, user: @user, title: "Future", starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour)
+    past = Booking.create!(space: @space, user: @user, title: "Past", starts_at: 1.day.ago, ends_at: 1.day.ago + 1.hour, agree_booking_rules: "1", agree_ethics: "1")
+    future = Booking.create!(space: @space, user: @user, title: "Future", starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour, agree_booking_rules: "1", agree_ethics: "1")
 
     assert_includes Booking.upcoming, future
     assert_not_includes Booking.upcoming, past
   end
 
   test "scope for_date returns bookings on a specific date" do
-    today_booking = Booking.create!(space: @space, user: @user, title: "Today", starts_at: Time.current.beginning_of_day + 10.hours, ends_at: Time.current.beginning_of_day + 12.hours)
-    tomorrow_booking = Booking.create!(space: @space, user: @user, title: "Tomorrow", starts_at: 1.day.from_now.beginning_of_day + 10.hours, ends_at: 1.day.from_now.beginning_of_day + 12.hours)
+    today_booking = Booking.create!(space: @space, user: @user, title: "Today", starts_at: Time.current.beginning_of_day + 10.hours, ends_at: Time.current.beginning_of_day + 12.hours, agree_booking_rules: "1", agree_ethics: "1")
+    tomorrow_booking = Booking.create!(space: @space, user: @user, title: "Tomorrow", starts_at: 1.day.from_now.beginning_of_day + 10.hours, ends_at: 1.day.from_now.beginning_of_day + 12.hours, agree_booking_rules: "1", agree_ethics: "1")
 
     results = Booking.for_date(Date.current)
     assert_includes results, today_booking

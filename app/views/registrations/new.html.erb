@@ -1,0 +1,52 @@
+<div class="max-w-md mx-auto px-4 sm:px-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Join THENCF</h1>
+
+  <div class="card p-6">
+    <p class="text-sm text-gray-600 mb-6">
+      Create an account to become a member of the North Connacht Cultural Co-op.
+      Your registration will be reviewed by an administrator.
+    </p>
+
+    <%= form_with model: @user, url: registration_path, class: "space-y-6" do |form| %>
+      <% if @user.errors.any? %>
+        <div class="form-error">
+          <ul class="list-disc list-inside">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <label class="form-label">Your name</label>
+        <%= form.text_field :name, required: true, autofocus: true, placeholder: "Enter your full name", class: "form-input" %>
+      </div>
+
+      <div>
+        <label class="form-label">Email address</label>
+        <%= form.email_field :email_address, required: true, autocomplete: "email", placeholder: "Enter your email address", class: "form-input" %>
+      </div>
+
+      <div>
+        <label class="form-label">Password</label>
+        <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Choose a password", minlength: 8, class: "form-input" %>
+        <p class="form-hint">At least 8 characters</p>
+      </div>
+
+      <div>
+        <label class="form-label">Confirm password</label>
+        <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Confirm your password", class: "form-input" %>
+      </div>
+
+      <div class="pt-4">
+        <%= form.submit "Create Account", class: "w-full btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer text-center" %>
+      </div>
+    <% end %>
+
+    <p class="mt-6 text-center text-sm text-gray-600">
+      Already have an account?
+      <%= link_to "Sign in", new_session_path, class: "text-purple-600 hover:text-purple-700 font-medium" %>
+    </p>
+  </div>
+</div>

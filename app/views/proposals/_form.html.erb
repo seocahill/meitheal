@@ -12,6 +12,7 @@
 
   <div>
     <%= f.label :title, class: "form-label" %>
+    <p class="form-hint mb-2">The title of your project/proposal.</p>
     <%= f.text_field :title, class: "form-input", required: true %>
   </div>
 
@@ -19,6 +20,37 @@
     <%= f.label :description, class: "form-label" %>
     <p class="form-hint mb-2">Describe your project, its goals, and how the funding would be used.</p>
     <%= f.text_area :description, rows: 10, class: "form-input" %>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <%= f.label :submission_deadline, "Application Deadline", class: "form-label" %>
+      <p class="form-hint mb-2">When must this application be submitted to the funder?</p>
+      <%= f.date_field :submission_deadline, class: "form-input" %>
+    </div>
+
+    <div>
+      <%= f.label :amount_requested, "Amount Requested", class: "form-label" %>
+      <p class="form-hint mb-2">Total amount you're applying for.</p>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+        <%= f.number_field :amount_requested, class: "form-input pl-8", min: 0, step: 0.01 %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :organizer_fee, "Organizer Fee", class: "form-label" %>
+      <p class="form-hint mb-2">Your fee for organizing (0 if none).</p>
+      <div class="relative">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+        <%= f.number_field :organizer_fee, class: "form-input pl-8", min: 0, step: 0.01, value: @proposal.organizer_fee || 0 %>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
+    <p class="font-medium mb-1">Before submitting:</p>
+    <p>Make sure all fields are filled in. You can save as draft and come back later to complete.</p>
   </div>
 
   <div class="flex items-center gap-4 pt-4 border-t border-gray-100">

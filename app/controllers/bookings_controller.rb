@@ -71,7 +71,7 @@ class BookingsController < ApplicationController
   end
 
   def booking_params
-    params.require(:booking).permit(:space_id, :title, :description, :starts_at, :ends_at)
+    params.require(:booking).permit(:space_id, :title, :description, :starts_at, :ends_at, :agree_booking_rules, :agree_ethics)
   end
 
   def require_editable

@@ -41,7 +41,9 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
           space_id: @space.id,
           title: "New Booking",
           starts_at: 3.weeks.from_now,
-          ends_at: 3.weeks.from_now + 2.hours
+          ends_at: 3.weeks.from_now + 2.hours,
+          agree_booking_rules: "1",
+          agree_ethics: "1"
         }
       }
     end
@@ -55,10 +57,27 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
         space_id: @space.id,
         title: "New Booking",
         starts_at: 3.weeks.from_now,
-        ends_at: 3.weeks.from_now + 2.hours
+        ends_at: 3.weeks.from_now + 2.hours,
+        agree_booking_rules: "1",
+        agree_ethics: "1"
       }
     }
     assert Booking.last.pending?
+  end
+
+  test "booking without agreements is rejected" do
+    sign_in_as(@viewer)
+    assert_no_difference "Booking.count" do
+      post bookings_path, params: {
+        booking: {
+          space_id: @space.id,
+          title: "New Booking",
+          starts_at: 3.weeks.from_now,
+          ends_at: 3.weeks.from_now + 2.hours
+        }
+      }
+    end
+    assert_response :unprocessable_entity
   end
 
   test "booking owner can edit their booking" do

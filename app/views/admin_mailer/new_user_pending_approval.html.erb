@@ -1,0 +1,13 @@
+<h1>New User Registration</h1>
+
+<p>A new user has registered and is awaiting approval:</p>
+
+<ul>
+  <li><strong>Name:</strong> <%= @user.profile&.name || "Not provided" %></li>
+  <li><strong>Email:</strong> <%= @user.email_address %></li>
+  <li><strong>Registered:</strong> <%= @user.created_at.strftime("%d %B %Y at %H:%M") %></li>
+</ul>
+
+<p>
+  <%= link_to "Review pending users", admin_users_url(approved: "pending") %>
+</p>

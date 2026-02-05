@@ -1,9 +1,15 @@
 class FundingOpportunity < ApplicationRecord
+  belongs_to :created_by, class_name: "User", optional: true
   has_many :proposals, dependent: :destroy
 
   validates :title, presence: true
   validates :organization, presence: true
   validates :deadline, presence: true
+
+  def editable_by?(user)
+    return false unless user
+    user.can_edit? || created_by == user
+  end
 
   scope :open, -> { where("deadline >= ?", Date.current) }
   scope :upcoming, -> { open.order(:deadline) }

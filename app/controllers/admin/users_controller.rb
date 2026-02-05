@@ -1,10 +1,18 @@
 module Admin
   class UsersController < ApplicationController
     before_action :require_owner
-    before_action :set_user, only: [ :edit, :update, :destroy ]
+    before_action :set_user, only: [ :edit, :update, :destroy, :approve ]
 
     def index
       @users = User.order(:email_address)
+      @users = @users.where(approved: false) if params[:approved] == "pending"
+      @pending_count = User.where(approved: false).count
+    end
+
+    def approve
+      @user.update!(approved: true)
+      UserMailer.account_approved(@user).deliver_later
+      redirect_to admin_users_path, notice: "#{@user.profile&.name || @user.email_address} has been approved and notified."
     end
 
     def new
@@ -13,6 +21,7 @@ module Admin
 
     def create
       @user = User.new(user_params)
+      @user.approved = true # Admin-created users are automatically approved
       if @user.save
         redirect_to admin_users_path, notice: "User created successfully."
       else
@@ -47,7 +56,7 @@ module Admin
     end
 
     def user_params
-      params.require(:user).permit(:email_address, :password, :role)
+      params.require(:user).permit(:email_address, :password, :role, :approved)
     end
 
     def password_params

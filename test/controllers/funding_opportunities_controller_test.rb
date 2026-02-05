@@ -26,21 +26,20 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @opportunity.title
   end
 
-  # Editor access for CRUD
-  test "new requires editor role" do
-    sign_in_as(@viewer)
+  # Any member can create
+  test "new requires authentication" do
     get new_funding_opportunity_path
-    assert_redirected_to root_path
+    assert_redirected_to new_session_path
   end
 
-  test "editor can access new form" do
-    sign_in_as(@editor)
+  test "any member can access new form" do
+    sign_in_as(@viewer)
     get new_funding_opportunity_path
     assert_response :success
   end
 
-  test "editor can create opportunity" do
-    sign_in_as(@editor)
+  test "any member can create opportunity" do
+    sign_in_as(@viewer)
     assert_difference "FundingOpportunity.count" do
       post funding_opportunities_path, params: {
         funding_opportunity: {
@@ -52,26 +51,37 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
       }
     end
     assert_redirected_to funding_opportunity_path(FundingOpportunity.last)
+    assert_equal @viewer, FundingOpportunity.last.created_by
   end
 
-  test "viewer cannot create opportunity" do
-    sign_in_as(@viewer)
-    assert_no_difference "FundingOpportunity.count" do
-      post funding_opportunities_path, params: {
-        funding_opportunity: {
-          title: "New Grant",
-          organization: "Culture Ireland",
-          deadline: 1.month.from_now
-        }
-      }
-    end
-    assert_redirected_to root_path
-  end
-
+  # Edit/delete requires editor or creator
   test "editor can edit opportunity" do
     sign_in_as(@editor)
     get edit_funding_opportunity_path(@opportunity)
     assert_response :success
+  end
+
+  test "creator can edit their opportunity" do
+    # Create opportunity as viewer
+    sign_in_as(@viewer)
+    post funding_opportunities_path, params: {
+      funding_opportunity: {
+        title: "My Grant",
+        organization: "Local Council",
+        deadline: 1.month.from_now
+      }
+    }
+    opp = FundingOpportunity.last
+
+    # Viewer can edit their own
+    get edit_funding_opportunity_path(opp)
+    assert_response :success
+  end
+
+  test "other viewer cannot edit opportunity they didnt create" do
+    sign_in_as(@viewer)
+    get edit_funding_opportunity_path(@opportunity)
+    assert_redirected_to funding_opportunities_path
   end
 
   test "editor can update opportunity" do

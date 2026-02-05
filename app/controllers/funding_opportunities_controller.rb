@@ -1,7 +1,7 @@
 class FundingOpportunitiesController < ApplicationController
   allow_unauthenticated_access only: [ :index, :show ]
-  before_action :require_editor, except: [ :index, :show ]
   before_action :set_funding_opportunity, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_editable, only: [ :edit, :update, :destroy ]
 
   def index
     @funding_opportunities = FundingOpportunity.upcoming
@@ -19,6 +19,7 @@ class FundingOpportunitiesController < ApplicationController
 
   def create
     @funding_opportunity = FundingOpportunity.new(funding_opportunity_params)
+    @funding_opportunity.created_by = Current.user
     if @funding_opportunity.save
       redirect_to @funding_opportunity, notice: "Funding opportunity created."
     else
@@ -50,5 +51,11 @@ class FundingOpportunitiesController < ApplicationController
 
   def funding_opportunity_params
     params.require(:funding_opportunity).permit(:title, :organization, :description, :deadline, :amount, :url, :categories)
+  end
+
+  def require_editable
+    unless @funding_opportunity.editable_by?(Current.user)
+      redirect_to funding_opportunities_path, alert: "You don't have permission to do that."
+    end
   end
 end

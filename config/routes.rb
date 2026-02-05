@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   end
 
   resource :session
+  resource :registration, only: [:new, :create]
   resources :passwords, param: :token
 
   resources :events do
@@ -26,7 +27,11 @@ Rails.application.routes.draw do
         patch :move_down
       end
     end
-    resources :users
+    resources :users do
+      member do
+        post :approve
+      end
+    end
     resources :memberships do
       resources :payments, only: [ :create, :destroy ]
     end

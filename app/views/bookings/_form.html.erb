@@ -37,6 +37,27 @@
     <%= form.text_area :description, rows: 3, class: "form-input" %>
   </div>
 
+  <% if booking.new_record? %>
+    <!-- Agreements (only for new bookings) -->
+    <div class="space-y-3 p-4 bg-gray-50 rounded-xl">
+      <p class="text-sm font-medium text-gray-700">Before booking, please confirm:</p>
+
+      <div class="flex items-start gap-3">
+        <%= form.check_box :agree_booking_rules, class: "mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500", required: true %>
+        <%= form.label :agree_booking_rules, class: "text-sm text-gray-600" do %>
+          I have read and agree to the <%= link_to "Booking Rules", page_path("booking-rules"), target: "_blank", class: "text-purple-600 hover:text-purple-700 underline" %>
+        <% end %>
+      </div>
+
+      <div class="flex items-start gap-3">
+        <%= form.check_box :agree_ethics, class: "mt-1 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500", required: true %>
+        <%= form.label :agree_ethics, class: "text-sm text-gray-600" do %>
+          I agree to abide by the <%= link_to "Ethics Code", page_path("ethics"), target: "_blank", class: "text-purple-600 hover:text-purple-700 underline" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
     <%= link_to "Cancel", calendar_path, class: "text-gray-600 hover:text-gray-900" %>
     <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
