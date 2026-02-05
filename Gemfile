@@ -89,3 +89,5 @@ group :test do
 end
 
 gem "dotenv", "~> 3.2"
+
+gem "recaptcha", "~> 5.21"

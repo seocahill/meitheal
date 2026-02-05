@@ -144,7 +144,8 @@ namespace :import do
           title: fm['title'],
           body: html_body,
           excerpt: html_body.gsub(/<[^>]*>/, '').truncate(200),
-          published_at: fm['date'] || Date.today
+          published_at: fm['date'] || Date.today,
+          post_type: :news
         )
 
         if post.save
@@ -155,6 +156,39 @@ namespace :import do
       end
     else
       puts "News directory not found at #{news_path}"
+    end
+
+    # Import Projects
+    puts "\n=== Importing Projects ==="
+    projects_path = NCF_SOURCE_PATH.join("projects")
+    if Dir.exist?(projects_path)
+      Dir.glob(projects_path.join("*.markdown")).each do |file|
+        data = parse_markdown_file(file)
+        fm = data[:frontmatter]
+
+        next if fm['title'].blank?
+
+        base_slug = fm['title'].parameterize
+
+        post = Post.find_or_initialize_by(slug: base_slug)
+        html_body = markdown_to_html(data[:body], markdown)
+        post.assign_attributes(
+          user: admin_user,
+          title: fm['title'],
+          body: html_body,
+          excerpt: html_body.gsub(/<[^>]*>/, '').truncate(200),
+          published_at: fm['date'] || Date.today,
+          post_type: :project
+        )
+
+        if post.save
+          puts "✓ Imported project: #{fm['title']}"
+        else
+          puts "✗ Failed to import project: #{fm['title']} - #{post.errors.full_messages.join(', ')}"
+        end
+      end
+    else
+      puts "Projects directory not found at #{projects_path}"
     end
 
     # Import FAQs
@@ -223,7 +257,8 @@ namespace :import do
 
     puts "\n=== Import Complete ==="
     puts "Events: #{Event.count}"
-    puts "Posts: #{Post.count}"
+    puts "News posts: #{Post.news.count}"
+    puts "Projects: #{Post.project.count}"
     puts "FAQs: #{Faq.count}"
     puts "Profiles: #{Profile.count}"
     puts "\nNote: Images are still referenced from the old site."

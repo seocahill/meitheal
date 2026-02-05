@@ -7,6 +7,7 @@ one:
   excerpt: This is test post one
   published_at: 2026-02-04 00:52:54
   published: true
+  post_type: 0
 
 two:
   user: editor
@@ -15,3 +16,22 @@ two:
   excerpt: This is test post two
   published_at: 2026-02-04 00:52:54
   published: false
+  post_type: 0
+
+project_one:
+  user: owner
+  title: Test Project One
+  slug: test-project-one
+  excerpt: This is a test project
+  published_at: 2026-02-04 00:52:54
+  published: true
+  post_type: 1
+
+project_draft:
+  user: editor
+  title: Draft Project
+  slug: draft-project
+  excerpt: This is a draft project
+  published_at:
+  published: false
+  post_type: 1

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_05_220414) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_05_232736) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -286,6 +286,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_05_220414) do
   create_table "posts", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "excerpt"
+    t.integer "post_type"
     t.boolean "published"
     t.datetime "published_at"
     t.string "slug"

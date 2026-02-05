@@ -1,4 +1,4 @@
-class PostsController < ApplicationController
+class ProjectsController < ApplicationController
   include Pagy::Method
 
   allow_unauthenticated_access only: [ :index, :show ]
@@ -7,23 +7,23 @@ class PostsController < ApplicationController
   before_action :require_publishable, only: [ :publish, :unpublish ]
 
   def index
-    @pagy, @posts = pagy(Post.news.published.recent, items: 10)
+    @pagy, @posts = pagy(Post.project.published.recent, items: 10)
   end
 
   def show
     unless @post.published? || can_view_draft?(@post)
-      redirect_to posts_path, alert: "Post not found."
+      redirect_to projects_path, alert: "Project not found."
     end
   end
 
   def new
-    @post = Post.new(post_type: :news)
+    @post = Post.new(post_type: :project)
   end
 
   def create
-    @post = Current.user.posts.build(post_params.merge(post_type: :news))
+    @post = Current.user.posts.build(post_params.merge(post_type: :project))
     if @post.save
-      redirect_to @post, notice: "Post created. It will be visible after an admin publishes it."
+      redirect_to project_path(@post.slug), notice: "Project created. It will be visible after an admin publishes it."
     else
       render :new, status: :unprocessable_entity
     end
@@ -33,14 +33,13 @@ class PostsController < ApplicationController
   end
 
   def update
-    # Viewers can't change published status even on their own posts
     filtered_params = post_params
     unless Current.user.can_edit?
       filtered_params = filtered_params.except(:published_at)
     end
 
     if @post.update(filtered_params)
-      redirect_to @post, notice: "Post updated."
+      redirect_to project_path(@post.slug), notice: "Project updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -48,23 +47,23 @@ class PostsController < ApplicationController
 
   def destroy
     @post.destroy
-    redirect_to posts_path, notice: "Post deleted."
+    redirect_to projects_path, notice: "Project deleted."
   end
 
   def publish
     @post.update!(published_at: Time.current)
-    redirect_to @post, notice: "Post published."
+    redirect_to project_path(@post.slug), notice: "Project published."
   end
 
   def unpublish
     @post.update!(published_at: nil)
-    redirect_to @post, notice: "Post unpublished."
+    redirect_to project_path(@post.slug), notice: "Project unpublished."
   end
 
   private
 
   def set_post
-    @post = Post.find_by!(slug: params[:slug])
+    @post = Post.project.find_by!(slug: params[:slug])
   end
 
   def post_params
@@ -74,7 +73,6 @@ class PostsController < ApplicationController
   end
 
   def can_view_draft?(post)
-    # Must call authenticated? to ensure session is resumed for unauthenticated routes
     authenticated? && (post.user == Current.user || Current.user.can_edit?)
   end
 

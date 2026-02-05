@@ -6,6 +6,8 @@ class Post < ApplicationRecord
   validates :title, presence: true
   validates :slug, presence: true, uniqueness: true, format: { with: /\A[a-z0-9-]+\z/, message: "only allows lowercase letters, numbers, and hyphens" }
 
+  enum :post_type, { news: 0, project: 1 }, default: :news
+
   before_validation :generate_slug, if: -> { slug.blank? && title.present? }
 
   scope :published, -> { where.not(published_at: nil).where("published_at <= ?", Time.current) }

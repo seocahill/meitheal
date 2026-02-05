@@ -11,6 +11,13 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "index only shows news posts" do
+    get posts_url
+    assert_response :success
+    assert_no_match "Test Project One", response.body
+    assert_match "Test Post One", response.body
+  end
+
   test "should get show for published post" do
     get post_url(@post.slug)
     assert_response :success

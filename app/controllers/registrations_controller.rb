@@ -7,6 +7,12 @@ class RegistrationsController < ApplicationController
   end
 
   def create
+    if Rails.env.production? && !verify_recaptcha(action: "registration", minimum_score: 0.5)
+      @user = User.new(user_params)
+      flash.now[:alert] = "reCAPTCHA verification failed. Please try again."
+      return render :new, status: :unprocessable_entity
+    end
+
     @user = User.new(user_params)
 
     if @user.save

@@ -6,6 +6,13 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :projects, param: :slug do
+    member do
+      patch :publish
+      patch :unpublish
+    end
+  end
+
   resource :session
   resource :registration, only: [:new, :create]
   resources :passwords, param: :token

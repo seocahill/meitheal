@@ -219,14 +219,91 @@ Page.find_or_create_by!(slug: "about") do |p|
   p.title = "About us"
   p.visibility = :published
   p.nav_location = :footer
-  p.content = "<p>We're a community makerspace in Dublin. Members get access to the workshop, tools, and each other.</p><p>Drop in on Open Night or <a href=\"/pages/contact\">get in touch</a>.</p>"
+  p.content = <<~HTML
+    <h2>About THENCF</h2>
+    <p>THENCF is a cultural cooperative based in Ballina, County Mayo. Our legal form is "THENCF COMPANY LIMITED BY GUARANTEE" r/n 767209.</p>
+    <p>We are organised <a href="https://www.ica.coop/en/whats-co-op/co-operative-identity-values-principles">according to the ICA cooperative principles</a>.</p>
+    <blockquote>
+      <p>Cooperatives are based on the values of self-help, self-responsibility, democracy, equality, equity, and solidarity. In the tradition of their founders, cooperative members believe in the ethical values of honesty, openness, social responsibility and caring for others.</p>
+    </blockquote>
+    <p>We are also a member of the <a href="https://encc.eu/pages/the-encc">European Network of Cultural Centres</a>.</p>
+
+    <h2>Location</h2>
+    <p>THENCF community art space is located at 5 Pearse Street, Upstairs, Old Albany Store, Ballina, Co. Mayo, F26 F9T7.</p>
+    <p>The space comprises two large rooms, two small rooms and a terrace.</p>
+
+    <h3>Goals</h3>
+    <ul>
+      <li>Community and social meet-ups for local artists.</li>
+      <li>Public and private spaces for artists.</li>
+      <li>Reduce youth migration from area through better social facilities.</li>
+      <li>Increase participation in the arts.</li>
+      <li>Develop local artists.</li>
+      <li>To regenerate the town by reusing vacant spaces.</li>
+      <li>To create a vibrant, authentic, modern nightlife in the area.</li>
+      <li>Improve prestige of area abroad.</li>
+    </ul>
+  HTML
 end
 
 Page.find_or_create_by!(slug: "contact") do |p|
   p.title = "Contact"
   p.visibility = :published
   p.nav_location = :footer
-  p.content = "<p>Email: <a href=\"mailto:hello@thencf.art\">hello@thencf.art</a></p><p>Open Night is every second Thursday, 6–9pm. No booking needed for a look around.</p>"
+  p.content = <<~HTML
+    <h2>Contact us</h2>
+    <p>Email: <a href="mailto:hello@thencf.art">hello@thencf.art</a></p>
+
+    <h2>Location</h2>
+    <p>THENCF community art space is located at 5 Pearse Street, Upstairs, Old Albany Store, Ballina, Co. Mayo, F26 F9T7.</p>
+    <iframe class="w-full aspect-video" src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sie!4v1746657031198!5m2!1sen!2sie!6m8!1m7!1sEexL5XWMu2DK1PQy0bwkdQ!2m2!1d54.11495901623964!2d-9.153041428766286!3f304.79776!4f0!5f0.7820865974627469" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  HTML
+end
+
+Page.find_or_create_by!(slug: "privacy") do |p|
+  p.title = "Privacy Policy"
+  p.visibility = :published
+  p.nav_location = :footer
+  p.content = <<~HTML
+    <h2>GDPR Disclaimer</h2>
+    <p>As part of our commitment to protecting your personal data, we wish to inform you about how we handle the information you provide to us via this website. Any survey conducted by the NCF is exclusively for our internal research purposes, namely to assess the demand for member studio space and to align our members with suitable activities and fellow members with shared interests.</p>
+
+    <h3>Data Collected</h3>
+    <ul>
+      <li>Name</li>
+      <li>Email Address</li>
+      <li>Home Town</li>
+    </ul>
+
+    <h3>Purpose of Data Collection</h3>
+    <ul>
+      <li>Evaluate the demand for member studio space.</li>
+      <li>Communication and Newsletters</li>
+      <li>Facilitate connections and align members with relevant activities and other members within the collective.</li>
+    </ul>
+
+    <h3>Legal Basis for Processing</h3>
+    <p>The data collected is processed based on the legitimate interests of our art collective in improving member experiences and efficiently managing resources.</p>
+
+    <h3>Data Storage and Security</h3>
+    <ul>
+      <li>Your personal data will be stored securely and will not be shared with third parties without your explicit consent.</li>
+      <li>We employ appropriate technical and organizational measures to protect your data from unauthorized access, use, or disclosure.</li>
+    </ul>
+
+    <h3>Data Retention</h3>
+    <p>We will retain your information only as long as necessary to fulfill the purposes outlined above, after which it will be securely deleted.</p>
+
+    <h3>Your Rights</h3>
+    <ul>
+      <li>You have the right to access, rectify, or request the deletion of your personal data at any time.</li>
+      <li>Additionally, you can object to or request the restriction of data processing.</li>
+      <li>If you wish to exercise any of these rights, please contact us at <a href="mailto:info@thencf.art">info@thencf.art</a>.</li>
+    </ul>
+
+    <h3>Contact Information</h3>
+    <p>If you have any questions or concerns regarding our data practices, please contact us at <a href="mailto:info@thencf.art">info@thencf.art</a>.</p>
+  HTML
 end
 
 Page.find_or_create_by!(slug: "code-of-conduct") do |p|
