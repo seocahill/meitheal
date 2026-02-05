@@ -62,7 +62,7 @@ class NewslettersController < ApplicationController
 
       # Process with AI
       response = @newsletter.chat.ask(import_email_prompt(email_metadata, email_content))
-      render json: { content: response.content }
+      render json: { content: strip_code_fences(response.content) }
     rescue ZohoMailService::ApiError => e
       render json: { error: "Could not fetch email: #{e.message}" }, status: :unprocessable_entity
     rescue RubyLLM::Error => e
@@ -97,7 +97,7 @@ class NewslettersController < ApplicationController
 
     begin
       response = @newsletter.chat.ask(compose_prompt(prompt))
-      render json: { content: response.content }
+      render json: { content: strip_code_fences(response.content) }
     rescue RubyLLM::Error => e
       render json: { error: "AI service unavailable: #{e.message}" }, status: :service_unavailable
     end
@@ -128,7 +128,7 @@ class NewslettersController < ApplicationController
 
       User request: #{user_prompt}
 
-      Please provide the newsletter content in HTML format suitable for email. Use <h2> for section headers, <p> for paragraphs, <ul>/<li> for lists.
+      Respond with ONLY the newsletter content in markdown format. Use ## for section headers. Do not wrap in code blocks.
     PROMPT
   end
 
@@ -155,5 +155,9 @@ class NewslettersController < ApplicationController
 
       Provide ONLY the HTML section to be added, no explanatory text.
     PROMPT
+  end
+
+  def strip_code_fences(text)
+    text.gsub(/\A```(?:html|markdown)?\n?/, "").gsub(/\n?```\z/, "")
   end
 end

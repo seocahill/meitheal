@@ -63,21 +63,31 @@ export default class extends Controller {
       const data = await response.json()
 
       if (response.ok) {
-        // Find the Trix editor and append content
-        const trixEditor = document.querySelector('trix-editor')
-        if (trixEditor && trixEditor.editor) {
-          // Move cursor to end
-          trixEditor.editor.setSelectedRange([trixEditor.editor.getDocument().getLength() - 1, trixEditor.editor.getDocument().getLength() - 1])
-          // Insert a line break then the content
-          trixEditor.editor.insertHTML('<br><br>' + data.content)
+        // Find the Lexxy editor and append content
+        const lexxEditor = document.querySelector('lexxy-editor')
+        if (lexxEditor && lexxEditor.contents) {
+          // Focus the editor first
+          lexxEditor.focus()
+          // Insert a line break then the content at the end
+          lexxEditor.contents.insertHtml('<br><br>' + data.content)
+
+          // Mark as imported
+          button.innerHTML = '<span class="text-green-600">✓ Imported</span>'
+          button.classList.add('opacity-50')
+
+          // Show success message with save reminder
+          this.showFlash('Email content added - remember to save!')
+        } else {
+          console.error('Lexxy editor not found')
+          alert('Could not find editor - please copy content manually')
+          // Show the content in output area as fallback
+          if (this.hasOutputTarget) {
+            this.outputTarget.innerHTML = data.content
+            this.resultTarget.classList.remove("hidden")
+          }
+          button.innerHTML = originalText
+          button.disabled = false
         }
-
-        // Mark as imported
-        button.innerHTML = '<span class="text-green-600">✓ Imported</span>'
-        button.classList.add('opacity-50')
-
-        // Show success message
-        this.showFlash('Email content imported to newsletter')
       } else {
         alert(data.error || "Failed to import email")
         button.innerHTML = originalText
