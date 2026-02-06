@@ -179,7 +179,7 @@
       Your Activity
     </h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- My Bookings -->
       <div class="card p-5">
         <div class="flex items-center justify-between mb-4">
@@ -235,8 +235,71 @@
         <% end %>
         <%= link_to "View funding opportunities →", funding_opportunities_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
       </div>
+
+      <!-- Membership Status -->
+      <div class="card p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-gray-900">Membership</h3>
+          <% if @has_active_membership %>
+            <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">Active</span>
+          <% else %>
+            <span class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full">Inactive</span>
+          <% end %>
+        </div>
+        <% if @membership %>
+          <div class="text-sm text-gray-600 mb-4">
+            <p><span class="font-medium"><%= @membership.membership_type.humanize %></span> member</p>
+            <% if @membership.expires_on %>
+              <% if @membership.expired? %>
+                <p class="text-rose-600">Expired <%= @membership.expires_on.strftime("%b %d, %Y") %></p>
+              <% else %>
+                <p>Expires <%= @membership.expires_on.strftime("%b %d, %Y") %></p>
+              <% end %>
+            <% end %>
+          </div>
+          <% if @membership.expired? || !@has_active_membership %>
+            <%= link_to "Renew membership →", new_membership_payment_path(@membership), class: "inline-block bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow" %>
+          <% else %>
+            <%= link_to "Pay/Donate →", new_membership_payment_path(@membership), class: "text-sm text-purple-600 hover:text-purple-700" %>
+          <% end %>
+        <% else %>
+          <p class="text-sm text-gray-500 mb-4">No membership on file. Contact an admin to set up your membership.</p>
+        <% end %>
+      </div>
     </div>
   </div>
+
+  <!-- Recent Forum Activity -->
+  <% if @recent_topics.any? %>
+    <div class="mb-10">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
+        Latest from the Forum
+      </h2>
+
+      <div class="card divide-y divide-gray-100">
+        <% @recent_topics.each do |topic| %>
+          <%= link_to thredded.messageboard_topic_path(topic.messageboard, topic), class: "block p-4 hover:bg-gray-50 transition-colors" do %>
+            <div class="flex items-start justify-between gap-4">
+              <div class="min-w-0 flex-1">
+                <p class="font-medium text-gray-900 truncate"><%= topic.title %></p>
+                <p class="text-sm text-gray-500">
+                  <span class="text-purple-600"><%= topic.messageboard.name %></span>
+                  · <%= topic.user&.name || "Member" %>
+                  · <%= topic.posts_count %> <%= "reply".pluralize(topic.posts_count - 1) if topic.posts_count > 1 %>
+                </p>
+              </div>
+              <span class="text-xs text-gray-400 whitespace-nowrap"><%= time_ago_in_words(topic.last_post_at || topic.created_at) %> ago</span>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="mt-4 text-center">
+        <%= link_to "Visit the Forum →", thredded_path, class: "text-sm text-purple-600 hover:text-purple-700 font-medium" %>
+      </div>
+    </div>
+  <% end %>
 
   <!-- Quick Links -->
   <div>

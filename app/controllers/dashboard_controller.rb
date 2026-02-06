@@ -8,6 +8,17 @@ class DashboardController < ApplicationController
     @upcoming_events = Event.published.upcoming.limit(5)
     @open_funding = FundingOpportunity.upcoming.limit(5)
 
+    # Recent forum activity - approved topics only
+    @recent_topics = Thredded::Topic
+      .where(moderation_state: :approved)
+      .includes(:user, :messageboard)
+      .order(last_post_at: :desc)
+      .limit(5)
+
+    # Membership status
+    @membership = @user.memberships.order(starts_on: :desc).first
+    @has_active_membership = @user.has_active_membership?
+
     # Editor items
     if @user.can_edit?
       @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)
