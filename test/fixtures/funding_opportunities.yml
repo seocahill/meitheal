@@ -8,6 +8,7 @@ arts_council_grant:
   amount: 15000
   url: https://www.artscouncil.ie
   categories: visual art, music, theatre
+  approved: true
 
 expired_grant:
   title: Creative Ireland Fund
@@ -17,3 +18,14 @@ expired_grant:
   amount: 5000
   url: https://www.creativeireland.gov.ie
   categories: community, heritage
+  approved: true
+
+pending_grant:
+  title: Pending Community Grant
+  organization: Local Authority
+  description: A grant awaiting approval
+  deadline: <%= 2.months.from_now.to_date %>
+  amount: 3000
+  categories: community
+  approved: false
+  created_by: viewer
