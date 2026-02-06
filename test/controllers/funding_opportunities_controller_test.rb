@@ -14,16 +14,70 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "index shows open opportunities" do
+  test "index shows approved opportunities to public" do
     get funding_opportunities_path
     assert_response :success
     assert_includes response.body, @opportunity.title
   end
 
-  test "show is accessible to public" do
+  test "index does not show pending opportunities to public" do
+    pending = funding_opportunities(:pending_grant)
+    get funding_opportunities_path
+    assert_not_includes response.body, pending.title
+  end
+
+  test "index shows approved opportunities to authenticated users" do
+    sign_in_as(@viewer)
+    get funding_opportunities_path
+    assert_includes response.body, @opportunity.title
+  end
+
+  test "index shows own pending opportunities to creator" do
+    sign_in_as(@viewer)
+    get funding_opportunities_path
+    pending = funding_opportunities(:pending_grant)
+    assert_includes response.body, pending.title
+  end
+
+  test "index does not show other users pending opportunities" do
+    sign_in_as(@editor)
+    get funding_opportunities_path
+    pending = funding_opportunities(:pending_grant)
+    assert_not_includes response.body, pending.title
+  end
+
+  test "show is accessible to public for approved opportunities" do
     get funding_opportunity_path(@opportunity)
     assert_response :success
     assert_includes response.body, @opportunity.title
+  end
+
+  test "show redirects public from pending opportunities" do
+    pending = funding_opportunities(:pending_grant)
+    get funding_opportunity_path(pending)
+    assert_redirected_to funding_opportunities_path
+  end
+
+  test "show allows creator to view their pending opportunity" do
+    sign_in_as(@viewer)
+    pending = funding_opportunities(:pending_grant)
+    get funding_opportunity_path(pending)
+    assert_response :success
+  end
+
+  test "show allows editor to view pending opportunity" do
+    sign_in_as(@editor)
+    pending = funding_opportunities(:pending_grant)
+    get funding_opportunity_path(pending)
+    assert_response :success
+  end
+
+  test "show redirects other members from pending opportunity" do
+    other_viewer = User.create!(email_address: "other@example.com", password: "password", approved: true)
+    sign_in_as(other_viewer)
+    pending = funding_opportunities(:pending_grant)
+    get funding_opportunity_path(pending)
+    assert_redirected_to funding_opportunities_path
   end
 
   # Any member can create
@@ -38,20 +92,47 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "any member can create opportunity" do
+  test "viewer-created opportunity is pending approval" do
     sign_in_as(@viewer)
-    assert_difference "FundingOpportunity.count" do
-      post funding_opportunities_path, params: {
-        funding_opportunity: {
-          title: "New Grant",
-          organization: "Culture Ireland",
-          deadline: 1.month.from_now,
-          description: "A great opportunity"
-        }
+    post funding_opportunities_path, params: {
+      funding_opportunity: {
+        title: "New Grant",
+        organization: "Culture Ireland",
+        deadline: 1.month.from_now,
+        description: "A great opportunity"
       }
-    end
-    assert_redirected_to funding_opportunity_path(FundingOpportunity.last)
-    assert_equal @viewer, FundingOpportunity.last.created_by
+    }
+    opp = FundingOpportunity.last
+    assert_equal @viewer, opp.created_by
+    assert_not opp.approved?
+    assert_equal "Funding opportunity submitted for approval.", flash[:notice]
+  end
+
+  test "editor-created opportunity is auto-approved" do
+    sign_in_as(@editor)
+    post funding_opportunities_path, params: {
+      funding_opportunity: {
+        title: "Editor Grant",
+        organization: "Culture Ireland",
+        deadline: 1.month.from_now,
+        description: "An editor opportunity"
+      }
+    }
+    opp = FundingOpportunity.last
+    assert opp.approved?
+    assert_equal "Funding opportunity created.", flash[:notice]
+  end
+
+  test "owner-created opportunity is auto-approved" do
+    sign_in_as(@owner)
+    post funding_opportunities_path, params: {
+      funding_opportunity: {
+        title: "Owner Grant",
+        organization: "Culture Ireland",
+        deadline: 1.month.from_now
+      }
+    }
+    assert FundingOpportunity.last.approved?
   end
 
   # Edit/delete requires editor or creator
