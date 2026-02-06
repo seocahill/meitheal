@@ -2,7 +2,7 @@ class Membership < ApplicationRecord
   belongs_to :user
   has_many :payments, dependent: :destroy
 
-  enum :membership_type, { standard: 0, concession: 1 }
+  enum :membership_type, { associate: 0, concession: 1, full: 2, youth: 3 }
 
   validates :membership_type, presence: true
   validates :starts_on, presence: true

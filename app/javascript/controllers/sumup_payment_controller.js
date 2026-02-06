@@ -1,7 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["cardWidget", "loading", "error", "payButton", "donationOption", "customDonation", "donationDisplay", "totalDisplay", "buttonTotal"]
+  static targets = ["cardWidget", "loading", "error", "payButton", "donationOption", "customDonation", "donationDisplay", "totalDisplay", "buttonTotal", "typeSelect", "feeDisplay"]
+  static values = { prices: Object }
 
   connect() {
     this.checkoutId = null
@@ -14,6 +15,13 @@ export default class extends Controller {
     if (noDonationBtn) {
       this.setActiveButton(noDonationBtn)
     }
+  }
+
+  changeType() {
+    const selected = this.typeSelectTarget.selectedOptions[0]
+    this.baseAmountCents = parseInt(selected.dataset.price) || 0
+    this.payButtonTarget.dataset.baseAmount = this.baseAmountCents
+    this.updateDisplays()
   }
 
   setDonation(event) {
@@ -48,10 +56,14 @@ export default class extends Controller {
   }
 
   updateDisplays() {
+    const feeEuros = (this.baseAmountCents / 100).toFixed(2)
     const donationEuros = (this.donationCents / 100).toFixed(2)
     const totalCents = this.baseAmountCents + this.donationCents
     const totalEuros = (totalCents / 100).toFixed(2)
 
+    if (this.hasFeeDisplayTarget) {
+      this.feeDisplayTarget.textContent = `€${feeEuros}`
+    }
     this.donationDisplayTarget.textContent = `€${donationEuros}`
     this.totalDisplayTarget.textContent = `€${totalEuros}`
     this.buttonTotalTarget.textContent = totalEuros
@@ -59,18 +71,19 @@ export default class extends Controller {
 
   async initiatePayment(event) {
     const membershipId = event.target.dataset.membershipId
+    const membershipType = this.typeSelectTarget.value
     this.setLoading(true)
     this.hideError()
 
     try {
-      // First create a checkout on our server with donation amount
+      // First create a checkout on our server with donation amount and membership type
       const response = await fetch(`/memberships/${membershipId}/payment/create_checkout`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({ donation_cents: this.donationCents })
+        body: JSON.stringify({ donation_cents: this.donationCents, membership_type: membershipType })
       })
 
       const data = await response.json()

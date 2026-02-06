@@ -46,7 +46,7 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
       post admin_memberships_path, params: {
         membership: {
           user_id: @viewer.id,
-          membership_type: "standard",
+          membership_type: "full",
           starts_on: Date.current
         }
       }

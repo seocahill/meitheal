@@ -27,7 +27,7 @@ class User < ApplicationRecord
   end
 
   def has_active_membership?
-    memberships.active.exists?
+    memberships.active.exists? && !memberships.active.first.associate?
   end
 
   # Thredded compatibility methods

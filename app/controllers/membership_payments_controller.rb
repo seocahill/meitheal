@@ -2,16 +2,27 @@ class MembershipPaymentsController < ApplicationController
   before_action :set_membership
 
   MEMBERSHIP_PRICES = {
-    standard: 5000,   # €50
-    concession: 2500  # €25
+    associate: 0,
+    youth: 500,       # €5
+    concession: 1000, # €10
+    full: 2000        # €20
   }.freeze
 
+  PAID_TYPES = MEMBERSHIP_PRICES.select { |_, v| v > 0 }.keys.freeze
+
   def new
-    @amount_cents = MEMBERSHIP_PRICES[@membership.membership_type.to_sym]
+    @selected_type = @membership.associate? ? :full : @membership.membership_type.to_sym
+    @amount_cents = MEMBERSHIP_PRICES[@selected_type]
   end
 
   def create_checkout
-    membership_fee_cents = MEMBERSHIP_PRICES[@membership.membership_type.to_sym]
+    selected_type = params[:membership_type]&.to_sym
+    unless PAID_TYPES.include?(selected_type)
+      return render json: { error: "Invalid membership type" }, status: :unprocessable_entity
+    end
+
+    @membership.update!(membership_type: selected_type)
+    membership_fee_cents = MEMBERSHIP_PRICES[selected_type]
     donation_cents = (params[:donation_cents] || 0).to_i
     donation_cents = 0 if donation_cents < 0  # Prevent negative donations
     total_amount_cents = membership_fee_cents + donation_cents
@@ -101,9 +112,9 @@ class MembershipPaymentsController < ApplicationController
   def extend_membership!
     new_expiry = if @membership.expires_on.present? && @membership.expires_on > Date.current
                    @membership.expires_on + 1.year
-                 else
+    else
                    1.year.from_now.to_date
-                 end
+    end
 
     @membership.update!(expires_on: new_expiry)
   end
