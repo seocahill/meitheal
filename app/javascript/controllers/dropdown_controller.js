@@ -8,15 +8,15 @@ export default class extends Controller {
   }
 
   toggle() {
-    this.menuTarget.classList.toggle("hidden")
-    if (!this.menuTarget.classList.contains("hidden")) {
+    this.menuTarget.classList.toggle("open")
+    if (this.menuTarget.classList.contains("open")) {
       document.addEventListener("click", this.closeOnClickOutside)
     }
   }
 
   closeOnClickOutside(event) {
     if (!this.element.contains(event.target)) {
-      this.menuTarget.classList.add("hidden")
+      this.menuTarget.classList.remove("open")
       document.removeEventListener("click", this.closeOnClickOutside)
     }
   }

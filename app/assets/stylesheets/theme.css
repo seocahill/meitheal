@@ -137,7 +137,7 @@
   z-index: 50;
 }
 
-.dropdown-menu:not(.hidden) {
+.dropdown-menu.open {
   display: block;
 }
 
