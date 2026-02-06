@@ -1,13 +1,21 @@
 # Space fixtures
 
-main_hall:
-  name: Main Hall
+front_room:
+  name: Front Room
   description: Large room for events and exhibitions
   capacity: 50
   active: true
+  component_of: whole_building
 
-studio:
-  name: Studio
+back_room:
+  name: Back Room
   description: Smaller space for workshops
   capacity: 15
+  active: true
+  component_of: whole_building
+
+whole_building:
+  name: Whole Building
+  description: Entire building including Front Room and Back Room
+  capacity: 65
   active: true

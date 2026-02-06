@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_06_141514) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_06_144457) do
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -343,10 +343,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_141514) do
   create_table "spaces", force: :cascade do |t|
     t.boolean "active", default: true, null: false
     t.integer "capacity"
+    t.integer "component_of_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["component_of_id"], name: "index_spaces_on_component_of_id"
   end
 
   create_table "thredded_categories", force: :cascade do |t|
@@ -622,6 +624,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_141514) do
   add_foreign_key "proposals", "funding_opportunities"
   add_foreign_key "proposals", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "spaces", "spaces", column: "component_of_id"
   add_foreign_key "thredded_messageboard_users", "thredded_messageboards", on_delete: :cascade
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade

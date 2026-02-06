@@ -9,6 +9,7 @@ class Booking < ApplicationRecord
   validates :starts_at, presence: true
   validates :ends_at, presence: true
   validate :ends_after_starts
+  validate :no_overlapping_bookings
   validate :agreements_accepted, on: :create
 
   enum :status, { pending: 0, confirmed: 1, cancelled: 2 }, default: :pending
@@ -25,6 +26,22 @@ class Booking < ApplicationRecord
   end
 
   private
+
+  def no_overlapping_bookings
+    return if starts_at.blank? || ends_at.blank? || space.blank?
+
+    linked_ids = space.linked_space_ids
+    return if linked_ids.empty?
+
+    overlapping = Booking.where(space_id: linked_ids)
+      .where.not(status: :cancelled)
+      .where("starts_at < ? AND ends_at > ?", ends_at, starts_at)
+    overlapping = overlapping.where.not(id: id) if persisted?
+
+    if overlapping.exists?
+      errors.add(:base, "conflicts with an existing booking on a linked space")
+    end
+  end
 
   def ends_after_starts
     return if starts_at.blank? || ends_at.blank?
