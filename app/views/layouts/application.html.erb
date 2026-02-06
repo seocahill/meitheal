@@ -22,54 +22,175 @@
   </head>
 
   <body class="bg-gray-50 min-h-screen">
-    <nav class="nav-gradient">
+    <nav class="nav-gradient" data-controller="mobile-menu">
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
         <div class="flex justify-between h-14">
-          <div class="flex items-center gap-6">
+          <!-- Left: Logo and main nav -->
+          <div class="flex items-center gap-4">
             <%= link_to root_path, class: "text-xl font-bold text-white hover:text-white/90" do %>
               THENCF
             <% end %>
-            <div class="hidden md:flex items-center gap-4">
-              <%= link_to "News", posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Events", events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Gallery", artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Members", profiles_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Forum", thredded_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Projects", projects_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Funding", funding_opportunities_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= link_to "Calendar", calendar_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-            </div>
-          </div>
-          <div class="flex items-center gap-3">
+
             <% if authenticated? %>
-              <% if current_user_can_edit? %>
-                <div class="hidden lg:flex items-center gap-3">
-                  <%= link_to "Newsletters", newsletters_path, class: "text-white/80 hover:text-white text-sm" %>
-                  <%= link_to "Pages", admin_pages_path, class: "text-white/80 hover:text-white text-sm" %>
-                </div>
-              <% end %>
-              <% if current_user_can_manage? %>
+              <!-- Authenticated navigation -->
+              <div class="hidden lg:flex items-center gap-1">
+                <%= link_to "Dashboard", dashboard_path, class: "nav-link" %>
+
+                <!-- Explore dropdown -->
                 <div class="relative" data-controller="dropdown">
-                  <button data-action="click->dropdown#toggle" class="text-white/80 hover:text-white text-sm font-medium">
-                    Admin ▾
+                  <button data-action="click->dropdown#toggle" class="nav-link">
+                    Explore
+                    <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                   </button>
-                  <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                    <%= link_to "Inbox", admin_inbox_index_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
-                    <%= link_to "Todos", admin_todos_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
-                    <%= link_to "Users", admin_users_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
-                    <%= link_to "Memberships", admin_memberships_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
-                    <%= link_to "Proposals", admin_proposals_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
-                    <%= link_to "Email Groups", admin_email_groups_path, class: "block px-4 py-2 text-gray-700 hover:bg-gray-100 text-sm" %>
+                  <div data-dropdown-target="menu" class="dropdown-menu">
+                    <%= link_to "News", posts_path, class: "dropdown-item" %>
+                    <%= link_to "Events", events_path, class: "dropdown-item" %>
+                    <%= link_to "Gallery", artists_path, class: "dropdown-item" %>
+                    <%= link_to "Projects", projects_path, class: "dropdown-item" %>
+                    <%= link_to "Members", profiles_path, class: "dropdown-item" %>
                   </div>
                 </div>
-              <% end %>
-              <%= link_to "Account", my_profile_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-              <%= button_to "Sign Out", session_path, method: :delete, class: "text-white/70 hover:text-white text-sm" %>
+
+                <!-- Participate dropdown -->
+                <div class="relative" data-controller="dropdown">
+                  <button data-action="click->dropdown#toggle" class="nav-link">
+                    Participate
+                    <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                  </button>
+                  <div data-dropdown-target="menu" class="dropdown-menu">
+                    <%= link_to "Forum", thredded_path, class: "dropdown-item" %>
+                    <%= link_to "Funding", funding_opportunities_path, class: "dropdown-item" %>
+                    <%= link_to "Calendar", calendar_path, class: "dropdown-item" %>
+                    <%= link_to "Book Space", new_booking_path, class: "dropdown-item" %>
+                  </div>
+                </div>
+
+                <% if current_user_can_edit? %>
+                  <!-- Manage dropdown (editors) -->
+                  <div class="relative" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" class="nav-link">
+                      Manage
+                      <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div data-dropdown-target="menu" class="dropdown-menu">
+                      <%= link_to "Newsletters", newsletters_path, class: "dropdown-item" %>
+                      <%= link_to "Pages", admin_pages_path, class: "dropdown-item" %>
+                      <%= link_to "FAQs", admin_faqs_path, class: "dropdown-item" %>
+                    </div>
+                  </div>
+                <% end %>
+
+                <% if current_user_can_manage? %>
+                  <!-- Admin dropdown (owners) -->
+                  <div class="relative" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" class="nav-link">
+                      Admin
+                      <svg class="w-4 h-4 ml-1 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                    </button>
+                    <div data-dropdown-target="menu" class="dropdown-menu w-52">
+                      <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Communications</div>
+                      <%= link_to "Inbox", admin_inbox_index_path, class: "dropdown-item" %>
+                      <%= link_to "Email Groups", admin_email_groups_path, class: "dropdown-item" %>
+                      <div class="border-t border-gray-100 my-1"></div>
+                      <div class="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Organization</div>
+                      <%= link_to "Todos", admin_todos_path, class: "dropdown-item" %>
+                      <%= link_to "Users", admin_users_path, class: "dropdown-item" %>
+                      <%= link_to "Memberships", admin_memberships_path, class: "dropdown-item" %>
+                      <%= link_to "Proposals", admin_proposals_path, class: "dropdown-item" %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
             <% else %>
-              <%= link_to "Sign In", new_session_path, class: "text-white font-medium text-sm px-3 py-1 bg-white/20 rounded-lg hover:bg-white/30" %>
+              <!-- Public navigation -->
+              <div class="hidden md:flex items-center gap-4">
+                <%= link_to "News", posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to "Events", events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to "Gallery", artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to "Projects", projects_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Right: User menu -->
+          <div class="flex items-center gap-3">
+            <% if authenticated? %>
+              <!-- User dropdown -->
+              <div class="relative hidden lg:block" data-controller="dropdown">
+                <button data-action="click->dropdown#toggle" class="flex items-center gap-2 text-white/90 hover:text-white text-sm font-medium">
+                  <span class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-xs font-semibold">
+                    <%= Current.user.profile&.name&.first&.upcase || Current.user.email_address.first.upcase %>
+                  </span>
+                  <span class="hidden xl:inline"><%= Current.user.profile&.name || Current.user.email_address.split("@").first %></span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div data-dropdown-target="menu" class="dropdown-menu right-0 left-auto">
+                  <div class="px-4 py-2 border-b border-gray-100">
+                    <div class="text-sm font-medium text-gray-900"><%= Current.user.profile&.name || "Member" %></div>
+                    <div class="text-xs text-gray-500"><%= Current.user.email_address %></div>
+                  </div>
+                  <%= link_to "My Profile", my_profile_path, class: "dropdown-item" %>
+                  <div class="border-t border-gray-100 my-1"></div>
+                  <%= button_to "Sign Out", session_path, method: :delete, class: "dropdown-item w-full text-left text-rose-600 hover:bg-rose-50" %>
+                </div>
+              </div>
+
+              <!-- Mobile menu button -->
+              <button data-action="click->mobile-menu#toggle" class="lg:hidden text-white p-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path data-mobile-menu-target="openIcon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                  <path data-mobile-menu-target="closeIcon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            <% else %>
+              <%= link_to "Sign In", new_session_path, class: "text-white font-medium text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30" %>
             <% end %>
           </div>
         </div>
+
+        <!-- Mobile menu (authenticated users) -->
+        <% if authenticated? %>
+          <div data-mobile-menu-target="menu" class="hidden lg:hidden pb-4">
+            <div class="pt-2 space-y-1">
+              <%= link_to "Dashboard", dashboard_path, class: "mobile-nav-link" %>
+
+              <div class="pt-2 pb-1 px-3 text-xs font-semibold text-white/50 uppercase tracking-wider">Explore</div>
+              <%= link_to "News", posts_path, class: "mobile-nav-link" %>
+              <%= link_to "Events", events_path, class: "mobile-nav-link" %>
+              <%= link_to "Gallery", artists_path, class: "mobile-nav-link" %>
+              <%= link_to "Projects", projects_path, class: "mobile-nav-link" %>
+              <%= link_to "Members", profiles_path, class: "mobile-nav-link" %>
+
+              <div class="pt-2 pb-1 px-3 text-xs font-semibold text-white/50 uppercase tracking-wider">Participate</div>
+              <%= link_to "Forum", thredded_path, class: "mobile-nav-link" %>
+              <%= link_to "Funding", funding_opportunities_path, class: "mobile-nav-link" %>
+              <%= link_to "Calendar", calendar_path, class: "mobile-nav-link" %>
+              <%= link_to "Book Space", new_booking_path, class: "mobile-nav-link" %>
+
+              <% if current_user_can_edit? %>
+                <div class="pt-2 pb-1 px-3 text-xs font-semibold text-white/50 uppercase tracking-wider">Manage</div>
+                <%= link_to "Newsletters", newsletters_path, class: "mobile-nav-link" %>
+                <%= link_to "Pages", admin_pages_path, class: "mobile-nav-link" %>
+                <%= link_to "FAQs", admin_faqs_path, class: "mobile-nav-link" %>
+              <% end %>
+
+              <% if current_user_can_manage? %>
+                <div class="pt-2 pb-1 px-3 text-xs font-semibold text-white/50 uppercase tracking-wider">Admin</div>
+                <%= link_to "Inbox", admin_inbox_index_path, class: "mobile-nav-link" %>
+                <%= link_to "Todos", admin_todos_path, class: "mobile-nav-link" %>
+                <%= link_to "Users", admin_users_path, class: "mobile-nav-link" %>
+                <%= link_to "Memberships", admin_memberships_path, class: "mobile-nav-link" %>
+                <%= link_to "Proposals", admin_proposals_path, class: "mobile-nav-link" %>
+                <%= link_to "Email Groups", admin_email_groups_path, class: "mobile-nav-link" %>
+              <% end %>
+
+              <div class="pt-3 mt-2 border-t border-white/10">
+                <%= link_to "My Profile", my_profile_path, class: "mobile-nav-link" %>
+                <%= button_to "Sign Out", session_path, method: :delete, class: "mobile-nav-link w-full text-left text-rose-300" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
       </div>
     </nav>
 
