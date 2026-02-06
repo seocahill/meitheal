@@ -31,6 +31,9 @@ class FundingOpportunitiesController < ApplicationController
     @funding_opportunity.created_by = Current.user
     @funding_opportunity.approved = Current.user.can_edit?
     if @funding_opportunity.save
+      unless @funding_opportunity.approved?
+        AdminMailer.new_funding_opportunity_pending_approval(@funding_opportunity).deliver_later
+      end
       notice = if @funding_opportunity.approved?
         "Funding opportunity created."
       else

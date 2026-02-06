@@ -123,6 +123,32 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Funding opportunity created.", flash[:notice]
   end
 
+  test "viewer-created opportunity sends admin notification" do
+    sign_in_as(@viewer)
+    assert_enqueued_emails(1) do
+      post funding_opportunities_path, params: {
+        funding_opportunity: {
+          title: "Notification Grant",
+          organization: "Test Org",
+          deadline: 1.month.from_now
+        }
+      }
+    end
+  end
+
+  test "editor-created opportunity does not send admin notification" do
+    sign_in_as(@editor)
+    assert_no_enqueued_emails do
+      post funding_opportunities_path, params: {
+        funding_opportunity: {
+          title: "Editor Grant No Email",
+          organization: "Test Org",
+          deadline: 1.month.from_now
+        }
+      }
+    end
+  end
+
   test "owner-created opportunity is auto-approved" do
     sign_in_as(@owner)
     post funding_opportunities_path, params: {

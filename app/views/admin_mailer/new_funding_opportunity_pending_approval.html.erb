@@ -1,0 +1,14 @@
+<h1>New Funding Opportunity Submitted</h1>
+
+<p>A new funding opportunity has been submitted and is awaiting approval:</p>
+
+<ul>
+  <li><strong>Title:</strong> <%= @funding_opportunity.title %></li>
+  <li><strong>Organization:</strong> <%= @funding_opportunity.organization %></li>
+  <li><strong>Deadline:</strong> <%= @funding_opportunity.deadline.strftime("%d %B %Y") %></li>
+  <li><strong>Submitted by:</strong> <%= @funding_opportunity.created_by&.email_address || "Unknown" %></li>
+</ul>
+
+<p>
+  <%= link_to "Review pending funding opportunities", admin_funding_opportunities_url %>
+</p>
