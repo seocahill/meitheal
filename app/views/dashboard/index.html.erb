@@ -172,162 +172,145 @@
     </div>
   <% end %>
 
-  <!-- Member Section (everyone sees this) -->
+  <!-- Action Items for Members -->
   <div class="mb-10">
-    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-      Your Activity
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <!-- My Bookings -->
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-gray-900">My Upcoming Bookings</h3>
-        </div>
-        <% if @my_bookings.any? %>
-          <ul class="space-y-3 mb-4">
-            <% @my_bookings.each do |booking| %>
-              <li class="flex items-center justify-between text-sm">
+    <% needs_attention = !@profile_complete || !@has_active_membership %>
+    <% if needs_attention %>
+      <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100 rounded-xl p-6 mb-6">
+        <h2 class="font-semibold text-gray-900 mb-4">Get started</h2>
+        <div class="space-y-3">
+          <% unless @profile_complete %>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                </span>
                 <div>
-                  <span class="text-gray-900 font-medium"><%= booking.title %></span>
-                  <span class="text-gray-500 text-xs block"><%= booking.space.name %> · <%= booking.starts_at.strftime("%b %d, %H:%M") %></span>
+                  <p class="text-sm font-medium text-gray-900">Complete your profile</p>
+                  <p class="text-xs text-gray-500">Help other members find and collaborate with you</p>
                 </div>
-                <span class="text-xs px-2 py-1 rounded-full <%= booking.confirmed? ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' %>">
-                  <%= booking.status.capitalize %>
+              </div>
+              <%= link_to "Update profile", edit_profile_path(@profile), class: "text-sm font-medium text-purple-600 hover:text-purple-700" %>
+            </div>
+          <% end %>
+          <% if @membership && !@has_active_membership %>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                 </span>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="text-sm text-gray-500 mb-4">No upcoming bookings</p>
-        <% end %>
-        <%= link_to "Book a space →", calendar_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
-      </div>
-
-      <!-- My Proposals -->
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-gray-900">My Funding Proposals</h3>
-        </div>
-        <% if @my_proposals.any? %>
-          <ul class="space-y-3 mb-4">
-            <% @my_proposals.each do |proposal| %>
-              <li class="flex items-center justify-between text-sm">
-                <div class="truncate">
-                  <span class="text-gray-900 font-medium"><%= truncate(proposal.title, length: 30) %></span>
-                  <span class="text-gray-500 text-xs block"><%= proposal.funding_opportunity.title.truncate(35) %></span>
+                <div>
+                  <p class="text-sm font-medium text-gray-900">Renew your membership</p>
+                  <p class="text-xs text-gray-500">Required for booking spaces and full access</p>
                 </div>
-                <span class="text-xs px-2 py-1 rounded-full
-                  <%= case proposal.status
-                      when 'draft' then 'bg-gray-100 text-gray-700'
-                      when 'submitted' then 'bg-blue-100 text-blue-700'
-                      when 'approved' then 'bg-green-100 text-green-700'
-                      when 'rejected' then 'bg-rose-100 text-rose-700'
-                      end %>">
-                  <%= proposal.status.capitalize %>
-                </span>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="text-sm text-gray-500 mb-4">No proposals yet</p>
-        <% end %>
-        <%= link_to "View funding opportunities →", funding_opportunities_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
-      </div>
-
-      <!-- Membership Status -->
-      <div class="card p-5">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-gray-900">Membership</h3>
-          <% if @has_active_membership %>
-            <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">Active</span>
-          <% else %>
-            <span class="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full">Inactive</span>
+              </div>
+              <%= link_to "Pay now", new_membership_payment_path(@membership), class: "text-sm font-medium text-purple-600 hover:text-purple-700" %>
+            </div>
           <% end %>
         </div>
-        <% if @membership %>
-          <div class="text-sm text-gray-600 mb-4">
-            <p><span class="font-medium"><%= @membership.membership_type.humanize %></span> member</p>
-            <% if @membership.expires_on %>
-              <% if @membership.expired? %>
-                <p class="text-rose-600">Expired <%= @membership.expires_on.strftime("%b %d, %Y") %></p>
-              <% else %>
-                <p>Expires <%= @membership.expires_on.strftime("%b %d, %Y") %></p>
-              <% end %>
-            <% end %>
-          </div>
-          <% if @membership.expired? || !@has_active_membership %>
-            <%= link_to "Renew membership →", new_membership_payment_path(@membership), class: "inline-block bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow" %>
-          <% else %>
-            <%= link_to "Pay/Donate →", new_membership_payment_path(@membership), class: "text-sm text-purple-600 hover:text-purple-700" %>
-          <% end %>
-        <% else %>
-          <p class="text-sm text-gray-500 mb-4">No membership on file. Contact an admin to set up your membership.</p>
-        <% end %>
       </div>
+    <% end %>
+
+    <!-- What can I do? -->
+    <h2 class="text-lg font-semibold text-gray-700 mb-4">What can I do?</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <%= link_to new_booking_path, class: "card p-4 text-center hover:shadow-md transition-shadow group" do %>
+        <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </div>
+        <p class="text-sm font-medium text-gray-900">Book a space</p>
+      <% end %>
+
+      <%= link_to funding_opportunities_path, class: "card p-4 text-center hover:shadow-md transition-shadow group" do %>
+        <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-green-50 flex items-center justify-center text-green-600 group-hover:bg-green-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <p class="text-sm font-medium text-gray-900">Apply for funding</p>
+      <% end %>
+
+      <%= link_to new_event_path, class: "card p-4 text-center hover:shadow-md transition-shadow group" do %>
+        <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-purple-50 flex items-center justify-center text-purple-600 group-hover:bg-purple-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"/></svg>
+        </div>
+        <p class="text-sm font-medium text-gray-900">List an event</p>
+      <% end %>
+
+      <%= link_to thredded_path, class: "card p-4 text-center hover:shadow-md transition-shadow group" do %>
+        <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/></svg>
+        </div>
+        <p class="text-sm font-medium text-gray-900">Join the forum</p>
+      <% end %>
     </div>
+
+    <% if @membership && @has_active_membership %>
+      <p class="text-sm text-gray-500 mb-6">
+        Membership active until <%= @membership.expires_on&.strftime("%b %d, %Y") || "ongoing" %>.
+        <%= link_to "Make a donation", new_membership_payment_path(@membership), class: "text-purple-600 hover:text-purple-700" %>
+      </p>
+    <% end %>
   </div>
 
-  <!-- Recent Forum Activity -->
+  <!-- Forum Activity -->
   <% if @recent_topics.any? %>
     <div class="mb-10">
-      <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-        <span class="w-2 h-2 bg-indigo-500 rounded-full"></span>
-        Latest from the Forum
-      </h2>
-
-      <div class="card divide-y divide-gray-100">
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">Latest from the forum</h2>
+      <div class="space-y-2">
         <% @recent_topics.each do |topic| %>
-          <%= link_to thredded.messageboard_topic_path(topic.messageboard, topic), class: "block p-4 hover:bg-gray-50 transition-colors" do %>
-            <div class="flex items-start justify-between gap-4">
-              <div class="min-w-0 flex-1">
-                <p class="font-medium text-gray-900 truncate"><%= topic.title %></p>
-                <p class="text-sm text-gray-500">
-                  <span class="text-purple-600"><%= topic.messageboard.name %></span>
-                  · <%= topic.user&.name || "Member" %>
-                  · <%= topic.posts_count %> <%= "reply".pluralize(topic.posts_count - 1) if topic.posts_count > 1 %>
-                </p>
+          <%= link_to thredded.messageboard_topic_path(topic.messageboard, topic), class: "block card p-3 hover:shadow-md transition-shadow" do %>
+            <div class="flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate"><%= topic.title %></p>
+                <p class="text-xs text-gray-500"><%= topic.messageboard.name %> · <%= time_ago_in_words(topic.last_post_at || topic.created_at) %> ago</p>
               </div>
-              <span class="text-xs text-gray-400 whitespace-nowrap"><%= time_ago_in_words(topic.last_post_at || topic.created_at) %> ago</span>
+              <span class="text-xs text-gray-400"><%= topic.posts_count %> posts</span>
             </div>
           <% end %>
         <% end %>
       </div>
-
-      <div class="mt-4 text-center">
-        <%= link_to "Visit the Forum →", thredded_path, class: "text-sm text-purple-600 hover:text-purple-700 font-medium" %>
-      </div>
     </div>
   <% end %>
 
-  <!-- Quick Links -->
-  <div>
-    <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-      <span class="w-2 h-2 bg-gray-400 rounded-full"></span>
-      Explore
-    </h2>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <% if @upcoming_events.any? %>
-        <% @upcoming_events.take(2).each do |event| %>
-          <%= link_to event_path(event), class: "card p-4 hover:shadow-md transition-shadow" do %>
-            <p class="text-xs text-purple-600 font-medium mb-1">Upcoming Event</p>
-            <p class="font-semibold text-gray-900 truncate"><%= event.title %></p>
-            <p class="text-sm text-gray-500"><%= event.starts_at.strftime("%b %d, %Y") %></p>
-          <% end %>
+  <!-- Your Activity (only show if they have bookings or proposals) -->
+  <% if @my_bookings.any? || @my_proposals.any? %>
+    <div>
+      <h2 class="text-lg font-semibold text-gray-700 mb-4">Your activity</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% if @my_bookings.any? %>
+          <div class="card p-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Upcoming bookings</h3>
+            <ul class="space-y-2">
+              <% @my_bookings.each do |booking| %>
+                <li class="flex items-center justify-between text-sm">
+                  <span class="text-gray-900"><%= booking.title %></span>
+                  <span class="text-xs text-gray-500"><%= booking.starts_at.strftime("%b %d") %></span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
         <% end %>
-      <% end %>
-
-      <% if @open_funding.any? %>
-        <% @open_funding.take(2).each do |opp| %>
-          <%= link_to funding_opportunity_path(opp), class: "card p-4 hover:shadow-md transition-shadow" do %>
-            <p class="text-xs text-green-600 font-medium mb-1">Funding Open</p>
-            <p class="font-semibold text-gray-900 truncate"><%= opp.title %></p>
-            <p class="text-sm text-gray-500">Deadline: <%= opp.deadline.strftime("%b %d") %></p>
-          <% end %>
+        <% if @my_proposals.any? %>
+          <div class="card p-4">
+            <h3 class="text-sm font-medium text-gray-700 mb-3">Your proposals</h3>
+            <ul class="space-y-2">
+              <% @my_proposals.each do |proposal| %>
+                <li class="flex items-center justify-between text-sm">
+                  <span class="text-gray-900 truncate"><%= truncate(proposal.title, length: 25) %></span>
+                  <span class="text-xs px-2 py-0.5 rounded-full
+                    <%= case proposal.status
+                        when 'draft' then 'bg-gray-100 text-gray-600'
+                        when 'submitted' then 'bg-blue-100 text-blue-600'
+                        when 'approved' then 'bg-green-100 text-green-600'
+                        when 'rejected' then 'bg-rose-100 text-rose-600'
+                        end %>">
+                    <%= proposal.status %>
+                  </span>
+                </li>
+              <% end %>
+            </ul>
+          </div>
         <% end %>
-      <% end %>
+      </div>
     </div>
-  </div>
+  <% end %>
 </div>

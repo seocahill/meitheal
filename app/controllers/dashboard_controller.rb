@@ -1,12 +1,18 @@
 class DashboardController < ApplicationController
   def index
     @user = Current.user
+    @profile = @user.profile
 
-    # Items relevant to all members
-    @my_bookings = @user.bookings.upcoming.includes(:space).limit(5)
-    @my_proposals = @user.proposals.includes(:funding_opportunity).order(updated_at: :desc).limit(5)
-    @upcoming_events = Event.published.upcoming.limit(5)
-    @open_funding = FundingOpportunity.upcoming.limit(5)
+    # Profile completeness check
+    @profile_complete = @profile&.bio.present? && @profile&.visible?
+
+    # Membership status
+    @membership = @user.memberships.order(starts_on: :desc).first
+    @has_active_membership = @user.has_active_membership?
+
+    # Member's own activity (only load if they have any)
+    @my_bookings = @user.bookings.upcoming.includes(:space).limit(3)
+    @my_proposals = @user.proposals.includes(:funding_opportunity).order(updated_at: :desc).limit(3)
 
     # Recent forum activity - approved topics only
     @recent_topics = Thredded::Topic
@@ -14,10 +20,6 @@ class DashboardController < ApplicationController
       .includes(:user, :messageboard)
       .order(last_post_at: :desc)
       .limit(5)
-
-    # Membership status
-    @membership = @user.memberships.order(starts_on: :desc).first
-    @has_active_membership = @user.has_active_membership?
 
     # Editor items
     if @user.can_edit?
