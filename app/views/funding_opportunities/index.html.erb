@@ -1,7 +1,7 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Funding</h1>
-    <% if current_user_can_edit? %>
+    <% if authenticated? %>
       <%= link_to "Add Opportunity", new_funding_opportunity_path, class: "btn-primary text-white px-5 py-2.5 rounded-xl font-medium" %>
     <% end %>
   </div>
@@ -13,6 +13,11 @@
           <div class="flex-1">
             <% days_left = (opportunity.deadline - Date.current).to_i %>
             <div class="flex items-center gap-2 mb-3">
+              <% unless opportunity.approved? %>
+                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">
+                  Pending approval
+                </span>
+              <% end %>
               <% if days_left <= 7 %>
                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-rose-100 text-rose-700">
                   <%= days_left %> days left
