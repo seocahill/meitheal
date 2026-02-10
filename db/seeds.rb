@@ -101,6 +101,8 @@ Booking.find_or_create_by!(
   b.description = "Monthly board prep."
   b.ends_at = (base + 3.days).change(hour: 12, min: 0)
   b.status = :confirmed
+  b.agree_booking_rules = "1"
+  b.agree_ethics = "1"
 end
 
 Booking.find_or_create_by!(
@@ -112,17 +114,19 @@ Booking.find_or_create_by!(
   b.description = "Project kick-off."
   b.ends_at = (base + 5.days).change(hour: 15, min: 0)
   b.status = :pending
+  b.agree_booking_rules = "1"
+  b.agree_ethics = "1"
 end
 
 # --- Memberships ---
 mem_admin = Membership.find_or_create_by!(user: admin, starts_on: 1.year.ago.to_date) do |m|
-  m.membership_type = :standard
+  m.membership_type = :full
   m.expires_on = 1.year.from_now.to_date
   m.notes = "Founding member"
 end
 
 mem_editor = Membership.find_or_create_by!(user: editor, starts_on: 6.months.ago.to_date) do |m|
-  m.membership_type = :standard
+  m.membership_type = :full
   m.expires_on = 6.months.from_now.to_date
   m.notes = nil
 end
