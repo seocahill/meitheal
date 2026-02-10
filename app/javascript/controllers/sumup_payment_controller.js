@@ -151,6 +151,9 @@ export default class extends Controller {
     this.payButtonTarget.disabled = loading
     if (loading) {
       this.payButtonTarget.innerHTML = "Processing..."
+      this.loadingTarget.classList.remove("hidden")
+    } else {
+      this.loadingTarget.classList.add("hidden")
     }
   }
 

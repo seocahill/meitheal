@@ -40,7 +40,7 @@ class MembershipPaymentsController < ApplicationController
         amount_cents: total_amount_cents,
         description: description,
         checkout_reference: checkout_reference,
-        return_url: membership_payment_complete_url(@membership)
+        return_url: complete_membership_payment_url(@membership)
       )
 
       # Store pending payment with donation details
@@ -56,6 +56,9 @@ class MembershipPaymentsController < ApplicationController
       render json: { checkout_id: checkout["id"] }
     rescue SumupCheckoutService::CheckoutError => e
       render json: { error: e.message }, status: :unprocessable_entity
+    rescue => e
+      Rails.logger.error("Payment checkout failed: #{e.class}: #{e.message}")
+      render json: { error: "Payment service unavailable. Please try again later." }, status: :service_unavailable
     end
   end
 

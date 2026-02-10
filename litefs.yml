@@ -1,0 +1,38 @@
+# LiteFS configuration for Fly.io with S3 backup
+
+# The fuse section defines settings for the FUSE file system.
+fuse:
+  dir: "/litefs"
+
+# The data section defines where internal LiteFS data is stored.
+data:
+  dir: "/var/lib/litefs"
+
+# The exec section defines the command to execute after LiteFS is initialized.
+exec:
+  - cmd: "/rails/bin/docker-entrypoint"
+
+# The lease section defines how the primary is determined.
+lease:
+  type: "consul"
+  advertise-url: "http://${FLY_ALLOC_ID}.vm.${FLY_APP_NAME}.internal:20202"
+  candidate: ${FLY_REGION == PRIMARY_REGION}
+  promote: true
+
+  consul:
+    url: "${FLY_CONSUL_URL}"
+    key: "litefs/${FLY_APP_NAME}"
+
+# The backup section defines settings for backing up to S3.
+backup:
+  type: "s3"
+  interval: "10m"
+
+  # S3 backup configuration
+  s3:
+    bucket: "meitheal-litefs-backups"
+    path: "backups"
+    region: "eu-west-1"
+    # Credentials from Rails credentials or environment
+    access-key-id: "${AWS_ACCESS_KEY_ID}"
+    secret-access-key: "${AWS_SECRET_ACCESS_KEY}"

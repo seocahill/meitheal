@@ -4,8 +4,8 @@ class SumupCheckoutService
   class CheckoutError < StandardError; end
 
   def initialize
-    @api_key = Rails.application.credentials.dig(:sumup, :api_key) || ENV["SUMUP_API_KEY"]
-    @merchant_code = Rails.application.credentials.dig(:sumup, :merchant_code) || ENV["SUMUP_MERCHANT_CODE"]
+    @api_key = Rails.application.credentials.dig(:sumup_api_key) || ENV["SUMUP_API_KEY"]
+    @merchant_code = Rails.application.credentials.dig(:sumup_merchant_code) || ENV["SUMUP_MERCHANT_CODE"]
   end
 
   def create_checkout(amount_cents:, description:, checkout_reference:, return_url: nil)
@@ -46,7 +46,7 @@ class SumupCheckoutService
       checkout_reference: checkout_reference,
       amount: amount_cents / 100.0,
       currency: "EUR",
-      pay_to_email: @merchant_code,
+      merchant_code: @merchant_code,
       description: description
     }
     params[:return_url] = return_url if return_url.present?

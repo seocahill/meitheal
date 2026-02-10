@@ -42,6 +42,9 @@ gem "thruster", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
 
+# AWS SDK for S3 storage [https://github.com/aws/aws-sdk-ruby]
+gem "aws-sdk-s3", require: false
+
 # Rich text editor with markdown support [https://github.com/basecamp/lexxy]
 gem "lexxy"
 
@@ -91,3 +94,5 @@ end
 gem "dotenv", "~> 3.2"
 
 gem "recaptcha", "~> 5.21"
+
+gem "dockerfile-rails", ">= 1.7", :group => :development

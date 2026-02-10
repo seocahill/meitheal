@@ -20,11 +20,11 @@ class ZohoMailService
   }.freeze
 
   def initialize
-    @region = (ENV["ZOHO_REGION"] || Rails.application.credentials.dig(:zoho, :region) || "eu").to_sym
-    @client_id = ENV["ZOHO_CLIENT_ID"] || Rails.application.credentials.dig(:zoho, :client_id)
-    @client_secret = ENV["ZOHO_CLIENT_SECRET"] || Rails.application.credentials.dig(:zoho, :client_secret)
-    @refresh_token = ENV["ZOHO_REFRESH_TOKEN"] || Rails.application.credentials.dig(:zoho, :refresh_token)
-    @account_id = ENV["ZOHO_ACCOUNT_ID"] || Rails.application.credentials.dig(:zoho, :account_id)
+    @region = (Rails.application.credentials.dig(:zoho_region) || ENV["ZOHO_REGION"] || "eu").to_sym
+    @client_id = Rails.application.credentials.dig(:zoho_client_id) || ENV["ZOHO_CLIENT_ID"]
+    @client_secret = Rails.application.credentials.dig(:zoho_client_secret) || ENV["ZOHO_CLIENT_SECRET"]
+    @refresh_token = Rails.application.credentials.dig(:zoho_refresh_token) || ENV["ZOHO_REFRESH_TOKEN"]
+    @account_id = Rails.application.credentials.dig(:zoho_account_id) || ENV["ZOHO_ACCOUNT_ID"]
   end
 
   def configured?
