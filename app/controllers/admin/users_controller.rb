@@ -1,11 +1,14 @@
 module Admin
   class UsersController < ApplicationController
+    include Pagy::Method
+
     before_action :require_owner
     before_action :set_user, only: [ :edit, :update, :destroy, :approve ]
 
     def index
-      @users = User.order(:email_address)
-      @users = @users.where(approved: false) if params[:approved] == "pending"
+      users_scope = User.order(:email_address)
+      users_scope = users_scope.where(approved: false) if params[:approved] == "pending"
+      @pagy, @users = pagy(users_scope, limit: 25)
       @pending_count = User.where(approved: false).count
     end
 
