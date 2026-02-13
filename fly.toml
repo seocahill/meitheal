@@ -16,13 +16,12 @@ console_command = '/rails/bin/rails console'
   app = './bin/rails server -b 0.0.0.0 -p 8080'
 
 [env]
-  DATABASE_URL = 'sqlite3:///data/production.sqlite3'
   PORT = '8080'
   SOLID_QUEUE_IN_PUMA = 'true'
 
 [[mounts]]
   source = 'data'
-  destination = '/data'
+  destination = '/rails/storage'
   auto_extend_size_threshold = 80
   auto_extend_size_increment = '1GB'
   auto_extend_size_limit = '10GB'
