@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount MissionControl::Jobs::Engine, at: "/jobs"
+
   resources :posts, param: :slug do
     member do
       patch :publish
@@ -14,7 +16,7 @@ Rails.application.routes.draw do
   end
 
   resource :session
-  resource :registration, only: [:new, :create]
+  resource :registration, only: [ :new, :create ]
   resources :passwords, param: :token
 
   resources :events do
