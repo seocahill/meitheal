@@ -17,7 +17,7 @@ console_command = '/rails/bin/rails console'
 
 [env]
   PORT = '8080'
-  SOLID_QUEUE_IN_PUMA = 'true'
+  SOLID_QUEUE_IN_PUMA =
 
 [[mounts]]
   source = 'data'
