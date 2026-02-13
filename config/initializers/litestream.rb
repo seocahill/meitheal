@@ -20,6 +20,7 @@ Rails.application.configure do
   # config.litestream.base_controller_class = "MyApplicationController"
   #
   # Set authentication credentials for Litestream dashboard
-  # config.litestream.username = litestream_credentials&.username
-  # config.litestream.password = litestream_credentials&.password
+  # Set authentication credentials for Litestream
+  config.litestream.username = Rails.application.credentials.dig(:litestream, :username)
+  config.litestream.password = Rails.application.credentials.dig(:litestream, :password)
 end
