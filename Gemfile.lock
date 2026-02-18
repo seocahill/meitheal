@@ -110,7 +110,7 @@ GEM
     bindex (0.8.1)
     bootsnap (1.21.1)
       msgpack (~> 1.2)
-    brakeman (7.1.2)
+    brakeman (8.0.2)
       racc
     brevo (4.0.0)
       addressable (~> 2.3, >= 2.3.0)
