@@ -4,8 +4,9 @@ recent_payment:
   membership: active_membership
   amount_cents: 2000
   paid_on: <%= 1.week.ago.to_date %>
-  payment_method: 0
+  payment_method: 3
   notes: Annual fee
+  sumup_transaction_id: txn-001
 
 old_payment:
   membership: expired_membership

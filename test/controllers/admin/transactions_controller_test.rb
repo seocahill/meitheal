@@ -80,11 +80,80 @@ class Admin::TransactionsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "index shows member name when payment matches transaction" do
+    with_stubbed_service(SAMPLE_RESPONSE) do
+      sign_in_as(@owner)
+      get admin_transactions_path
+      assert_response :success
+      assert_includes response.body, "owner"
+    end
+  end
+
   test "index shows empty state when no transactions" do
     with_stubbed_service({ "items" => [], "links" => [] }) do
       sign_in_as(@owner)
       get admin_transactions_path
       assert_includes response.body, "No transactions found"
+    end
+  end
+
+  test "index paginates transactions 10 per page and shows navigation" do
+    many_items = 15.times.map do |i|
+      {
+        "id" => "txn-#{i + 1}",
+        "transaction_code" => "CODE#{i + 1}",
+        "amount" => 10.0,
+        "currency" => "EUR",
+        "timestamp" => "2026-01-15T10:30:00.000Z",
+        "status" => "SUCCESSFUL",
+        "type" => "PAYMENT",
+        "payment_type" => "ECOM"
+      }
+    end
+
+    response_payload = { "items" => many_items, "links" => [] }
+
+    with_stubbed_service(response_payload) do
+      sign_in_as(@owner)
+
+      # First page
+      get admin_transactions_path
+      assert_response :success
+      assert_includes response.body, "Page 1"
+      assert_includes response.body, "Next"
+      refute_includes response.body, "Previous"
+      assert_includes response.body, "CODE1"
+      assert_includes response.body, "CODE10"
+      refute_includes response.body, "CODE11"
+
+      # Second page
+      get admin_transactions_path, params: { page: 2 }
+      assert_response :success
+      assert_includes response.body, "Page 2"
+      assert_includes response.body, "Previous"
+      refute_includes response.body, "Next"
+      assert_includes response.body, "CODE11"
+      assert_includes response.body, "CODE15"
+      refute_includes response.body, "CODE1"
+    end
+  end
+
+  test "index filters transactions by search query" do
+    items = [
+      SAMPLE_RESPONSE["items"].first.merge("transaction_code" => "ORDER-123-ABC", "status" => "SUCCESSFUL"),
+      SAMPLE_RESPONSE["items"].last.merge("transaction_code" => "OTHER-999-ZZZ", "status" => "FAILED")
+    ]
+
+    response_payload = { "items" => items, "links" => [] }
+
+    with_stubbed_service(response_payload) do
+      sign_in_as(@owner)
+      get admin_transactions_path, params: { q: "order-123" }
+      assert_response :success
+
+      # Should include matching transaction and exclude non-matching
+      assert_includes response.body, "ORDER-123-ABC"
+      refute_includes response.body, "OTHER-999-ZZZ"
     end
   end
 
