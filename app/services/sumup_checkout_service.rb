@@ -1,6 +1,7 @@
 class SumupCheckoutService
   CHECKOUT_URL = "https://api.sumup.com/v0.1/checkouts".freeze
-  TRANSACTIONS_URL = "https://api.sumup.com/v0.1/me/transactions/history".freeze
+  TRANSACTIONS_URL = "https://api.sumup.com/v2.1/merchants/MQ2STZEV/transactions/history".freeze
+  PAYOUTS_URL = "https://api.sumup.com/v1.0/merchants/MQ2STZEV/payouts".freeze
 
   class CheckoutError < StandardError; end
 
@@ -44,6 +45,19 @@ class SumupCheckoutService
   # Supported filters: oldest_time, newest_time, statuses, payment_types, limit, order
   def list_transactions(filters = {})
     uri = URI(TRANSACTIONS_URL)
+    uri.query = URI.encode_www_form(filters.compact) if filters.any?
+
+    request = Net::HTTP::Get.new(uri, headers)
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    JSON.parse(response.body)
+  end
+
+  def list_payouts(filters = {})
+    uri = URI(PAYOUTS_URL)
     uri.query = URI.encode_www_form(filters.compact) if filters.any?
 
     request = Net::HTTP::Get.new(uri, headers)

@@ -2,8 +2,25 @@ class Admin::MembershipsController < ApplicationController
   before_action :require_owner
   before_action :set_membership, only: [ :show, :edit, :update, :destroy ]
 
+  PER_PAGE = 10
+
   def index
-    @memberships = Membership.includes(:user, :payments).order(created_at: :desc)
+    scope = Membership.includes(:user, :payments).joins(:user).order(created_at: :desc)
+
+    if params[:q].present?
+      scope = scope.where("LOWER(users.email_address) LIKE ?", "%#{params[:q].downcase}%")
+    end
+
+    scope = case params[:status]
+    when "active"   then scope.active
+    when "expired"  then scope.where("expires_on < ?", Date.current)
+    else scope
+    end
+
+    @page = [ (params[:page] || 1).to_i, 1 ].max
+    offset = (@page - 1) * PER_PAGE
+    @memberships = scope.offset(offset).limit(PER_PAGE)
+    @has_more = scope.count > offset + PER_PAGE
   end
 
   def show

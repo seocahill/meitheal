@@ -63,8 +63,8 @@
         <thead class="bg-gray-50 border-b border-gray-200">
           <tr>
             <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
-            <th class="text-left px-4 py-3 font-medium text-gray-600">Member</th>
             <th class="text-left px-4 py-3 font-medium text-gray-600">Code</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Product</th>
             <th class="text-left px-4 py-3 font-medium text-gray-600">Amount</th>
             <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
             <th class="text-left px-4 py-3 font-medium text-gray-600">Type</th>
@@ -80,14 +80,8 @@
                   <%= Time.parse(txn["timestamp"]).strftime("%d %b %Y %H:%M") rescue txn["timestamp"] %>
                 <% end %>
               </td>
-              <td class="px-4 py-3 text-gray-700">
-                <% if payment&.membership&.user %>
-                  <%= payment.membership.user.name || payment.membership.user.email_address %>
-                <% else %>
-                  -
-                <% end %>
-              </td>
               <td class="px-4 py-3 font-mono text-xs text-gray-500"><%= txn["transaction_code"] %></td>
+              <td class="px-4 py-3 font-mono text-xs text-gray-500"><%= txn["product_summary"] %></td>
               <td class="px-4 py-3 font-medium">
                 <%= number_to_currency(txn["amount"], unit: "€", format: "%u%n") %>
                 <span class="text-xs text-gray-400"><%= txn["currency"] %></span>

@@ -78,6 +78,57 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_memberships_path
   end
 
+  # Search
+  test "index filters by email search query" do
+    sign_in_as(@owner)
+    get admin_memberships_path, params: { q: "owner@example" }
+    assert_response :success
+    assert_includes response.body, "owner@example.com"
+    refute_includes response.body, "editor@example.com"
+  end
+
+  test "index shows all memberships when no search query" do
+    sign_in_as(@owner)
+    get admin_memberships_path
+    assert_response :success
+    assert_includes response.body, "owner@example.com"
+    assert_includes response.body, "editor@example.com"
+  end
+
+  # Status filter
+  test "index filters to active memberships" do
+    sign_in_as(@owner)
+    get admin_memberships_path, params: { status: "active" }
+    assert_response :success
+    assert_select "tbody div", text: "owner@example.com"
+    assert_select "tbody div", {count: 0, text: "editor@example.com"}
+  end
+
+  test "index filters to expired memberships" do
+    sign_in_as(@owner)
+    get admin_memberships_path, params: { status: "expired" }
+    assert_response :success
+    assert_select "tbody div", text: "editor@example.com"
+    assert_select "tbody div", {count: 0, text: "owner@example.com"}
+  end
+
+  # Pagination
+  test "index paginates 10 per page and shows navigation" do
+    sign_in_as(@owner)
+    11.times do |i|
+      Membership.create!(user: @owner, membership_type: :full, starts_on: Date.current)
+    end
+
+    get admin_memberships_path
+    assert_response :success
+    assert_includes response.body, "Next"
+    refute_includes response.body, "Previous"
+
+    get admin_memberships_path, params: { page: 2 }
+    assert_response :success
+    assert_includes response.body, "Previous"
+  end
+
   # Payment management
   test "can add payment to membership" do
     sign_in_as(@owner)

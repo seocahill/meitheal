@@ -3,8 +3,9 @@ class Admin::TransactionsController < ApplicationController
 
   def index
     filters = {}
-    filters[:oldest_time] = params[:from] if params[:from].present?
-    filters[:newest_time] = params[:to] if params[:to].present?
+    filters[:oldest_time] = params[:from] || 30.days.ago.iso8601
+    filters[:newest_time] = params[:to] || Date.today.iso8601
+    filters[:limit] = 50
 
     service = SumupCheckoutService.new
     response = service.list_transactions(filters)
@@ -22,7 +23,8 @@ class Admin::TransactionsController < ApplicationController
           txn["transaction_code"],
           txn["status"],
           txn["type"],
-          txn["payment_type"]
+          txn["payment_type"],
+          txn["product_summary"]
         ].compact.any? { |value| value.to_s.downcase.include?(downcased) }
       end
     end
