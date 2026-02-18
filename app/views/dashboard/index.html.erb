@@ -190,7 +190,7 @@
                   <p class="text-xs text-gray-500">Help other members find and collaborate with you</p>
                 </div>
               </div>
-              <%= link_to "Update profile", edit_profile_path(@profile), class: "text-sm font-medium text-purple-600 hover:text-purple-700" %>
+              <%= link_to "Update profile", my_profile_path, class: "text-sm font-medium text-purple-600 hover:text-purple-700" %>
             </div>
           <% end %>
           <% if @membership && !@has_active_membership %>
