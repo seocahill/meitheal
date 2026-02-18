@@ -134,7 +134,7 @@ class Admin::TransactionsControllerTest < ActionDispatch::IntegrationTest
       refute_includes response.body, "Next"
       assert_includes response.body, "CODE11"
       assert_includes response.body, "CODE15"
-      refute_includes response.body, "CODE1"
+      refute_includes response.body, "CODE10"
     end
   end
 
