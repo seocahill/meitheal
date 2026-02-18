@@ -72,9 +72,7 @@ class Admin::CalendarImportsControllerTest < ActionDispatch::IntegrationTest
         ical_file: ical_upload(MINIMAL_ICAL)
       }
     end
-    assert_response :success
-    assert_includes response.body, "1"
-    assert_includes response.body, "booking"
+    assert_redirected_to calendar_path
   end
 
   test "imported booking is confirmed and assigned to importer" do
@@ -114,6 +112,26 @@ class Admin::CalendarImportsControllerTest < ActionDispatch::IntegrationTest
         ical_file: ical_upload(two_events)
       }
     end
+  end
+
+  test "import is idempotent for same event data" do
+    sign_in_as(@owner)
+
+    assert_difference "Booking.count", 1 do
+      post admin_calendar_imports_path, params: {
+        space_id: @space.id,
+        ical_file: ical_upload(MINIMAL_ICAL)
+      }
+    end
+
+    assert_no_difference "Booking.count" do
+      post admin_calendar_imports_path, params: {
+        space_id: @space.id,
+        ical_file: ical_upload(MINIMAL_ICAL)
+      }
+    end
+
+    assert_redirected_to calendar_path
   end
 
   # Create - missing file

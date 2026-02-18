@@ -2,11 +2,16 @@
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">Space Calendar</h1>
     <% if authenticated? %>
-      <% if Current.user.has_active_membership? %>
-        <%= link_to "Book Space", new_booking_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
-      <% else %>
-        <span class="text-sm text-gray-500">Active membership required to book</span>
-      <% end %>
+      <div class="flex items-center gap-3">
+        <% if current_user_can_manage? %>
+          <%= link_to "Import calendar", new_admin_calendar_import_path, class: "bg-gray-100 text-gray-800 px-4 py-2 rounded hover:bg-gray-200 text-sm" %>
+        <% end %>
+        <% if Current.user.has_active_membership? %>
+          <%= link_to "Book Space", new_booking_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+        <% else %>
+          <span class="text-sm text-gray-500">Active membership required to book</span>
+        <% end %>
+      </div>
     <% end %>
   </div>
 

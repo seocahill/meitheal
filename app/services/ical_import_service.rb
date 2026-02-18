@@ -31,12 +31,18 @@ class IcalImportService
 
   def import_event(event)
     starts_at = parse_time(event.dtstart)
-    ends_at = parse_time(event.dtend) || starts_at + 1.hour
+    ends_at = parse_time(event.dtend) || starts_at + 1.hour if starts_at
 
     return :skipped if starts_at.nil?
 
+    title = event.summary.to_s.presence || "Imported event"
+
+    if Booking.exists?(space: @space, starts_at: starts_at, title: title)
+      return :skipped
+    end
+
     booking = Booking.new(
-      title: event.summary.to_s.presence || "Imported event",
+      title: title,
       description: event.description.to_s.presence,
       starts_at: starts_at,
       ends_at: ends_at,

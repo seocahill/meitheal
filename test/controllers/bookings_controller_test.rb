@@ -140,4 +140,18 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, edit_booking_path(@booking)
     assert_includes response.body, cancel_booking_path(@booking)
   end
+
+  test "calendar shows import button to admin managers" do
+    sign_in_as(@owner)
+    get calendar_path
+    assert_response :success
+    assert_includes response.body, new_admin_calendar_import_path
+  end
+
+  test "calendar does not show import button to regular viewers" do
+    sign_in_as(@viewer)
+    get calendar_path
+    assert_response :success
+    assert_not_includes response.body, new_admin_calendar_import_path
+  end
 end
