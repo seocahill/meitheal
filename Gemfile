@@ -103,3 +103,6 @@ gem "dockerfile-rails", ">= 1.7", :group => :development
 gem "litestream", "~> 0.14.0"
 
 gem "mission_control-jobs", "~> 1.1"
+
+# iCal file parsing for calendar import [https://github.com/icalendar/icalendar]
+gem "icalendar"

@@ -1,0 +1,40 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Import Complete</h1>
+    <p class="text-gray-600 mt-1">Results for import into <strong><%= @space.name %></strong></p>
+  </div>
+
+  <div class="card p-6 space-y-4">
+    <div class="flex items-center gap-3 text-green-700 bg-green-50 rounded-lg px-4 py-3">
+      <span class="text-2xl font-bold"><%= @result.created %></span>
+      <span>booking<%= @result.created == 1 ? "" : "s" %> created successfully</span>
+    </div>
+
+    <% if @result.skipped.any? %>
+      <div class="bg-amber-50 rounded-lg px-4 py-3">
+        <p class="text-sm font-medium text-amber-800 mb-2">Skipped (<%= @result.skipped.size %>):</p>
+        <ul class="text-sm text-amber-700 space-y-1">
+          <% @result.skipped.each do |title| %>
+            <li class="truncate">&middot; <%= title.presence || "(no title)" %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <% if @result.errors.any? %>
+      <div class="bg-red-50 rounded-lg px-4 py-3">
+        <p class="text-sm font-medium text-red-800 mb-2">Errors (<%= @result.errors.size %>):</p>
+        <ul class="text-sm text-red-700 space-y-1">
+          <% @result.errors.each do |msg| %>
+            <li>&middot; <%= msg %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="flex gap-3 pt-2">
+      <%= link_to "View Calendar", calendar_path, class: "btn-primary text-white px-4 py-2 rounded-xl font-medium text-sm" %>
+      <%= link_to "Import Another", new_admin_calendar_import_path, class: "text-pink-600 hover:text-pink-800 text-sm px-4 py-2" %>
+    </div>
+  </div>
+</div>

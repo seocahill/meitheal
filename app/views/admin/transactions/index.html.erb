@@ -1,0 +1,82 @@
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">SumUp Transactions</h1>
+      <p class="text-gray-600 mt-1"><%= @transactions.size %> transaction<%= @transactions.size == 1 ? "" : "s" %></p>
+    </div>
+  </div>
+
+  <!-- Date filters -->
+  <%= form_with url: admin_transactions_path, method: :get, class: "mb-6" do |f| %>
+    <div class="flex gap-4 items-end bg-white rounded-xl border border-gray-200 px-4 py-3">
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">From</label>
+        <%= date_field_tag :from, params[:from], class: "border border-gray-300 rounded px-2 py-1 text-sm" %>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-gray-600 mb-1">To</label>
+        <%= date_field_tag :to, params[:to], class: "border border-gray-300 rounded px-2 py-1 text-sm" %>
+      </div>
+      <%= f.submit "Filter", class: "btn-primary text-white px-4 py-1.5 rounded-lg text-sm cursor-pointer" %>
+      <% if params[:from].present? || params[:to].present? %>
+        <%= link_to "Clear", admin_transactions_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if flash[:alert] %>
+    <div class="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700 mb-4">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <div class="card overflow-hidden">
+    <% if @transactions.any? %>
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Date</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Code</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Amount</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Status</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Type</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-600">Payment</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          <% @transactions.each do |txn| %>
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 text-gray-600">
+                <% if txn["timestamp"].present? %>
+                  <%= Time.parse(txn["timestamp"]).strftime("%d %b %Y %H:%M") rescue txn["timestamp"] %>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-gray-500"><%= txn["transaction_code"] %></td>
+              <td class="px-4 py-3 font-medium">
+                <%= number_to_currency(txn["amount"], unit: "€", format: "%u%n") %>
+                <span class="text-xs text-gray-400"><%= txn["currency"] %></span>
+              </td>
+              <td class="px-4 py-3">
+                <% status_class = case txn["status"]
+                   when "SUCCESSFUL" then "bg-green-100 text-green-800"
+                   when "FAILED", "CANCELLED" then "bg-red-100 text-red-800"
+                   when "REFUNDED", "CHARGE_BACK" then "bg-amber-100 text-amber-800"
+                   else "bg-gray-100 text-gray-600"
+                   end %>
+                <span class="px-2 py-0.5 rounded text-xs font-medium <%= status_class %>">
+                  <%= txn["status"] %>
+                </span>
+              </td>
+              <td class="px-4 py-3 text-gray-500"><%= txn["type"] %></td>
+              <td class="px-4 py-3 text-gray-500"><%= txn["payment_type"] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <div class="px-6 py-12 text-center text-gray-500">
+        No transactions found.
+      </div>
+    <% end %>
+  </div>
+</div>
