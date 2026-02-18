@@ -22,6 +22,9 @@ gem "jbuilder"
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 gem "bcrypt", "~> 3.1.7"
 
+# CSV parsing (required in Ruby 3.4+)
+gem "csv"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
@@ -41,6 +44,30 @@ gem "thruster", require: false
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 gem "image_processing", "~> 1.2"
+
+# AWS SDK for S3 storage [https://github.com/aws/aws-sdk-ruby]
+gem "aws-sdk-s3", require: false
+
+# Rich text editor with markdown support [https://github.com/basecamp/lexxy]
+gem "lexxy"
+
+# Unified LLM API for OpenAI, Anthropic, etc [https://github.com/crmne/ruby_llm]
+gem "ruby_llm"
+
+# Pagination [https://github.com/ddnexus/pagy]
+gem "pagy"
+
+# Markdown to HTML conversion [https://github.com/vmg/redcarpet]
+gem "redcarpet"
+
+# HTTP client for API requests
+gem "faraday"
+
+# Brevo email marketing API [https://github.com/getbrevo/brevo-ruby]
+gem "brevo"
+
+# Forum engine [https://github.com/thredded/thredded]
+gem "thredded"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -66,3 +93,13 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "dotenv", "~> 3.2"
+
+gem "recaptcha", "~> 5.21"
+
+gem "dockerfile-rails", ">= 1.7", :group => :development
+
+gem "litestream", "~> 0.14.0"
+
+gem "mission_control-jobs", "~> 1.1"

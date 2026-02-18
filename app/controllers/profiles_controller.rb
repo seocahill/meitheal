@@ -27,6 +27,7 @@ class ProfilesController < ApplicationController
   # GET /my_profile - Show form to create or edit own profile
   def show_my_profile
     @profile = Current.user.profile || Current.user.build_profile
+    @membership = Current.user.memberships.order(created_at: :desc).first
     if @profile.persisted?
       render :edit_my_profile
     else
@@ -62,7 +63,7 @@ class ProfilesController < ApplicationController
 
   def profile_params
     params.require(:profile).permit(
-      :name, :bio, :skills, :website, :location, :visible,
+      :name, :bio, :skills, :website, :location, :visible, :public_gallery,
       :avatar, portfolio_images: []
     )
   end

@@ -4,6 +4,10 @@ class User < ApplicationRecord
   has_many :events, dependent: :nullify
   has_many :bookings, dependent: :nullify
   has_many :memberships, dependent: :destroy
+  has_many :email_group_memberships, dependent: :destroy
+  has_many :email_groups, through: :email_group_memberships
+  has_many :proposals, dependent: :destroy
+  has_many :posts, dependent: :nullify
   has_one :profile, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
@@ -20,5 +24,31 @@ class User < ApplicationRecord
 
   def can_manage?
     owner?
+  end
+
+  def has_active_membership?
+    memberships.active.exists? && !memberships.active.first.associate?
+  end
+
+  # Thredded compatibility methods
+  def name
+    return unless approved?
+
+    profile&.name || email_address.split("@").first
+  end
+
+  # Alias for Gravatar compatibility
+  def email
+    email_address
+  end
+
+  # Thredded admin/moderator check
+  def admin
+    owner?
+  end
+  alias_method :admin?, :admin
+
+  def thredded_can_moderate_messageboard?(_messageboard)
+    can_edit?
   end
 end

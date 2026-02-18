@@ -1,0 +1,137 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6" data-controller="ai-compose">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Newsletter</h1>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Main content area: editor + tools below -->
+    <div class="lg:col-span-2 space-y-6">
+      <div class="card p-6">
+        <%= render "form", newsletter: @newsletter %>
+      </div>
+
+      <!-- AI Assistant and Export side by side on wide screens -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- AI Assistant -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Assistant</h2>
+
+          <div class="space-y-4">
+            <div>
+              <label for="ai-prompt" class="form-label">
+                Describe what you need
+              </label>
+              <textarea
+                id="ai-prompt"
+                data-ai-compose-target="prompt"
+                rows="3"
+                class="form-input"
+                placeholder="e.g., Write about our upcoming exhibition..."></textarea>
+            </div>
+
+            <button
+              type="button"
+              data-action="click->ai-compose#compose"
+              data-newsletter-id="<%= @newsletter.id %>"
+              class="w-full btn-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50"
+              data-ai-compose-target="button">
+              Generate with AI
+            </button>
+
+            <div data-ai-compose-target="status" class="text-sm text-gray-500 text-center hidden">
+              Generating...
+            </div>
+
+            <div data-ai-compose-target="result" class="hidden">
+              <div class="border-t pt-4 mt-4">
+                <label class="form-label mb-2">Generated Content</label>
+                <div
+                  data-ai-compose-target="output"
+                  class="bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm max-h-48 overflow-y-auto prose prose-sm">
+                </div>
+                <p class="form-hint mt-2">Copy and paste into the editor above.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-gray-100">
+            <h3 class="text-sm font-medium text-gray-700 mb-2">Quick Prompts</h3>
+            <div class="flex flex-wrap gap-2">
+              <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write an engaging introduction for this newsletter" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                Introduction
+              </button>
+              <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Summarize upcoming events and opportunities" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                Events summary
+              </button>
+              <button type="button" data-action="click->ai-compose#useSuggestion" data-prompt="Write a call to action encouraging member engagement" class="text-xs px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors">
+                Call to action
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export to Brevo -->
+        <div class="card p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Export to Brevo</h2>
+          <p class="text-sm text-gray-500 mb-4">
+            <% if @newsletter.brevo_campaign_id.present? %>
+              This newsletter has been exported to Brevo as a draft campaign.
+            <% else %>
+              Export this newsletter to Brevo as a draft campaign for sending.
+            <% end %>
+          </p>
+          <%= button_to export_to_brevo_newsletter_path(@newsletter),
+                method: :post,
+                class: "w-full btn-primary text-white px-4 py-2.5 rounded-xl text-sm font-medium",
+                data: { turbo_confirm: @newsletter.brevo_campaign_id.present? ? "Update the existing Brevo campaign?" : nil } do %>
+            <% if @newsletter.brevo_campaign_id.present? %>
+              Update in Brevo
+            <% else %>
+              Export to Brevo
+            <% end %>
+          <% end %>
+          <% if @newsletter.brevo_campaign_id.present? %>
+            <p class="text-xs text-gray-400 mt-2 text-center">Campaign ID: <%= @newsletter.brevo_campaign_id %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: Inbox emails only -->
+    <% if @inbox_emails.any? %>
+      <div class="lg:col-span-1">
+        <div class="card p-6 lg:sticky lg:top-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-2">Import from Inbox</h2>
+          <p class="text-sm text-gray-500 mb-4">Click Import to add email content to your newsletter using AI.</p>
+
+          <ul class="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <% @inbox_emails.each do |email| %>
+              <li class="border-b border-gray-100 pb-3 last:border-0">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">
+                      <%= email["subject"] || "(No subject)" %>
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1 truncate">
+                      <%= email["fromAddress"] || email["sender"] %>
+                    </p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                      <%= format_zoho_time(email["receivedTime"]) %>
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    data-action="click->ai-compose#importEmail"
+                    data-newsletter-id="<%= @newsletter.id %>"
+                    data-message-id="<%= email['messageId'] %>"
+                    data-folder-id="<%= @inbox_folder_id %>"
+                    class="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-50">
+                    Import
+                  </button>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -5,7 +5,7 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     @owner = users(:owner)
     @editor = users(:editor)
     @viewer = users(:viewer)
-    @space = spaces(:main_hall)
+    @space = spaces(:front_room)
     @booking = bookings(:upcoming_booking)
   end
 
@@ -41,7 +41,9 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
           space_id: @space.id,
           title: "New Booking",
           starts_at: 3.weeks.from_now,
-          ends_at: 3.weeks.from_now + 2.hours
+          ends_at: 3.weeks.from_now + 2.hours,
+          agree_booking_rules: "1",
+          agree_ethics: "1"
         }
       }
     end
@@ -55,10 +57,27 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
         space_id: @space.id,
         title: "New Booking",
         starts_at: 3.weeks.from_now,
-        ends_at: 3.weeks.from_now + 2.hours
+        ends_at: 3.weeks.from_now + 2.hours,
+        agree_booking_rules: "1",
+        agree_ethics: "1"
       }
     }
     assert Booking.last.pending?
+  end
+
+  test "booking without agreements is rejected" do
+    sign_in_as(@viewer)
+    assert_no_difference "Booking.count" do
+      post bookings_path, params: {
+        booking: {
+          space_id: @space.id,
+          title: "New Booking",
+          starts_at: 3.weeks.from_now,
+          ends_at: 3.weeks.from_now + 2.hours
+        }
+      }
+    end
+    assert_response :unprocessable_entity
   end
 
   test "booking owner can edit their booking" do
@@ -98,5 +117,27 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to calendar_path
     pending_booking.reload
     assert pending_booking.cancelled?
+  end
+
+  test "calendar hides edit and cancel buttons from non-admin users" do
+    # Create a confirmed booking owned by the viewer — they should NOT see Edit/Cancel
+    viewer_booking = Booking.create!(
+      space: @space, user: @viewer, title: "Viewer Booking",
+      starts_at: 3.days.from_now, ends_at: 3.days.from_now + 2.hours,
+      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+    )
+    sign_in_as(@viewer)
+    get calendar_path
+    assert_response :success
+    assert_not_includes response.body, edit_booking_path(viewer_booking)
+    assert_not_includes response.body, cancel_booking_path(viewer_booking)
+  end
+
+  test "calendar shows edit and cancel buttons to admin users" do
+    sign_in_as(@editor)
+    get calendar_path
+    assert_response :success
+    assert_includes response.body, edit_booking_path(@booking)
+    assert_includes response.body, cancel_booking_path(@booking)
   end
 end

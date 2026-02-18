@@ -1,0 +1,29 @@
+<h1>Welcome to THENCF!</h1>
+
+<p>Hi <%= @user.profile&.name || @user.email_address.split("@").first %>,</p>
+
+<p>Great news! Your account has been approved. You can now sign in and access all member features.</p>
+
+<p>
+  <%= link_to "Sign in to THENCF", new_session_url %>
+</p>
+
+<p>
+  As a member you can:
+</p>
+
+<ul>
+  <li>Browse and participate in the community forum</li>
+  <li>View funding opportunities</li>
+  <li>Book spaces (once your membership is active)</li>
+  <li>Connect with other artists in the collective</li>
+</ul>
+
+<p>
+  Welcome to the North Connacht Cultural Co-op community!
+</p>
+
+<p>
+  Best regards,<br>
+  THENCF Team
+</p>

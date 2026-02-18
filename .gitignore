@@ -43,3 +43,10 @@ yarn-debug.log*
 
 # Ignore Kamal deployment files.
 /.kamal/secrets
+CLAUDE.md
+
+# Ignore key files for decrypting credentials and more.
+/config/*.key
+
+
+secrets

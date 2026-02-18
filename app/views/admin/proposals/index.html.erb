@@ -1,0 +1,65 @@
+<div class="max-w-6xl mx-auto px-4">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Proposals</h1>
+    <div class="flex gap-2">
+      <%= link_to "All", admin_proposals_path, class: "px-3 py-1 rounded-lg #{params[:status].blank? ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
+      <%= link_to "Pending", admin_proposals_path(status: "submitted"), class: "px-3 py-1 rounded-lg #{params[:status] == 'submitted' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
+      <%= link_to "Approved", admin_proposals_path(status: "approved"), class: "px-3 py-1 rounded-lg #{params[:status] == 'approved' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
+      <%= link_to "Rejected", admin_proposals_path(status: "rejected"), class: "px-3 py-1 rounded-lg #{params[:status] == 'rejected' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
+    </div>
+  </div>
+
+  <% if @proposals.any? %>
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Proposal</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Opportunity</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Applicant</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @proposals.each do |proposal| %>
+            <tr>
+              <td class="px-6 py-4">
+                <%= link_to proposal.title, admin_proposal_path(proposal), class: "font-medium text-gray-900 hover:text-pink-600" %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= proposal.funding_opportunity.title %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= proposal.user.email_address %>
+              </td>
+              <td class="px-6 py-4">
+                <% case proposal.status %>
+                <% when "draft" %>
+                  <span class="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800">Draft</span>
+                <% when "submitted" %>
+                  <span class="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">Pending Review</span>
+                <% when "approved" %>
+                  <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Approved</span>
+                <% when "rejected" %>
+                  <span class="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">Rejected</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= proposal.submitted_at&.strftime("%d %b %Y") || "-" %>
+              </td>
+              <td class="px-6 py-4 text-right text-sm">
+                <%= link_to "View", admin_proposal_path(proposal), class: "text-pink-600 hover:text-pink-800" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="bg-white shadow rounded-lg p-8 text-center">
+      <p class="text-gray-500">No proposals found.</p>
+    </div>
+  <% end %>
+</div>

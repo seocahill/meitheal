@@ -48,12 +48,14 @@ class FundingOpportunityTest < ActiveSupport::TestCase
     later = FundingOpportunity.create!(
       title: "Later Grant",
       organization: "Arts Council",
-      deadline: 2.months.from_now
+      deadline: 2.months.from_now,
+      approved: true
     )
     sooner = FundingOpportunity.create!(
       title: "Sooner Grant",
       organization: "Arts Council",
-      deadline: 1.week.from_now
+      deadline: 1.week.from_now,
+      approved: true
     )
 
     opportunities = FundingOpportunity.upcoming
@@ -78,6 +80,49 @@ class FundingOpportunityTest < ActiveSupport::TestCase
   test "categories_list returns empty array when no categories" do
     opportunity = FundingOpportunity.new(categories: nil)
     assert_equal [], opportunity.categories_list
+  end
+
+  # Approval scopes
+  test "approved scope returns only approved opportunities" do
+    approved = funding_opportunities(:arts_council_grant)
+    pending = funding_opportunities(:pending_grant)
+
+    assert_includes FundingOpportunity.approved, approved
+    assert_not_includes FundingOpportunity.approved, pending
+  end
+
+  test "pending_approval scope returns only unapproved opportunities" do
+    approved = funding_opportunities(:arts_council_grant)
+    pending = funding_opportunities(:pending_grant)
+
+    assert_includes FundingOpportunity.pending_approval, pending
+    assert_not_includes FundingOpportunity.pending_approval, approved
+  end
+
+  test "upcoming scope only returns approved opportunities" do
+    approved = funding_opportunities(:arts_council_grant)
+    pending = funding_opportunities(:pending_grant)
+
+    assert_includes FundingOpportunity.upcoming, approved
+    assert_not_includes FundingOpportunity.upcoming, pending
+  end
+
+  test "approved_or_owned_by returns approved opportunities plus user's pending ones" do
+    viewer = users(:viewer)
+    approved = funding_opportunities(:arts_council_grant)
+    pending = funding_opportunities(:pending_grant) # created_by: viewer
+
+    results = FundingOpportunity.approved_or_owned_by(viewer)
+    assert_includes results, approved
+    assert_includes results, pending
+  end
+
+  test "approved_or_owned_by excludes other users' pending opportunities" do
+    editor = users(:editor)
+    pending = funding_opportunities(:pending_grant) # created_by: viewer
+
+    results = FundingOpportunity.approved_or_owned_by(editor)
+    assert_not_includes results, pending
   end
 
   test "by_category scope filters by category" do

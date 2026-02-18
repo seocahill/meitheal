@@ -19,4 +19,27 @@ class SpaceTest < ActiveSupport::TestCase
     assert_includes Space.active, active
     assert_not_includes Space.active, inactive
   end
+
+  test "linked_space_ids returns parent ID for component space" do
+    front_room = spaces(:front_room)
+    whole_building = spaces(:whole_building)
+
+    assert_equal [whole_building.id], front_room.linked_space_ids
+  end
+
+  test "linked_space_ids returns component IDs for composite space" do
+    front_room = spaces(:front_room)
+    back_room = spaces(:back_room)
+    whole_building = spaces(:whole_building)
+
+    assert_includes whole_building.linked_space_ids, front_room.id
+    assert_includes whole_building.linked_space_ids, back_room.id
+    assert_equal 2, whole_building.linked_space_ids.size
+  end
+
+  test "linked_space_ids returns empty array for unlinked space" do
+    standalone = Space.create!(name: "Standalone Room", active: true)
+
+    assert_equal [], standalone.linked_space_ids
+  end
 end

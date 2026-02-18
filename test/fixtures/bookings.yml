@@ -1,7 +1,7 @@
 # Booking fixtures
 
 upcoming_booking:
-  space: main_hall
+  space: front_room
   user: editor
   title: Art Workshop
   description: Weekly art workshop session
@@ -10,7 +10,7 @@ upcoming_booking:
   status: 1
 
 pending_booking:
-  space: studio
+  space: back_room
   user: viewer
   title: Practice Session
   description: Studio practice

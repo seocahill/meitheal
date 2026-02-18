@@ -1,0 +1,127 @@
+<% prices_json = MembershipPaymentsController::PAID_TYPES.map { |t| [t, MembershipPaymentsController::MEMBERSHIP_PRICES[t]] }.to_h.to_json %>
+
+<div class="max-w-lg mx-auto px-4 sm:px-6" data-controller="sumup-payment" data-sumup-payment-prices-value="<%= prices_json %>">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Pay Membership</h1>
+
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Membership Details</h2>
+
+    <div class="space-y-4">
+      <div>
+        <label for="membership_type" class="block text-sm font-medium text-gray-700 mb-1">Membership Type</label>
+        <select id="membership_type"
+                data-action="change->sumup-payment#changeType"
+                data-sumup-payment-target="typeSelect"
+                class="form-input w-full">
+          <% MembershipPaymentsController::PAID_TYPES.each do |type| %>
+            <option value="<%= type %>"
+                    data-price="<%= MembershipPaymentsController::MEMBERSHIP_PRICES[type] %>"
+                    <%= "selected" if type == @selected_type %>>
+              <%= type.to_s.humanize %> &mdash; &euro;<%= number_with_precision(MembershipPaymentsController::MEMBERSHIP_PRICES[type] / 100.0, precision: 2) %>
+            </option>
+          <% end %>
+        </select>
+      </div>
+
+      <% if @membership.expires_on %>
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">Current Expiry</span>
+          <span class="font-medium"><%= @membership.expires_on.strftime("%d %B %Y") %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Donation Section -->
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-2">Add a Donation</h2>
+    <p class="text-sm text-gray-500 mb-4">Your donation helps support our community programmes and activities.</p>
+
+    <div class="flex flex-wrap gap-2 mb-4">
+      <button type="button" data-action="click->sumup-payment#setDonation" data-amount="0"
+              class="donation-btn px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-purple-500 hover:text-purple-600 transition-colors"
+              data-sumup-payment-target="donationOption">
+        No donation
+      </button>
+      <button type="button" data-action="click->sumup-payment#setDonation" data-amount="500"
+              class="donation-btn px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-purple-500 hover:text-purple-600 transition-colors"
+              data-sumup-payment-target="donationOption">
+        &euro;5
+      </button>
+      <button type="button" data-action="click->sumup-payment#setDonation" data-amount="1000"
+              class="donation-btn px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-purple-500 hover:text-purple-600 transition-colors"
+              data-sumup-payment-target="donationOption">
+        &euro;10
+      </button>
+      <button type="button" data-action="click->sumup-payment#setDonation" data-amount="2000"
+              class="donation-btn px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-purple-500 hover:text-purple-600 transition-colors"
+              data-sumup-payment-target="donationOption">
+        &euro;20
+      </button>
+      <button type="button" data-action="click->sumup-payment#setDonation" data-amount="5000"
+              class="donation-btn px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium hover:border-purple-500 hover:text-purple-600 transition-colors"
+              data-sumup-payment-target="donationOption">
+        &euro;50
+      </button>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <label class="text-sm text-gray-600">Other amount:</label>
+      <div class="relative flex-1">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+        <input type="number" min="0" step="1" placeholder="0"
+               data-action="input->sumup-payment#setCustomDonation"
+               data-sumup-payment-target="customDonation"
+               class="form-input pl-8 w-full">
+      </div>
+    </div>
+  </div>
+
+  <!-- Total & Payment -->
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment</h2>
+
+    <dl class="space-y-2 mb-6 pb-4 border-b border-gray-200">
+      <div class="flex justify-between text-sm">
+        <dt class="text-gray-600">Membership Fee</dt>
+        <dd data-sumup-payment-target="feeDisplay">&euro;<%= number_with_precision(@amount_cents / 100.0, precision: 2) %></dd>
+      </div>
+      <div class="flex justify-between text-sm">
+        <dt class="text-gray-600">Donation</dt>
+        <dd data-sumup-payment-target="donationDisplay">&euro;0.00</dd>
+      </div>
+      <div class="flex justify-between text-lg font-semibold pt-2">
+        <dt>Total</dt>
+        <dd data-sumup-payment-target="totalDisplay">&euro;<%= number_with_precision(@amount_cents / 100.0, precision: 2) %></dd>
+      </div>
+    </dl>
+
+    <div
+      id="sumup-card"
+      data-sumup-payment-target="cardWidget">
+      <div class="text-center py-8 text-gray-500 hidden" data-sumup-payment-target="loading">
+        Loading payment form...
+      </div>
+    </div>
+
+    <div data-sumup-payment-target="error" class="hidden mt-4 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700"></div>
+
+    <button
+      type="button"
+      data-action="click->sumup-payment#initiatePayment"
+      data-sumup-payment-target="payButton"
+      data-membership-id="<%= @membership.id %>"
+      data-base-amount="<%= @amount_cents %>"
+      class="mt-6 w-full btn-primary text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+      Pay &euro;<span data-sumup-payment-target="buttonTotal"><%= number_with_precision(@amount_cents / 100.0, precision: 2) %></span>
+    </button>
+
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      Payments are securely processed by SumUp.
+    </p>
+  </div>
+
+  <%= link_to "Cancel", my_profile_path, class: "block mt-6 text-center text-gray-600 hover:text-purple-600 transition-colors" %>
+</div>
+
+<script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script>

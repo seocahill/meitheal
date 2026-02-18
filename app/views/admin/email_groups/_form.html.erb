@@ -1,0 +1,42 @@
+<%= form_with model: [:admin, email_group], class: "space-y-6" do |form| %>
+  <% if email_group.errors.any? %>
+    <div class="form-error">
+      <ul class="list-disc list-inside">
+        <% email_group.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, class: "form-label" %>
+    <%= form.text_field :name, class: "form-input" %>
+  </div>
+
+  <div>
+    <%= form.label :local_part, "Email Address Prefix", class: "form-label" %>
+    <div class="mt-1 flex">
+      <%= form.text_field :local_part, class: "form-input rounded-r-none border-r-0", placeholder: "artists" %>
+      <span class="inline-flex items-center px-4 rounded-r-xl border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+        @thencf.art
+      </span>
+    </div>
+    <p class="form-hint">Lowercase letters, numbers, and hyphens only</p>
+  </div>
+
+  <div>
+    <%= form.label :description, class: "form-label" %>
+    <%= form.text_area :description, rows: 3, class: "form-input" %>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= form.check_box :active, class: "form-checkbox" %>
+    <%= form.label :active, "Active (can receive and send emails)", class: "text-sm text-gray-700" %>
+  </div>
+
+  <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
+    <%= link_to "Cancel", admin_email_groups_path, class: "text-gray-600 hover:text-gray-900" %>
+    <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+  </div>
+<% end %>

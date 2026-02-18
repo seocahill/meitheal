@@ -1,0 +1,49 @@
+<section id="artist-gallery" class="my-8 mx-4 md:mx-8">
+  <div class="max-w-7xl mx-auto mb-8">
+    <h2 class="text-3xl font-bold text-gray-900">Artist Gallery</h2>
+  </div>
+
+  <% if @profiles.empty? %>
+    <div class="max-w-7xl mx-auto">
+      <div class="card p-12 text-center">
+        <p class="text-gray-500 text-lg">No artists in the gallery yet.</p>
+      </div>
+    </div>
+  <% else %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-7xl mx-auto">
+      <% @profiles.in_groups(4, false).each do |column| %>
+        <div class="grid gap-4">
+          <% column.each do |profile| %>
+            <div class="relative group overflow-hidden rounded-lg">
+              <% if profile.avatar.attached? %>
+                <%= link_to profile.website.presence || "#", target: "_blank", rel: "noopener" do %>
+                  <%= image_tag profile.avatar, alt: profile.name, class: "h-auto max-w-full rounded-lg hover:opacity-90 transition-opacity" %>
+                <% end %>
+              <% else %>
+                <div class="bg-gradient-to-br from-purple-400 to-pink-400 aspect-square rounded-lg flex items-center justify-center">
+                  <% if profile.website.present? %>
+                    <%= link_to profile.website, target: "_blank", rel: "noopener", class: "text-white font-bold text-2xl" do %>
+                      <%= profile.name&.first&.upcase || "?" %>
+                    <% end %>
+                  <% else %>
+                    <span class="text-white font-bold text-2xl"><%= profile.name&.first&.upcase || "?" %></span>
+                  <% end %>
+                </div>
+              <% end %>
+              <% if profile.name.present? || profile.bio.present? %>
+                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                  <% if profile.name.present? %>
+                    <p class="font-semibold text-sm"><%= profile.name %></p>
+                  <% end %>
+                  <% if profile.bio.present? %>
+                    <p class="text-xs"><%= truncate(profile.bio, length: 60) %></p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</section>

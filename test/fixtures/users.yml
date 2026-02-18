@@ -4,13 +4,16 @@ owner:
   email_address: owner@example.com
   password_digest: <%= password_digest %>
   role: 2
+  approved: true
 
 editor:
   email_address: editor@example.com
   password_digest: <%= password_digest %>
   role: 1
+  approved: true
 
 viewer:
   email_address: viewer@example.com
   password_digest: <%= password_digest %>
   role: 0
+  approved: true

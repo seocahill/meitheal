@@ -1,0 +1,32 @@
+draft:
+  user: owner
+  funding_opportunity: arts_council_grant
+  title: Draft Art Project
+  description: A proposal still being worked on
+  status: 0
+  submission_deadline: <%= 2.weeks.from_now.to_date %>
+  amount_requested: 5000.00
+  organizer_fee: 500.00
+
+submitted:
+  user: editor
+  funding_opportunity: arts_council_grant
+  title: Community Mural Project
+  description: A large-scale mural for the town center
+  status: 1
+  submitted_at: <%= 1.week.ago %>
+  submission_deadline: <%= 1.month.from_now.to_date %>
+  amount_requested: 10000.00
+  organizer_fee: 1000.00
+
+approved:
+  user: owner
+  funding_opportunity: expired_grant
+  title: Heritage Documentation
+  description: Recording local oral histories
+  status: 2
+  submitted_at: <%= 2.weeks.ago %>
+  reviewed_at: <%= 1.week.ago %>
+  submission_deadline: <%= 1.month.ago.to_date %>
+  amount_requested: 3000.00
+  organizer_fee: 0

@@ -7,6 +7,10 @@ class SessionsController < ApplicationController
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
+      unless user.approved?
+        redirect_to new_session_path, alert: "Your account is pending approval. You'll receive an email once approved."
+        return
+      end
       start_new_session_for user
       redirect_to after_authentication_url
     else

@@ -1,0 +1,23 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <header class="mb-8">
+    <h1 class="text-2xl font-bold tracking-wide uppercase">Frequently Asked Questions</h1>
+  </header>
+
+  <% if @faqs.empty? %>
+    <p class="text-gray-500">No FAQs available yet.</p>
+  <% else %>
+    <div class="prose prose-lg max-w-none">
+      <% @faqs.each do |faq| %>
+        <details class="mb-6 pb-6 border-b border-gray-200 group">
+          <summary class="cursor-pointer font-semibold text-lg hover:text-gray-600 list-none flex items-center justify-between">
+            <%= faq.question %>
+            <span class="ml-4 text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="mt-4">
+            <%= faq.answer %>
+          </div>
+        </details>
+      <% end %>
+    </div>
+  <% end %>
+</div>

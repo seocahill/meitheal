@@ -1,4 +1,77 @@
-<div>
-  <h1 class="font-bold text-4xl">Home#index</h1>
-  <p>Find me in app/views/home/index.html.erb</p>
+<div class="min-h-screen flex">
+  <!-- Left side: Logo and Navigation -->
+  <div class="p-8 md:p-12 flex flex-col justify-between min-h-screen">
+    <div>
+      <!-- Logo -->
+      <h1 class="text-4xl md:text-6xl font-bold text-white mb-12">
+        <span class="logo-highlight">THENCF</span>
+      </h1>
+
+      <!-- Vertical Navigation -->
+      <nav class="flex flex-col gap-2 text-xl md:text-2xl font-bold text-white">
+        <%= link_to "About", page_path("about"), class: "menu-highlight inline-block" %>
+        <%= link_to "Events", events_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Membership", new_registration_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Art", artists_path, class: "menu-highlight inline-block" %>
+        <%= link_to "News", posts_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Funding", funding_opportunities_path, class: "menu-highlight inline-block" %>
+        <%= link_to "FAQ", faq_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Projects", projects_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Bookings", calendar_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Contact", contact_path, class: "menu-highlight inline-block" %>
+        <%= link_to "Shop", "https://thencf-cultural-cooperative.sumupstore.com/", class: "menu-highlight inline-block", target: "_blank" %>
+        <% if authenticated? %>
+          <%= link_to "My Account", my_profile_path, class: "menu-highlight inline-block" %>
+        <% end %>
+      </nav>
+    </div>
+
+    <!-- Bottom section -->
+    <div class="mt-auto">
+      <% if authenticated? %>
+        <div class="flex flex-col gap-2 text-lg font-medium text-white mb-6">
+          <%= link_to "Forum", thredded_path, class: "menu-highlight inline-block" %>
+          <% if current_user_can_edit? %>
+            <%= link_to "Newsletters", newsletters_path, class: "menu-highlight inline-block text-sm" %>
+            <%= link_to "Pages", admin_pages_path, class: "menu-highlight inline-block text-sm" %>
+          <% end %>
+          <% if current_user_can_manage? %>
+            <%= link_to "Admin", admin_users_path, class: "menu-highlight inline-block text-sm" %>
+          <% end %>
+        </div>
+        <%= button_to "Sign Out", session_path, method: :delete, class: "menu-highlight text-white font-bold text-sm cursor-pointer" %>
+      <% else %>
+        <%= link_to "Sign In", new_session_path, class: "menu-highlight inline-block text-white font-bold" %>
+      <% end %>
+
+      <p class="text-white/60 text-sm mt-8">
+        Ballina, Co. Mayo, Ireland
+      </p>
+    </div>
+  </div>
+
+  <!-- Right side: Content area (optional upcoming events) -->
+  <div class="hidden lg:flex flex-1 items-end justify-end p-12">
+    <% if @upcoming_events.any? %>
+      <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 max-w-md">
+        <h2 class="text-white font-bold text-xl mb-4">Upcoming</h2>
+        <div class="space-y-4">
+          <% @upcoming_events.each do |event| %>
+            <%= link_to event_path(event), class: "block group" do %>
+              <p class="text-white font-medium group-hover:text-pink-200 transition-colors">
+                <%= event.title %>
+              </p>
+              <p class="text-white/60 text-sm">
+                <%= event.starts_at.strftime("%d %b") %>
+                <% if event.venue_name.present? %>
+                  &middot; <%= event.venue_name %>
+                <% end %>
+              </p>
+            <% end %>
+          <% end %>
+        </div>
+        <%= link_to "View all events →", events_path, class: "inline-block mt-4 text-white/80 hover:text-white text-sm" %>
+      </div>
+    <% end %>
+  </div>
 </div>

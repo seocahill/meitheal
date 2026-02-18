@@ -1,0 +1,46 @@
+<div class="max-w-6xl mx-auto px-4">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Funding Opportunities</h1>
+  </div>
+
+  <% if @funding_opportunities.any? %>
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Organization</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Deadline</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Submitted by</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @funding_opportunities.each do |opportunity| %>
+            <tr class="bg-amber-50">
+              <td class="px-6 py-4">
+                <%= link_to opportunity.title, funding_opportunity_path(opportunity), class: "font-medium text-gray-900 hover:text-pink-600" %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= opportunity.organization %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= opportunity.deadline.strftime("%d %b %Y") %>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                <%= opportunity.created_by&.email_address || "Unknown" %>
+              </td>
+              <td class="px-6 py-4 text-right text-sm">
+                <%= button_to "Approve", approve_admin_funding_opportunity_path(opportunity), method: :post, class: "inline-block px-3 py-1 bg-emerald-600 text-white rounded hover:bg-emerald-700" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="bg-white shadow rounded-lg p-8 text-center">
+      <p class="text-gray-500">No funding opportunities pending approval.</p>
+    </div>
+  <% end %>
+</div>

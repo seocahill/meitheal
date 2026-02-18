@@ -1,0 +1,24 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Apply for Funding</h1>
+    <p class="mt-2 text-gray-600">
+      <%= @funding_opportunity.title %> &middot; <%= @funding_opportunity.organization %>
+    </p>
+    <p class="text-sm text-gray-500 mt-1">
+      Deadline: <%= @funding_opportunity.deadline.strftime("%d %B %Y") %>
+    </p>
+  </div>
+
+  <div class="card p-6">
+    <%= render "form" %>
+  </div>
+
+  <% if @proposal.persisted? && @proposal.draft? %>
+    <div class="card p-6 mt-6 bg-gradient-to-r from-purple-50 to-pink-50">
+      <p class="text-gray-800">
+        <strong>Ready to submit?</strong> Once you're happy with your proposal, you can submit it for review.
+      </p>
+      <%= button_to "Submit Proposal", submit_funding_opportunity_proposal_path(@funding_opportunity, @proposal), method: :post, class: "mt-4 btn-primary text-white px-5 py-2.5 rounded-xl font-medium" %>
+    </div>
+  <% end %>
+</div>

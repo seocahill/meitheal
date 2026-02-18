@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+archived_email_one:
+  message_id: archived_msg_001
+  folder_id: inbox_folder_123
+  archived_at: 2026-02-04 23:09:08
+
+archived_email_two:
+  message_id: archived_msg_002
+  folder_id: inbox_folder_123
+  archived_at: 2026-02-04 22:00:00

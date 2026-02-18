@@ -7,6 +7,7 @@ class Profile < ApplicationRecord
   validates :name, presence: true
 
   scope :visible, -> { where(visible: true) }
+  scope :in_public_gallery, -> { where(public_gallery: true) }
   scope :with_skill, ->(skill) { where("skills LIKE ?", "%#{skill}%") }
   scope :search, ->(query) {
     where("name LIKE ? OR bio LIKE ?", "%#{query}%", "%#{query}%")

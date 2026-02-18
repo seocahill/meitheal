@@ -1,0 +1,130 @@
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <div class="mb-6">
+    <%= link_to "← Back to Inbox", admin_inbox_index_path(folder_id: params[:folder_id]), class: "text-gray-500 hover:text-gray-700 text-sm" %>
+  </div>
+
+  <div class="card">
+    <!-- Email header -->
+    <div class="p-6 border-b border-gray-100">
+      <h1 class="text-xl font-semibold text-gray-900 mb-4">
+        <%= @email_metadata&.dig("subject") || "(No subject)" %>
+      </h1>
+
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold flex-shrink-0">
+          <%= (@email_metadata&.dig("fromAddress") || "?").first.upcase %>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-gray-900">
+            <%= @email_metadata&.dig("fromAddress") || @email_metadata&.dig("sender") %>
+          </p>
+          <p class="text-sm text-gray-500">
+            To: <%= @email_metadata&.dig("toAddress") %>
+          </p>
+          <% if @email_metadata&.dig("ccAddress").present? %>
+            <p class="text-sm text-gray-500">
+              Cc: <%= @email_metadata["ccAddress"] %>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="text-right text-sm text-gray-500 flex-shrink-0">
+          <%= format_zoho_datetime(@email_metadata&.dig("receivedTime")) %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attachments -->
+    <% if @attachments.present? %>
+      <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+        <div class="flex items-center gap-2 mb-3">
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+          </svg>
+          <span class="text-sm font-medium text-gray-700"><%= @attachments.size %> attachment<%= @attachments.size == 1 ? '' : 's' %></span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <% @attachments.each do |attachment| %>
+            <%= link_to attachment_admin_inbox_path(params[:id], attachment_id: attachment["attachmentId"], folder_id: @folder_id),
+                class: "inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm" do %>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span class="text-gray-700"><%= attachment["attachmentName"] %></span>
+              <span class="text-gray-400 text-xs">(<%= number_to_human_size(attachment["attachmentSize"]) %>)</span>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <!-- Email body -->
+    <div class="p-6">
+      <% if @email_content&.dig("content").present? %>
+        <div class="prose prose-sm max-w-none email-content">
+          <%= sanitize(@email_content["content"], tags: %w[p br div span a img h1 h2 h3 h4 h5 h6 ul ol li table tr td th thead tbody strong em b i u blockquote pre code hr], attributes: %w[href src alt class style]) %>
+        </div>
+      <% else %>
+        <p class="text-gray-500 italic">No content available.</p>
+      <% end %>
+    </div>
+
+    <!-- Actions -->
+    <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+      <p class="text-xs text-gray-500 mb-3">Create from this email:</p>
+      <div class="flex flex-wrap items-center gap-3">
+        <%= button_to create_newsletter_admin_inbox_path(params[:id], folder_id: @folder_id),
+            method: :post,
+            class: "btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium",
+            data: { turbo_confirm: "Create a newsletter draft from this email?" } do %>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            Newsletter
+          </span>
+        <% end %>
+
+        <%= button_to create_funding_admin_inbox_path(params[:id], folder_id: @folder_id),
+            method: :post,
+            class: "px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 font-medium",
+            data: { turbo_confirm: "Create a funding opportunity from this email?" } do %>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Funding
+          </span>
+        <% end %>
+
+        <%= button_to create_todo_admin_inbox_path(params[:id], folder_id: @folder_id),
+            method: :post,
+            class: "px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-100 font-medium",
+            data: { turbo_confirm: "Create a todo to follow up on this email?" } do %>
+          <span class="flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            Todo
+          </span>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .email-content img {
+    max-width: 100%;
+    height: auto;
+  }
+  .email-content a {
+    color: #9333ea;
+  }
+  .email-content blockquote {
+    border-left: 3px solid #e5e7eb;
+    padding-left: 1rem;
+    color: #6b7280;
+  }
+</style>

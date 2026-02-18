@@ -1,9 +1,11 @@
-<div class="max-w-2xl mx-auto px-4 py-8">
-  <h1 class="text-3xl font-bold mb-8">Create Your Profile</h1>
+<div class="max-w-4xl mx-auto px-4 sm:px-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-8">Create Your Profile</h1>
 
-  <div class="bg-blue-100 border border-blue-400 text-blue-800 px-4 py-3 rounded mb-6">
+  <div class="bg-purple-50 border-l-4 border-purple-400 text-purple-800 px-4 py-3 rounded-r-lg mb-6">
     Your profile lets other members find you and learn about your work.
   </div>
 
-  <%= render "form", profile: @profile %>
+  <div class="card p-6">
+    <%= render "form", profile: @profile %>
+  </div>
 </div>

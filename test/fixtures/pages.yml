@@ -1,0 +1,19 @@
+# Page fixtures
+
+about_page:
+  title: About NCF
+  slug: about
+  visibility: 1  # published
+  nav_location: 2  # footer
+
+draft_page:
+  title: Draft Page
+  slug: draft
+  visibility: 0  # draft
+  nav_location: 0  # none
+
+members_page:
+  title: Members Only Page
+  slug: members-only
+  visibility: 2  # members_only
+  nav_location: 0  # none

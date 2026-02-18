@@ -1,16 +1,25 @@
 class FundingOpportunitiesController < ApplicationController
   allow_unauthenticated_access only: [ :index, :show ]
-  before_action :require_editor, except: [ :index, :show ]
   before_action :set_funding_opportunity, only: [ :show, :edit, :update, :destroy ]
+  before_action :require_editable, only: [ :edit, :update, :destroy ]
 
   def index
-    @funding_opportunities = FundingOpportunity.upcoming
+    @funding_opportunities = if authenticated?
+      FundingOpportunity.approved_or_owned_by(Current.user).open.order(:deadline)
+    else
+      FundingOpportunity.upcoming
+    end
     if params[:category].present?
       @funding_opportunities = @funding_opportunities.by_category(params[:category])
     end
   end
 
   def show
+    resume_session
+    unless @funding_opportunity.approved? || @funding_opportunity.created_by == Current.user || current_user_can_edit?
+      redirect_to funding_opportunities_path, alert: "That opportunity is not available."
+      return
+    end
   end
 
   def new
@@ -19,8 +28,18 @@ class FundingOpportunitiesController < ApplicationController
 
   def create
     @funding_opportunity = FundingOpportunity.new(funding_opportunity_params)
+    @funding_opportunity.created_by = Current.user
+    @funding_opportunity.approved = Current.user.can_edit?
     if @funding_opportunity.save
-      redirect_to @funding_opportunity, notice: "Funding opportunity created."
+      unless @funding_opportunity.approved?
+        AdminMailer.new_funding_opportunity_pending_approval(@funding_opportunity).deliver_later
+      end
+      notice = if @funding_opportunity.approved?
+        "Funding opportunity created."
+      else
+        "Funding opportunity submitted for approval."
+      end
+      redirect_to @funding_opportunity, notice: notice
     else
       render :new, status: :unprocessable_entity
     end
@@ -50,5 +69,11 @@ class FundingOpportunitiesController < ApplicationController
 
   def funding_opportunity_params
     params.require(:funding_opportunity).permit(:title, :organization, :description, :deadline, :amount, :url, :categories)
+  end
+
+  def require_editable
+    unless @funding_opportunity.editable_by?(Current.user)
+      redirect_to funding_opportunities_path, alert: "You don't have permission to do that."
+    end
   end
 end

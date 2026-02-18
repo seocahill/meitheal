@@ -1,0 +1,39 @@
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <% unless @post.published? %>
+    <div class="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded mb-6">
+      <strong>Draft:</strong> This project is not yet published.
+    </div>
+  <% end %>
+
+  <article class="prose prose-lg max-w-none">
+    <h1 class="text-3xl font-bold mb-6"><%= @post.title %></h1>
+
+    <% if @post.featured_image.attached? %>
+      <%= image_tag @post.featured_image, alt: @post.title, class: "w-full mb-8 not-prose" %>
+    <% end %>
+
+    <p class="text-gray-500 text-sm">
+      <time datetime="<%= @post.published_at&.iso8601 %>">
+        <%= @post.published_at&.strftime("%B %d, %Y") %>
+      </time>
+    </p>
+
+    <div class="mt-6">
+      <%= @post.body %>
+    </div>
+  </article>
+
+  <% if @post.editable_by?(Current.user) %>
+    <div class="flex flex-wrap gap-4 mt-12 pt-8 border-t border-gray-200">
+      <%= link_to "Edit", edit_project_path(@post.slug), class: "px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm" %>
+      <% if @post.publishable_by?(Current.user) %>
+        <% if @post.published? %>
+          <%= button_to "Unpublish", unpublish_project_path(@post.slug), method: :patch, class: "px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm" %>
+        <% else %>
+          <%= button_to "Publish", publish_project_path(@post.slug), method: :patch, class: "px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm" %>
+        <% end %>
+      <% end %>
+      <%= button_to "Delete", project_path(@post.slug), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm" %>
+    </div>
+  <% end %>
+</div>
