@@ -434,7 +434,7 @@ namespace :import do
 
     # Import Gallery Member Avatars
     puts "\n=== Importing Gallery Member Avatars ==="
-    gallery_path = NCF_SOURCE_PATH.join("..", "data", "gallery.yml")
+    gallery_path = NCF_SOURCE_PATH.join("data", "gallery.yml")
     if File.exist?(gallery_path)
       gallery_data = YAML.load_file(gallery_path)
 
