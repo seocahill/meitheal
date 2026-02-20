@@ -30,60 +30,11 @@
       <%= form.label :starts_at, class: "form-label" %>
       <%= form.datetime_local_field :starts_at, class: "form-input" %>
     </div>
-
-    <div>
-      <%= form.label :doors_at, class: "form-label" %>
-      <%= form.datetime_local_field :doors_at, class: "form-input" %>
-    </div>
-
-    <div>
-      <%= form.label :ends_at, class: "form-label" %>
-      <%= form.datetime_local_field :ends_at, class: "form-input" %>
-    </div>
   </div>
 
   <div>
     <%= form.label :description, class: "form-label" %>
     <%= form.text_area :description, rows: 6, class: "form-input" %>
-  </div>
-
-  <div>
-    <%= form.label :bio, "Artist Bio", class: "form-label" %>
-    <%= form.text_area :bio, rows: 4, class: "form-input" %>
-  </div>
-
-  <div>
-    <%= form.label :links, "Links (one per line)", class: "form-label" %>
-    <%= form.text_area :links, rows: 3, class: "form-input" %>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div>
-      <%= form.label :ticket_price_cents, "Ticket Price (cents)", class: "form-label" %>
-      <%= form.number_field :ticket_price_cents, class: "form-input" %>
-    </div>
-
-    <div>
-      <%= form.label :capacity, class: "form-label" %>
-      <%= form.number_field :capacity, class: "form-input" %>
-    </div>
-
-    <div>
-      <%= form.label :ticket_url, "Ticket URL", class: "form-label" %>
-      <%= form.url_field :ticket_url, class: "form-input" %>
-    </div>
-  </div>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <%= form.label :venue_name, class: "form-label" %>
-      <%= form.text_field :venue_name, class: "form-input" %>
-    </div>
-
-    <div>
-      <%= form.label :venue_address, class: "form-label" %>
-      <%= form.text_area :venue_address, rows: 2, class: "form-input" %>
-    </div>
   </div>
 
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
