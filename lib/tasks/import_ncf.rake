@@ -270,7 +270,7 @@ namespace :import do
     require "yaml"
     require "open-uri"
 
-    NCF_SOURCE_PATH = Rails.root.join("..", "ncf", "source")
+    NCF_SOURCE_PATH = Rails.root.join("vendor", "old_site", "source")
     OLD_SITE_URL = "https://thencf.art"
 
     # Determine if we're in development and can access local files
