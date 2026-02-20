@@ -1,0 +1,39 @@
+---
+blog: events
+pageable: true
+---
+<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+  <div class="prose lg:prose-xl">
+    <h2>EVENTS</h2>
+    <% page_articles.each do |article| %>
+      <article class="mb-8">
+        <% if article.data.featured_image %>
+          <div class="mb-4">
+            <a href="<%= article.url %>">
+              <img src="/images/<%= article.data.featured_image %>" alt="<%= article.title %>" class="w-full h-64 object-cover rounded-lg">
+            </a>
+          </div>
+        <% end %>
+        <h3><a href="<%= article.url %>"><%= article.title %></a></h3>
+        <p class="text-gray-600 text-sm"><%= article.date.strftime('%B %d, %Y') %></p>
+        <a href="<%= article.url %>">Read more</a>
+      </article>
+    <% end %>
+
+    <% if paginate && num_pages > 1 %>
+      <div class="pagination flex justify-center space-x-4 mt-8">
+        <% if prev_page %>
+          <a href="<%= prev_page.url %>" class="text-indigo-600 hover:text-indigo-800">&laquo; Previous</a>
+        <% end %>
+        
+        <span class="text-gray-600">
+          Page <%= page_number %> of <%= num_pages %>
+        </span>
+
+        <% if next_page %>
+          <a href="<%= next_page.url %>" class="text-indigo-600 hover:text-indigo-800">Next &raquo;</a>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div> 

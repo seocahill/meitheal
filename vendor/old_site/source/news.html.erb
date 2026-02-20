@@ -1,0 +1,23 @@
+---
+blog: news
+pageable: true
+---
+<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+  <div class="prose lg:prose-xl">
+    <h2>NEWS</h2>
+    <% blog.articles.each do |article| %>
+      <article class="mb-8">
+        <% if article.data.featured_image %>
+          <div class="mb-4">
+            <a href="<%= article.url %>">
+              <img src="images/<%= article.data.featured_image %>" alt="<%= article.title %>" class="w-full h-64 object-cover rounded-lg">
+            </a>
+          </div>
+        <% end %>
+        <h3><a href="<%= article.url %>"><%= article.title %></a></h3>
+        <p class="text-gray-600 text-sm"><%= article.date.strftime('%B %d, %Y') %></p>
+        <a href="<%= article.url %>">Read more</a>
+      </article>
+    <% end %>
+  </div>
+</div>

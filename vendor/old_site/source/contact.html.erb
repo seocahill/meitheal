@@ -1,0 +1,31 @@
+<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+  <article class="prose lg:prose-xl">
+    <h2>Contact us</h2>
+    <p>Fill out the form below and we'll respond ASAP</p>
+    <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" data-netlify-recaptcha="true" action="/thanks.html">
+      <p class="hidden">
+        <label>
+          Don’t fill this out if you’re human: <input name="bot-field" />
+        </label>
+      </p>
+      <% field_set_tag(class: "form-group mb-6") do %>
+          <%= label_tag :email %>
+          <%= email_field_tag :email, class: "text-pink-500", required: true %>
+      <% end %>
+      <% field_set_tag(class: "form-group mb-6") do %>
+        <%= label_tag :query %>
+        <%= text_area_tag :query, class: "text-pink-500", require: true %>
+      <% end %>
+      <div data-netlify-recaptcha="true"></div>
+      <% field_set_tag(class: "form-group mb-6") do %>
+        <%= submit_tag "Submit", class: "inline-block px-6 py-2 border-2 border-purple-600 text-purple-600 font-medium text-xs leading-tight uppercase rounded hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0 transition duration-150 ease-in-out" %>
+      <% end %>
+    </form>
+    <p>Your email is used for return correspondence only. No other data is collected. This site has no cookies or third-party trackers.</p>
+  </article>
+</div>
+<div class="m-12 prose lg:prose-xl">
+  <h2>Location</h2>
+  <p>THENCF community art space is located at 5 Pearse Street, Upstairs, Old Albany Store, Ballina, Co. Mayo, F26 F9T7.</p>
+  <iframe class="w-full aspect-video" src="https://www.google.com/maps/embed?pb=!3m2!1sen!2sie!4v1746657031198!5m2!1sen!2sie!6m8!1m7!1sEexL5XWMu2DK1PQy0bwkdQ!2m2!1d54.11495901623964!2d-9.153041428766286!3f304.79776!4f0!5f0.7820865974627469" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> 
+</div>

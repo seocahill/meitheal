@@ -1,0 +1,15 @@
+---
+blog: projects
+---
+
+<div class="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:flex lg:items-center lg:justify-between lg:py-16 lg:px-8">
+  <div class="prose lg:prose-xl">
+    <h2>PROJECTS</h2>
+    <% blog.articles[0...5].each do |article| %>
+      <article>
+        <h3><a href="<%= article.url %>"><%= article.title %></a></h3>
+        <a href="<%= article.url %>">Read more</a>
+      </article>
+    <% end %>
+  </div>
+</div>

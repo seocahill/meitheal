@@ -1,12 +1,12 @@
 namespace :import do
   desc "Import content from old NCF Middleman site"
   task ncf: :environment do
-    require 'yaml'
-    require 'redcarpet'
+    require "yaml"
+    require "redcarpet"
 
     # Base URL for referencing old site images
     OLD_SITE_IMAGE_BASE = "https://thencf.art/images"
-    NCF_SOURCE_PATH = Rails.root.join("..", "ncf", "source")
+    NCF_SOURCE_PATH = Rails.root.join("vendor", "old_site", "source")
 
     # Custom renderer that prefixes image URLs with old site base
     class NCFRenderer < Redcarpet::Render::HTML
@@ -17,9 +17,9 @@ namespace :import do
 
       def image(link, title, alt_text)
         # Convert relative image paths to absolute URLs
-        unless link.start_with?('http://', 'https://', '//')
+        unless link.start_with?("http://", "https://", "//")
           # Remove leading slash and /images/ if present
-          clean_link = link.gsub(/^\//, '').gsub(/^images\//, '')
+          clean_link = link.gsub(/^\//, "").gsub(/^images\//, "")
           link = "#{@old_site_base}/#{clean_link}"
         end
 
@@ -31,9 +31,9 @@ namespace :import do
         # Check if the link is to an image file
         if link =~ /\.(jpg|jpeg|png|gif|webp)$/i
           # Convert link to image tag
-          unless link.start_with?('http://', 'https://', '//')
+          unless link.start_with?("http://", "https://", "//")
             # Remove leading slash and /images/ if present
-            clean_link = link.gsub(/^\//, '').gsub(/^images\//, '')
+            clean_link = link.gsub(/^\//, "").gsub(/^images\//, "")
             link = "#{@old_site_base}/#{clean_link}"
           end
           %(<img src="#{link}" alt="#{content}">)
@@ -66,7 +66,7 @@ namespace :import do
     def strip_images(html)
       return "" if html.blank?
       doc = Nokogiri::HTML.fragment(html)
-      doc.css('img').remove
+      doc.css("img").remove
       doc.to_html
     end
 
@@ -76,7 +76,7 @@ namespace :import do
 
       # Split frontmatter and body
       if content =~ /\A---\s*\n(.*?)\n---\s*\n(.*)\z/m
-        frontmatter = YAML.safe_load($1, permitted_classes: [Date, Time])
+        frontmatter = YAML.safe_load($1, permitted_classes: [ Date, Time ])
         body = $2
         { frontmatter: frontmatter, body: body }
       else
@@ -101,16 +101,16 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
         # Generate slug from filename
-        slug = File.basename(file, ".html.markdown").sub(/^\d{4}-\d{2}-\d{2}-/, '')
+        slug = File.basename(file, ".html.markdown").sub(/^\d{4}-\d{2}-\d{2}-/, "")
 
-        event = Event.find_or_initialize_by(title: fm['title'])
+        event = Event.find_or_initialize_by(title: fm["title"])
         event.assign_attributes(
           user: admin_user,
           description: strip_images(markdown_to_html(data[:body], markdown)),
-          starts_at: fm['date'] || Date.today,
+          starts_at: fm["date"] || Date.today,
           published: true
         )
 
@@ -132,19 +132,19 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
         # Generate slug from title
-        base_slug = fm['title'].parameterize
+        base_slug = fm["title"].parameterize
 
         post = Post.find_or_initialize_by(slug: base_slug)
         html_body = markdown_to_html(data[:body], markdown)
         post.assign_attributes(
           user: admin_user,
-          title: fm['title'],
+          title: fm["title"],
           body: html_body,
-          excerpt: html_body.gsub(/<[^>]*>/, '').truncate(200),
-          published_at: fm['date'] || Date.today,
+          excerpt: html_body.gsub(/<[^>]*>/, "").truncate(200),
+          published_at: fm["date"] || Date.today,
           post_type: :news
         )
 
@@ -166,18 +166,18 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
-        base_slug = fm['title'].parameterize
+        base_slug = fm["title"].parameterize
 
         post = Post.find_or_initialize_by(slug: base_slug)
         html_body = markdown_to_html(data[:body], markdown)
         post.assign_attributes(
           user: admin_user,
-          title: fm['title'],
+          title: fm["title"],
           body: html_body,
-          excerpt: html_body.gsub(/<[^>]*>/, '').truncate(200),
-          published_at: fm['date'] || Date.today,
+          excerpt: html_body.gsub(/<[^>]*>/, "").truncate(200),
+          published_at: fm["date"] || Date.today,
           post_type: :project
         )
 
@@ -199,12 +199,12 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
-        faq = Faq.find_or_initialize_by(question: fm['title'])
+        faq = Faq.find_or_initialize_by(question: fm["title"])
         faq.assign_attributes(
           answer: markdown_to_html(data[:body], markdown),
-          order: fm['order'] || 999,
+          order: fm["order"] || 999,
           active: true
         )
 
@@ -224,7 +224,7 @@ namespace :import do
     if File.exist?(gallery_path)
       gallery_data = YAML.load_file(gallery_path)
 
-      gallery_data['members']&.each do |member|
+      gallery_data["members"]&.each do |member|
         # Find or create user/profile for gallery member
         # This is a simplified version - you may want to adjust based on your needs
         email = "#{member['name'].parameterize}@imported.example"
@@ -238,9 +238,9 @@ namespace :import do
 
         profile = Profile.find_or_initialize_by(user: user)
         profile.assign_attributes(
-          name: member['name'],
-          bio: member['alt'],
-          website: member['link'],
+          name: member["name"],
+          bio: member["alt"],
+          website: member["link"],
           visible: true,
           public_gallery: true
         )
@@ -267,14 +267,14 @@ namespace :import do
 
   desc "Import images from old NCF site into Active Storage"
   task ncf_images: :environment do
-    require 'yaml'
-    require 'open-uri'
+    require "yaml"
+    require "open-uri"
 
     NCF_SOURCE_PATH = Rails.root.join("..", "ncf", "source")
     OLD_SITE_URL = "https://thencf.art"
 
     # Determine if we're in development and can access local files
-    use_local_files = Rails.env.development? && Dir.exist?(NCF_SOURCE_PATH.join("images"))
+    use_local_files = Dir.exist?(NCF_SOURCE_PATH.join("images"))
 
     puts "=== Importing Images ==="
     puts "Mode: #{use_local_files ? 'Local files' : 'Remote URLs'}"
@@ -284,7 +284,7 @@ namespace :import do
       return if image_path.blank?
 
       # Handle external URLs (already full URLs) - always download these
-      if image_path.to_s.start_with?('http://', 'https://')
+      if image_path.to_s.start_with?("http://", "https://")
         begin
           URI.open(image_path) do |image|
             record.public_send(attachment_name).attach(
@@ -302,7 +302,7 @@ namespace :import do
       end
 
       # Normalize image path (remove leading slash, /images/ prefix, etc)
-      clean_path = image_path.to_s.gsub(/^\//, '').gsub(/^images\//, '')
+      clean_path = image_path.to_s.gsub(/^\//, "").gsub(/^images\//, "")
 
       if use_local
         # Try to find the image locally
@@ -319,10 +319,10 @@ namespace :import do
             content_type: content_type_for(clean_path)
           )
           puts "  ✓ Attached local image: #{clean_path}"
-          return true
+          true
         rescue => e
           puts "  ✗ Failed to attach local image #{clean_path}: #{e.message}"
-          return false
+          false
         end
       else
         # Fetch from remote URL
@@ -336,10 +336,10 @@ namespace :import do
             )
           end
           puts "  ✓ Attached remote image: #{remote_url}"
-          return true
+          true
         rescue => e
           puts "  ✗ Failed to fetch remote image #{remote_url}: #{e.message}"
-          return false
+          false
         end
       end
     end
@@ -347,11 +347,11 @@ namespace :import do
     def content_type_for(filename)
       ext = File.extname(filename).downcase
       case ext
-      when '.jpg', '.jpeg' then 'image/jpeg'
-      when '.png' then 'image/png'
-      when '.gif' then 'image/gif'
-      when '.webp' then 'image/webp'
-      else 'application/octet-stream'
+      when ".jpg", ".jpeg" then "image/jpeg"
+      when ".png" then "image/png"
+      when ".gif" then "image/gif"
+      when ".webp" then "image/webp"
+      else "application/octet-stream"
       end
     end
 
@@ -359,7 +359,7 @@ namespace :import do
     def parse_markdown_file(file_path)
       content = File.read(file_path)
       if content =~ /\A---\s*\n(.*?)\n---\s*\n(.*)\z/m
-        frontmatter = YAML.safe_load($1, permitted_classes: [Date, Time])
+        frontmatter = YAML.safe_load($1, permitted_classes: [ Date, Time ])
         body = $2
         { frontmatter: frontmatter, body: body }
       else
@@ -375,9 +375,9 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
-        event = Event.find_by(title: fm['title'])
+        event = Event.find_by(title: fm["title"])
         next unless event
 
         # Skip if already has an image
@@ -387,7 +387,7 @@ namespace :import do
         end
 
         # Look for image in frontmatter
-        image_path = fm['featured_image'] || fm['image'] || fm['poster'] || fm['flyer']
+        image_path = fm["featured_image"] || fm["image"] || fm["poster"] || fm["flyer"]
         if image_path
           attach_image_from_source(
             event, :image, image_path,
@@ -407,9 +407,9 @@ namespace :import do
         data = parse_markdown_file(file)
         fm = data[:frontmatter]
 
-        next if fm['title'].blank?
+        next if fm["title"].blank?
 
-        base_slug = fm['title'].parameterize
+        base_slug = fm["title"].parameterize
         post = Post.find_by(slug: base_slug)
         next unless post
 
@@ -420,7 +420,7 @@ namespace :import do
         end
 
         # Look for image in frontmatter
-        image_path = fm['image'] || fm['featured_image']
+        image_path = fm["image"] || fm["featured_image"]
         if image_path
           attach_image_from_source(
             post, :featured_image, image_path,
@@ -438,7 +438,7 @@ namespace :import do
     if File.exist?(gallery_path)
       gallery_data = YAML.load_file(gallery_path)
 
-      gallery_data['members']&.each do |member|
+      gallery_data["members"]&.each do |member|
         email = "#{member['name'].parameterize}@imported.example"
         user = User.find_by(email_address: email)
         next unless user
@@ -453,7 +453,7 @@ namespace :import do
         end
 
         # Look for image in gallery data
-        image_path = member['image'] || member['avatar'] || member['photo']
+        image_path = member["image"] || member["avatar"] || member["photo"]
         if image_path
           attach_image_from_source(
             profile, :avatar, image_path,

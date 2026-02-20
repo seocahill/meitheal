@@ -1,0 +1,17 @@
+<section id="member-showcase" class="my-4 md:mx-4">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <% data.gallery.members.each_slice((data.gallery.members.length.to_f / 4).round).each do |column| %>
+      <div class="grid gap-4">
+        <% column.each do |member| %>
+          <div>
+            <a href="<%= member['link'] %>" target="_blank">
+              <img class="h-auto max-w-full rounded-lg"
+                   src="<%= member['image'] %>"
+                   alt="<%= member['alt'] %>">
+            </a>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</section>
