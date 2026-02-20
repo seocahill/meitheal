@@ -1,12 +1,12 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
-  has_many :events, dependent: :nullify
-  has_many :bookings, dependent: :nullify
+  has_many :events, dependent: :destroy
+  has_many :bookings, dependent: :destroy
   has_many :memberships, dependent: :destroy
   has_many :email_group_memberships, dependent: :destroy
   has_many :email_groups, through: :email_group_memberships
-  has_many :proposals, dependent: :destroy
+  has_many :proposals, dependent: :nullify
   has_many :posts, dependent: :nullify
   has_one :profile, dependent: :destroy
 
