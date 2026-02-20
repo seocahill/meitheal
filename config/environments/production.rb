@@ -67,10 +67,10 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :smtp
   config.action_mailer.smtp_settings = {
     # Will vary by region (e.g. "email-smtp.us-east-1.amazonaws.com")
-    address: "email-smtp.eu-west-1.amazonaws.com",
-    # Create an SMTP user: https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html
-    user_name: ENV["AWS_SMTP_USERNAME"],
-    password: ENV["AWS_SMTP_PASSWORD"],
+    address: Rails.application.credentials.dig(:email, :endpoint),
+    # Create an SMTP user:  https://docs.aws.amazon.com/ses/latest/dg/smtp-credentials.html
+    user_name: Rails.application.credentials.dig(:email, :username),
+    password: Rails.application.credentials.dig(:email, :password),
     # Encrypt via STARTTLS. See: https://docs.aws.amazon.com/ses/latest/dg/smtp-connect.html
     enable_starttls: true,
     port: 587,
