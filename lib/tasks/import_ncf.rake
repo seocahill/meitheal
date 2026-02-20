@@ -439,11 +439,7 @@ namespace :import do
       gallery_data = YAML.load_file(gallery_path)
 
       gallery_data["members"]&.each do |member|
-        email = "#{member['name'].parameterize}@imported.example"
-        user = User.find_by(email_address: email)
-        next unless user
-
-        profile = user.profile
+        profile = Profile.find_by(name: member["name"])
         next unless profile
 
         # Skip if already has an avatar
