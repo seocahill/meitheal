@@ -1,6 +1,7 @@
 <div class="max-w-6xl mx-auto px-4">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Funding Opportunities</h1>
+    <%= button_to "Refresh Opportunities", refresh_admin_funding_opportunities_path, method: :post, class: "px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium", data: { turbo_confirm: "This will search for new funding opportunities using AI. Continue?" } %>
   </div>
 
   <% if @funding_opportunities.any? %>

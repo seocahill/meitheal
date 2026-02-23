@@ -65,6 +65,9 @@ Rails.application.routes.draw do
       end
     end
     resources :funding_opportunities, only: [ :index ] do
+      collection do
+        post :refresh
+      end
       member do
         post :approve
       end
