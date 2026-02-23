@@ -13,6 +13,7 @@ class DashboardController < ApplicationController
     # Member's own activity (only load if they have any)
     @my_bookings = @user.bookings.upcoming.includes(:space).limit(3)
     @my_proposals = @user.proposals.includes(:funding_opportunity).order(updated_at: :desc).limit(3)
+    @my_draft_events = @user.events.draft.order(updated_at: :desc).limit(3)
 
     # Recent forum activity - approved topics only
     @recent_topics = Thredded::Topic
