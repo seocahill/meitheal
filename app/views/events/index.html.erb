@@ -22,6 +22,9 @@
 
           <h2 class="text-xl font-semibold mb-1">
             <%= link_to event.title, event, class: "underline hover:text-gray-600" %>
+            <% unless event.published? %>
+              <span class="ml-2 text-xs font-normal text-yellow-600 bg-yellow-100 px-2 py-1 rounded">Draft</span>
+            <% end %>
           </h2>
 
           <p class="text-gray-500 text-sm mb-2">

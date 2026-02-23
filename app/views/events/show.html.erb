@@ -22,9 +22,9 @@
       <% end %>
     </p>
 
-    <% if @event.description.present? %>
+    <% if @event.description.present? || @event.rich_description.present? %>
       <div class="mt-6">
-        <%= sanitize(@event.description) %>
+        <%= @event.rendered_description %>
       </div>
     <% end %>
 

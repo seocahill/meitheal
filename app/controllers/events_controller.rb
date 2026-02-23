@@ -7,7 +7,18 @@ class EventsController < ApplicationController
   before_action :require_publishable, only: [ :publish, :unpublish ]
 
   def index
-    @pagy, @events = pagy(Event.published.order(starts_at: :desc).with_attached_image, limit: 5)
+    scope = if authenticated?
+      # Show published events + user's own drafts + all drafts for editors
+      if Current.user.can_edit?
+        Event.all
+      else
+        Event.where(published: true).or(Event.where(user: Current.user))
+      end
+    else
+      Event.published
+    end
+
+    @pagy, @events = pagy(scope.order(starts_at: :desc).with_attached_image, limit: 5)
   end
 
   def show
@@ -69,7 +80,7 @@ class EventsController < ApplicationController
 
   def event_params
     params.require(:event).permit(
-      :title, :starts_at, :ends_at, :doors_at, :description, :bio,
+      :title, :starts_at, :ends_at, :doors_at, :description, :rich_description, :bio,
       :links, :ticket_price_cents, :ticket_url, :capacity,
       :venue_name, :venue_address, :published, :image
     )

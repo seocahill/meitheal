@@ -33,8 +33,8 @@
   </div>
 
   <div>
-    <%= form.label :description, class: "form-label" %>
-    <%= form.text_area :description, rows: 6, class: "form-input" %>
+    <%= form.label :rich_description, "Description", class: "form-label mb-2" %>
+    <%= form.rich_text_area :rich_description %>
   </div>
 
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
