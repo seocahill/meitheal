@@ -37,7 +37,7 @@ class RefreshFundingOpportunitiesJob < ApplicationJob
   end
 
   def chat
-    @chat ||= RubyLLM.chat(model: "mistral-large-latest")
+    @chat ||= RubyLLM.chat(model: "mistral-small-latest")
   end
 
   def prompt
