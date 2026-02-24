@@ -10,3 +10,6 @@ RubyLLM.configure do |config|
   # Use the new association-based acts_as API (recommended)
   config.use_new_acts_as = true
 end
+
+# Refresh model registry to pick up latest models
+RubyLLM.models.refresh!
