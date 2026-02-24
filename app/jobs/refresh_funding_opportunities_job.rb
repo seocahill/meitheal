@@ -36,13 +36,21 @@ class RefreshFundingOpportunitiesJob < ApplicationJob
     RubyLLM.config.mistral_api_key.present?
   end
 
+  def system_user
+    @system_user ||= User.find_by(role: "owner") || User.where.not(role: nil).first
+  end
+
   def chat
     @chat ||= Chat.create!(model_id: RubyLLM.config.default_model)
   end
 
   def prompt
     <<~PROMPT
-      You are a funding research assistant for an arts cooperative in Mayo, Ireland. Search your knowledge for current and upcoming funding opportunities from these sources:
+      You are a funding research assistant for an arts cooperative in Mayo, Ireland.
+
+      IMPORTANT: Today's date is #{Date.current.strftime('%B %d, %Y')} (#{Date.current.iso8601}).
+
+      Search your knowledge for current and upcoming funding opportunities from these sources:
 
       **Mayo Arts Service (Mayo County Council)**
       - Mayo Artist Bursary, Arts Act Grants, Tyrone Guthrie Bursary, Upstart Awards, Drama League of Ireland Summer School Bursary, Creative Mayo Grant Scheme, Per Cent for Art Scheme, Public Art Panel, Partnership Funding, Platform 31
@@ -63,14 +71,14 @@ class RefreshFundingOpportunitiesJob < ApplicationJob
       - organization: string (the funding body)
       - description: string (brief description of the grant)
       - amount: integer (funding amount in EUR, or null if variable/unspecified)
-      - deadline: string (ISO date format YYYY-MM-DD, or estimate if rolling deadline)
+      - deadline: string (ISO date format YYYY-MM-DD. CRITICAL: Must be in #{Date.current.year} or later - no past dates!)
       - categories: string (comma-separated: e.g., "visual arts,performance,community")
       - url: string (official website URL, or null if unavailable)
 
       Format your response as valid JSON only, no additional text:
       [{"title": "...", "organization": "...", ...}, ...]
 
-      Include at least 10-15 opportunities with realistic deadlines spread throughout the year. Focus on currently open or upcoming opportunities.
+      Include at least 10-15 opportunities with realistic future deadlines spread throughout #{Date.current.year}. All deadlines must be after #{Date.current.iso8601}.
     PROMPT
   end
 
@@ -119,6 +127,7 @@ class RefreshFundingOpportunitiesJob < ApplicationJob
         deadline: Date.parse(data["deadline"]),
         categories: data["categories"],
         url: data["url"],
+        created_by: system_user,
         approved: false
       )
       :created

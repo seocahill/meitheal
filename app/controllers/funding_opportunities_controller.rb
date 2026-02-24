@@ -5,13 +5,21 @@ class FundingOpportunitiesController < ApplicationController
 
   def index
     @funding_opportunities = if authenticated?
-      FundingOpportunity.approved_or_owned_by(Current.user).open.order(:deadline)
+      FundingOpportunity.approved_or_owned_by(Current.user)
     else
-      FundingOpportunity.upcoming
+      FundingOpportunity.approved
     end
+
     if params[:category].present?
       @funding_opportunities = @funding_opportunities.by_category(params[:category])
     end
+
+    # Order by: upcoming first (ordered by deadline), then expired (ordered by deadline desc)
+    @funding_opportunities = @funding_opportunities.order(
+      Arel.sql("CASE WHEN deadline >= '#{Date.current}' THEN 0 ELSE 1 END,
+                CASE WHEN deadline >= '#{Date.current}' THEN deadline ELSE NULL END ASC,
+                CASE WHEN deadline < '#{Date.current}' THEN deadline ELSE NULL END DESC")
+    )
   end
 
   def show
