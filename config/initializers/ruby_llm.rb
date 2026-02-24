@@ -5,7 +5,7 @@ RubyLLM.configure do |config|
   config.mistral_api_key = Rails.application.credentials.dig(:mistral_api_key) || ENV["MISTRAL_API_KEY"]
 
   # Default model for chat (e.g. newsletter composition)
-  config.default_model = "mistral-small-latest"
+  config.default_model = "mistral-small-2409"
 
   # Use the new association-based acts_as API (recommended)
   config.use_new_acts_as = true
