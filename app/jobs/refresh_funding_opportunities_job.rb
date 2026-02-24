@@ -37,7 +37,7 @@ class RefreshFundingOpportunitiesJob < ApplicationJob
   end
 
   def chat
-    @chat ||= RubyLLM.chat
+    @chat ||= RubyLLM.chat(model: RubyLLM.config.default_model)
   end
 
   def prompt
