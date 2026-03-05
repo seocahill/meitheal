@@ -35,7 +35,7 @@
         <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Confirm your password", class: "form-input" %>
       </div>
 
-      <%= recaptcha_v3(action: "registration") %>
+      <%= recaptcha_v3(action: "registration", turbo: true) %>
 
       <div class="pt-4">
         <%= form.submit "Create Account", class: "w-full btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer text-center" %>
