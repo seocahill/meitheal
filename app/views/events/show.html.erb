@@ -13,12 +13,12 @@
     <% end %>
 
     <p class="font-semibold text-gray-800">
-      <%= @event.starts_at.strftime("%A %B %d") %>
+      <%= @event.starts_at.strftime("%A %d %B") %>
       <% if @event.doors_at.present? %>
-        / Doors: <%= @event.doors_at.strftime("%-l.%M%P") %>
+        / Doors: <%= @event.doors_at.strftime("%-l:%M%P") %>
       <% end %>
       <% if @event.starts_at.present? %>
-        / Start: <%= @event.starts_at.strftime("%-l%P") %>
+        / Start: <%= @event.starts_at.strftime("%-l:%M%P") %>
       <% end %>
     </p>
 
