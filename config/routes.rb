@@ -115,6 +115,12 @@ Rails.application.routes.draw do
     end
   end
 
+  # General payments (SumUp)
+  resource :payment, controller: "payments", only: [ :new ] do
+    post :create_checkout
+    get :complete
+  end
+
   # Newsletters (editor-only)
   resources :newsletters do
     member do

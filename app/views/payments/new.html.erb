@@ -1,0 +1,70 @@
+<div class="max-w-lg mx-auto px-4 sm:px-6" data-controller="general-payment">
+  <h1 class="text-3xl font-bold text-gray-900 mb-2">Make a Payment</h1>
+  <p class="text-gray-600 mb-8">Pay for space hire, materials, or other cooperative expenses.</p>
+
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Details</h2>
+
+    <div class="space-y-4">
+      <div>
+        <label for="amount_euro" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+          <input type="number"
+                 id="amount_euro"
+                 min="1"
+                 step="0.01"
+                 placeholder="0.00"
+                 data-action="input->general-payment#updateTotal"
+                 data-general-payment-target="amountInput"
+                 class="form-input pl-8 w-full">
+        </div>
+        <p class="form-hint">Enter the amount in euros</p>
+      </div>
+
+      <div>
+        <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+        <input type="text"
+               id="description"
+               placeholder="e.g. Space hire for event, Materials, etc."
+               maxlength="200"
+               data-general-payment-target="descriptionInput"
+               class="form-input w-full">
+        <p class="form-hint">What is this payment for?</p>
+      </div>
+
+      <div class="pt-4 pb-2 border-t border-gray-200">
+        <div class="flex justify-between text-lg font-semibold">
+          <span>Total</span>
+          <span data-general-payment-target="totalDisplay">&euro;0.00</span>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="sumup-card"
+      data-general-payment-target="cardWidget">
+      <div class="text-center py-8 text-gray-500 hidden" data-general-payment-target="loading">
+        Loading payment form...
+      </div>
+    </div>
+
+    <div data-general-payment-target="error" class="hidden mt-4 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700"></div>
+
+    <button
+      type="button"
+      data-action="click->general-payment#initiatePayment"
+      data-general-payment-target="payButton"
+      class="mt-6 w-full btn-primary text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+      Pay &euro;<span data-general-payment-target="buttonTotal">0.00</span>
+    </button>
+
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      Payments are securely processed by SumUp.
+    </p>
+  </div>
+
+  <%= link_to "Cancel", my_profile_path, class: "block mt-6 text-center text-gray-600 hover:text-purple-600 transition-colors" %>
+</div>
+
+<script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script>
