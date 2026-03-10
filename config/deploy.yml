@@ -22,7 +22,7 @@ servers:
 #
 proxy:
   ssl: true
-  host: beta.thencf.art
+  host: thencf.art
 
 # Where you keep your container images.
 registry:
