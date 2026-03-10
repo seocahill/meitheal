@@ -1,0 +1,48 @@
+<%= form_with model: post, url: post.persisted? ? project_path(post.slug) : projects_path, class: "space-y-6" do |form| %>
+  <% if post.errors.any? %>
+    <div class="form-error">
+      <h2><%= pluralize(post.errors.count, "error") %> prohibited this project from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, class: "form-label" %>
+    <%= form.text_field :title, class: "form-input" %>
+  </div>
+
+  <div>
+    <%= form.label :slug, class: "form-label" %>
+    <%= form.text_field :slug, class: "form-input", placeholder: "e.g. community-garden" %>
+    <p class="form-hint">URL path for the project (lowercase letters, numbers, and hyphens only). Leave blank to auto-generate.</p>
+  </div>
+
+  <div>
+    <%= form.label :excerpt, class: "form-label" %>
+    <%= form.text_area :excerpt, class: "form-input", rows: 3, placeholder: "Brief description shown in project listings" %>
+  </div>
+
+  <div>
+    <%= form.label :body, "Content", class: "form-label mb-2" %>
+    <%= form.rich_text_area :body %>
+  </div>
+
+  <div>
+    <%= form.label :featured_image, class: "form-label" %>
+    <% if post.featured_image.attached? %>
+      <div class="mb-2">
+        <%= image_tag post.featured_image, class: "max-w-xs rounded" %>
+      </div>
+    <% end %>
+    <%= form.file_field :featured_image, class: "form-file" %>
+  </div>
+
+  <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
+    <%= link_to "Cancel", post.persisted? ? project_path(post.slug) : projects_path, class: "text-gray-600 hover:text-gray-900" %>
+    <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+  </div>
+<% end %>

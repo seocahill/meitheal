@@ -113,19 +113,10 @@ For complete methodology, see the systematic-debugging skill
 - When you notice something that should be fixed but is unrelated to your current task, document it in your journal rather than fixing it immediately
 
 ## Running rails commands
-- docker compose up if no containers running
-- `APP_DATABASE_PORT=5433 DATABASE_HOST=localhost bin/rails <cmd>
+- `bin/rails <cmd>
 
-## Accessing Staging data
-- ensure kube proxy is forwarding db to localhost 5432, ask if not
-- access via mcp
-
-## Accessing Staging data via rails console / runner with proxy
-- set -a && source .env.local.staging
-- DATABASE_HOST=localhost APP_DATABASE_PORT=5432 bin/rails console
-- NB NEVER MUTATE DATA, DO NOT RUN SPECS EVER!!!
+## Accessing Prod data
+- kamal console
 
 ## Running specs
-
-You can run specs in parallel to speed things up e.g. to run payroll pack spec
-`bundle exec parallel_test --type rspec packs/payrolling`
+- bin/rails test
