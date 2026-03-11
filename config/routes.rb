@@ -44,6 +44,9 @@ Rails.application.routes.draw do
       end
     end
     resources :memberships do
+      member do
+        post :mark_as_paid
+      end
       resources :payments, only: [ :create, :destroy ]
     end
     resources :pages do

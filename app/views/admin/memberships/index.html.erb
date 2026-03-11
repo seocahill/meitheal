@@ -76,7 +76,10 @@
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
               <%= link_to "View", admin_membership_path(membership), class: "text-pink-600 hover:text-pink-900 mr-4" %>
-              <%= link_to "Edit", edit_admin_membership_path(membership), class: "text-gray-600 hover:text-gray-900" %>
+              <%= link_to "Edit", edit_admin_membership_path(membership), class: "text-gray-600 hover:text-gray-900 mr-4" %>
+              <% unless membership.full? %>
+                <%= button_to "Mark Paid", mark_as_paid_admin_membership_path(membership), method: :post, class: "inline text-green-600 hover:text-green-900", form: { class: "inline" } %>
+              <% end %>
             </td>
           </tr>
         <% end %>

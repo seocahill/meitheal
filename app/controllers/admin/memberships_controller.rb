@@ -1,6 +1,6 @@
 class Admin::MembershipsController < ApplicationController
   before_action :require_owner
-  before_action :set_membership, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_membership, only: [ :show, :edit, :update, :destroy, :mark_as_paid ]
 
   PER_PAGE = 10
 
@@ -57,6 +57,11 @@ class Admin::MembershipsController < ApplicationController
   def destroy
     @membership.destroy
     redirect_to admin_memberships_path, notice: "Membership deleted."
+  end
+
+  def mark_as_paid
+    @membership.update!(membership_type: :full)
+    redirect_back fallback_location: admin_memberships_path, notice: "Membership marked as paid (full)."
   end
 
   private
