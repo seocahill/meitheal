@@ -19,7 +19,7 @@
     <%= stylesheet_link_tag "thredded", "data-turbo-track": "reload", preload: false %>
     <%= stylesheet_link_tag "theme", "data-turbo-track": "reload", preload: false %>
     <%= javascript_importmap_tags %>
-    <%= javascript_include_tag "thredded", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "thredded", "data-turbo-track": "reload", defer: true %>
   </head>
 
   <body class="bg-gray-50 min-h-screen">
