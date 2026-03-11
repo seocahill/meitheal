@@ -16,27 +16,29 @@
   </div>
 
   <!-- Admin: Pending Bookings Needing Approval -->
-  <% if @pending_bookings&.any? %>
-    <div class="mb-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
-      <h2 class="text-lg font-semibold text-amber-800 mb-3">Pending Bookings Needing Approval</h2>
-      <div class="space-y-2">
-        <% @pending_bookings.each do |booking| %>
-          <div class="flex justify-between items-center bg-white rounded p-3 border border-amber-200">
-            <div>
-              <span class="font-medium"><%= booking.title %></span>
-              <span class="text-sm text-gray-500 ml-2">
-                <%= booking.starts_at.strftime("%b %d, %l:%M %p") %> - <%= booking.space.name %>
-              </span>
-              <span class="text-sm text-gray-400 ml-2">by <%= booking.user.name %></span>
+  <% if authenticated? && current_user_can_manage? %>
+    <% if @pending_bookings&.any? %>
+      <div class="mb-8 bg-amber-50 border border-amber-200 rounded-lg p-4">
+        <h2 class="text-lg font-semibold text-amber-800 mb-3">Pending Bookings Needing Approval</h2>
+        <div class="space-y-2">
+          <% @pending_bookings.each do |booking| %>
+            <div class="flex justify-between items-center bg-white rounded p-3 border border-amber-200">
+              <div>
+                <span class="font-medium"><%= booking.title %></span>
+                <span class="text-sm text-gray-500 ml-2">
+                  <%= booking.starts_at.strftime("%b %d, %l:%M %p") %> - <%= booking.space.name %>
+                </span>
+                <span class="text-sm text-gray-400 ml-2">by <%= booking.user.name %></span>
+              </div>
+              <div class="flex gap-2">
+                <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700" %>
+                <%= button_to "Decline", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Decline this booking?" }, class: "px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700" %>
+              </div>
             </div>
-            <div class="flex gap-2">
-              <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700" %>
-              <%= button_to "Decline", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Decline this booking?" }, class: "px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700" %>
-            </div>
-          </div>
-        <% end %>
+          <% end %>
+        </div>
       </div>
-    </div>
+    <% end %>
   <% end %>
 
   <!-- Month Navigation -->
@@ -93,34 +95,35 @@
   </div>
 
   <!-- Upcoming Bookings List -->
-  <div class="mt-8">
-    <h2 class="text-2xl font-bold mb-4">Upcoming Bookings</h2>
-    <% upcoming = @bookings.select { |b| b.starts_at > Time.current && b.confirmed? }.first(5) %>
-    <% if upcoming.empty? %>
-      <p class="text-gray-600">No upcoming confirmed bookings this month.</p>
-    <% else %>
-      <div class="space-y-4">
-        <% upcoming.each do |booking| %>
-          <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-            <div>
-              <h3 class="font-semibold"><%= booking.title %></h3>
-              <p class="text-sm text-gray-600">
-                <%= booking.starts_at.strftime("%A, %B %d at %l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %>
-              </p>
-              <p class="text-sm text-gray-500"><%= booking.space.name %></p>
-            </div>
-            <% if current_user_can_edit? %>
-              <div class="flex gap-2">
-                <%= link_to "Edit", edit_booking_path(booking), class: "text-gray-600 hover:text-gray-800" %>
-                <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-800" %>
+  <% if authenticated? && current_user_can_edit? %>
+    <div class="mt-8">
+      <h2 class="text-2xl font-bold mb-4">Upcoming Bookings</h2>
+      <% upcoming = @bookings.select { |b| b.starts_at > Time.current && b.confirmed? }.first(5) %>
+      <% if upcoming.empty? %>
+        <p class="text-gray-600">No upcoming confirmed bookings this month.</p>
+      <% else %>
+        <div class="space-y-4">
+          <% upcoming.each do |booking| %>
+            <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
+              <div>
+                <h3 class="font-semibold"><%= booking.title %></h3>
+                <p class="text-sm text-gray-600">
+                  <%= booking.starts_at.strftime("%A, %B %d at %l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %>
+                </p>
+                <p class="text-sm text-gray-500"><%= booking.space.name %></p>
               </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    <% end %>
-  </div>
-
+              <% if current_user_can_edit? %>
+                <div class="flex gap-2">
+                  <%= link_to "Edit", edit_booking_path(booking), class: "text-gray-600 hover:text-gray-800" %>
+                  <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-800" %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
   <!-- Spaces List -->
   <% if @spaces.any? %>
     <div class="mt-8">

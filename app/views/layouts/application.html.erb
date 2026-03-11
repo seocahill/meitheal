@@ -35,7 +35,7 @@
               <!-- Authenticated navigation -->
               <div class="hidden lg:flex items-center gap-1">
                 <%= link_to "Dashboard", dashboard_path, class: "nav-link" %>
-
+                <%= link_to "Forum", thredded_path, class: "nav-link" %>
                 <!-- Explore dropdown -->
                 <div class="relative" data-controller="dropdown">
                   <button data-action="click->dropdown#toggle" class="nav-link">
@@ -60,7 +60,6 @@
                   <div data-dropdown-target="menu" class="dropdown-menu">
                     <%= link_to "Forum", thredded_path, class: "dropdown-item" %>
                     <%= link_to "Funding", funding_opportunities_path, class: "dropdown-item" %>
-                    <%= link_to "Calendar", calendar_path, class: "dropdown-item" %>
                     <%= link_to "Book Space", new_booking_path, class: "dropdown-item" %>
                     <%= link_to "Make a Payment", new_payment_path, class: "dropdown-item" %>
                   </div>
@@ -111,6 +110,7 @@
                 <%= link_to "News", posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
                 <%= link_to "Events", events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
                 <%= link_to "Gallery", artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to "Bookings", calendar_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
                 <%= link_to "Projects", projects_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               </div>
             <% end %>
