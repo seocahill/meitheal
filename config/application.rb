@@ -23,6 +23,8 @@ module Meitheal
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    # Allow iframes and video in the sanitize view helper
     config.action_view.sanitized_allowed_tags = Rails::HTML5::SafeListSanitizer.allowed_tags + [ "iframe", "video" ]
+    config.action_view.sanitized_allowed_attributes = Rails::HTML5::SafeListSanitizer.allowed_attributes + [ "allow", "allowfullscreen", "frameborder", "loading", "referrerpolicy" ]
   end
 end
