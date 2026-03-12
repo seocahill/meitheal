@@ -23,5 +23,6 @@ module Meitheal
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    config.action_view.sanitized_allowed_tags = Rails::HTML5::SafeListSanitizer.allowed_tags + [ "iframe", "video" ]
   end
 end
