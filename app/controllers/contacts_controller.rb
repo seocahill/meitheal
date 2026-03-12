@@ -9,6 +9,11 @@ class ContactsController < ApplicationController
     @email = params[:email]
     @message = params[:message]
 
+    if Rails.env.production? && !verify_recaptcha(action: "contact", minimum_score: 0.5)
+      flash.now[:alert] = "reCAPTCHA verification failed. Please try again."
+      return render :show, status: :unprocessable_entity
+    end
+
     if @email.blank? || @message.blank?
       flash.now[:alert] = "Please fill in both fields."
       return render :show, status: :unprocessable_entity

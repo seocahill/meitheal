@@ -15,6 +15,8 @@
         <%= form.text_area :message, required: true, rows: 6, placeholder: "How can we help?", value: @message, class: "form-input" %>
       </div>
 
+      <%= recaptcha_v3(action: "contact", turbo: true) %>
+
       <div>
         <%= form.submit "Send Message", class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
       </div>
