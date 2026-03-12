@@ -2,6 +2,8 @@ class Proposal < ApplicationRecord
   belongs_to :user
   belongs_to :funding_opportunity
 
+  has_many_attached :documents
+
   validates :title, presence: true
   validates :user_id, uniqueness: {
     scope: :funding_opportunity_id,

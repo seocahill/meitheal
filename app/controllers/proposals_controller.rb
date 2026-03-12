@@ -6,30 +6,43 @@ class ProposalsController < ApplicationController
   before_action :ensure_draft, only: [ :edit, :update ]
 
   def new
-    @proposal = @funding_opportunity.proposals.find_or_initialize_by(user: Current.user)
-    if @proposal.persisted? && !@proposal.draft?
-      redirect_to @funding_opportunity, alert: "You have already submitted a proposal."
+    if current_user_can_edit?
+      @proposal = @funding_opportunity.proposals.build
+      @users = User.where(approved: true).order(:email_address)
+    else
+      @proposal = @funding_opportunity.proposals.find_or_initialize_by(user: Current.user)
+      if @proposal.persisted? && !@proposal.draft?
+        redirect_to @funding_opportunity, alert: "You have already submitted a proposal."
+      end
     end
   end
 
   def create
-    @proposal = @funding_opportunity.proposals.find_or_initialize_by(user: Current.user)
-    @proposal.assign_attributes(proposal_params)
+    if current_user_can_edit?
+      @proposal = @funding_opportunity.proposals.build(proposal_params)
+      @proposal.user_id ||= Current.user.id
+    else
+      @proposal = @funding_opportunity.proposals.find_or_initialize_by(user: Current.user)
+      @proposal.assign_attributes(proposal_params)
+    end
 
     if @proposal.save
       redirect_to @funding_opportunity, notice: "Proposal saved as draft."
     else
+      @users = User.where(approved: true).order(:email_address) if current_user_can_edit?
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
+    @users = User.where(approved: true).order(:email_address) if current_user_can_edit?
   end
 
   def update
     if @proposal.update(proposal_params)
       redirect_to @funding_opportunity, notice: "Proposal updated."
     else
+      @users = User.where(approved: true).order(:email_address) if current_user_can_edit?
       render :edit, status: :unprocessable_entity
     end
   end
@@ -45,6 +58,7 @@ class ProposalsController < ApplicationController
       redirect_to @funding_opportunity, notice: "Proposal submitted successfully."
     else
       flash.now[:alert] = "Please fill in all required fields before submitting."
+      @users = User.where(approved: true).order(:email_address) if current_user_can_edit?
       render :edit, status: :unprocessable_entity
     end
   end
@@ -66,6 +80,7 @@ class ProposalsController < ApplicationController
   end
 
   def ensure_owner
+    return if current_user_can_edit?
     unless @proposal.user == Current.user
       redirect_to @funding_opportunity, alert: "Not authorized."
     end
@@ -78,6 +93,8 @@ class ProposalsController < ApplicationController
   end
 
   def proposal_params
-    params.require(:proposal).permit(:title, :description, :submission_deadline, :amount_requested, :organizer_fee)
+    permitted = [ :title, :description, :submission_deadline, :amount_requested, :organizer_fee, documents: [] ]
+    permitted << :user_id if current_user_can_edit?
+    params.require(:proposal).permit(permitted)
   end
 end

@@ -10,13 +10,39 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2">
+    <div class="lg:col-span-2 space-y-6">
       <div class="bg-white shadow rounded-lg p-6">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">Proposal Details</h2>
         <div class="prose max-w-none">
           <%= simple_format(@proposal.description) %>
         </div>
       </div>
+
+      <% if @proposal.documents.any? %>
+        <div class="bg-white shadow rounded-lg p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">Attachments</h2>
+          <div class="space-y-3">
+            <% @proposal.documents.each do |doc| %>
+              <% if doc.content_type.start_with?("image/") %>
+                <div>
+                  <%= link_to rails_blob_path(doc, disposition: "inline"), target: "_blank", class: "block" do %>
+                    <%= image_tag rails_blob_path(doc, disposition: "inline"), class: "max-w-sm rounded-lg border border-gray-200" %>
+                  <% end %>
+                  <p class="text-xs text-gray-500 mt-1"><%= doc.filename %> (<%= number_to_human_size(doc.byte_size) %>)</p>
+                </div>
+              <% else %>
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <svg class="w-8 h-8 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                  <div>
+                    <%= link_to doc.filename, rails_blob_path(doc, disposition: "inline"), target: "_blank", class: "text-purple-600 hover:text-purple-800 font-medium text-sm" %>
+                    <p class="text-xs text-gray-500"><%= doc.content_type %> &middot; <%= number_to_human_size(doc.byte_size) %></p>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
     </div>
 
     <div class="space-y-6">
