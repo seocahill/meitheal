@@ -31,11 +31,19 @@ class Admin::ProposalsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "owners can approve proposal" do
+  test "owners can approve submitted proposal" do
     sign_in_as @owner
     post approve_admin_proposal_path(@proposal)
     assert_redirected_to admin_proposals_path
     assert @proposal.reload.approved?
+  end
+
+  test "owners can approve draft proposal" do
+    sign_in_as @owner
+    draft = proposals(:draft)
+    post approve_admin_proposal_path(draft)
+    assert_redirected_to admin_proposals_path
+    assert draft.reload.approved?
   end
 
   test "owners can reject proposal with notes" do
@@ -46,5 +54,11 @@ class Admin::ProposalsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_proposals_path
     assert @proposal.reload.rejected?
     assert_equal "Budget concerns", @proposal.admin_notes
+  end
+
+  test "proposal show page displays applicant name" do
+    sign_in_as @owner
+    get admin_proposal_path(@proposal)
+    assert_select "dd", text: @proposal.user.name
   end
 end

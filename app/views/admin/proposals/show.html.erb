@@ -62,7 +62,7 @@
         <dl class="mt-4 space-y-2 text-sm">
           <div>
             <dt class="text-gray-500">Applicant</dt>
-            <dd class="font-medium"><%= @proposal.user.email_address %></dd>
+            <dd class="font-medium"><%= @proposal.user.name %></dd>
           </div>
           <% if @proposal.submitted_at %>
             <div>
@@ -103,7 +103,7 @@
         </dl>
       </div>
 
-      <% if @proposal.submitted? %>
+      <% unless @proposal.approved? || @proposal.rejected? %>
         <div class="bg-white shadow rounded-lg p-6">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">Review Actions</h3>
 

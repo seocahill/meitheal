@@ -71,6 +71,28 @@
       </div>
     <% end %>
 
+    <% if @approved_proposals&.any? %>
+      <div class="mt-6">
+        <h2 class="text-xl font-semibold mb-3">Approved Proposals</h2>
+        <div class="space-y-3">
+          <% @approved_proposals.each do |proposal| %>
+            <div class="p-4 bg-green-50 rounded-lg">
+              <div class="flex justify-between items-start">
+                <div>
+                  <h3 class="font-medium text-gray-900"><%= proposal.title %></h3>
+                  <p class="text-sm text-gray-600">by <%= proposal.user.name %></p>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">Approved</span>
+              </div>
+              <% if proposal.description.present? %>
+                <p class="mt-2 text-sm text-gray-700"><%= truncate(proposal.description, length: 200) %></p>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
     <% if authenticated? && !@funding_opportunity.closed? %>
       <% user_proposal = @funding_opportunity.proposals.find_by(user: Current.user) %>
       <div class="mt-6 p-4 bg-blue-50 rounded-lg">

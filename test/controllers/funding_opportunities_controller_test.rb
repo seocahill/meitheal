@@ -208,4 +208,23 @@ class FundingOpportunitiesControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to funding_opportunities_path
   end
+
+  # Approved proposals transparency
+  test "authenticated member can see approved proposals on show page" do
+    sign_in_as(@viewer)
+    expired = funding_opportunities(:expired_grant)
+    get funding_opportunity_path(expired)
+    assert_response :success
+    approved = proposals(:approved)
+    assert_includes response.body, approved.title
+    assert_includes response.body, approved.user.name
+  end
+
+  test "public cannot see approved proposals on show page" do
+    expired = funding_opportunities(:expired_grant)
+    get funding_opportunity_path(expired)
+    assert_response :success
+    approved = proposals(:approved)
+    assert_not_includes response.body, approved.title
+  end
 end

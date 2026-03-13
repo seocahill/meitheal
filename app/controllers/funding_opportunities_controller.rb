@@ -28,6 +28,10 @@ class FundingOpportunitiesController < ApplicationController
       redirect_to funding_opportunities_path, alert: "That opportunity is not available."
       return
     end
+
+    if authenticated?
+      @approved_proposals = @funding_opportunity.proposals.approved.includes(:user)
+    end
   end
 
   def new
