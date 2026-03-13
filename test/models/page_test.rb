@@ -130,6 +130,20 @@ class PageTest < ActiveSupport::TestCase
     assert_not_includes Page.visible_to(member), draft_page
   end
 
+  test "slug cannot clash with existing routes" do
+    # These slugs match real routes defined in config/routes.rb
+    %w[dashboard calendar events faq artists forum up].each do |reserved|
+      page = Page.new(title: "Test", slug: reserved, content: "Content")
+      assert_not page.valid?, "Expected slug '#{reserved}' to be invalid (clashes with route)"
+      assert_includes page.errors[:slug], "is reserved (clashes with an existing route)"
+    end
+  end
+
+  test "slug that does not clash with routes is valid" do
+    page = Page.new(title: "Test", slug: "perfectly-fine-slug", content: "Content")
+    assert page.valid?, page.errors.full_messages.join(", ")
+  end
+
   test "published? returns true for published visibility" do
     page = Page.new(visibility: :published)
     assert page.published?

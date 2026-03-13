@@ -10,6 +10,7 @@ class Page < ApplicationRecord
   validates :title, presence: true
   validates :slug, presence: true, uniqueness: true
   validates :slug, format: { with: /\A[a-z0-9-]+\z/, message: "only allows lowercase letters, numbers, and hyphens" }
+  validate :slug_does_not_clash_with_routes, if: -> { slug.present? && slug_changed? }
 
   # Nav location scopes
   scope :in_nav, -> { where(nav_location: :nav) }
@@ -28,5 +29,16 @@ class Page < ApplicationRecord
 
   def self.find_by_slug(slug)
     find_by!(slug: slug)
+  end
+
+  private
+
+  def slug_does_not_clash_with_routes
+    route = Rails.application.routes.recognize_path("/#{slug}", method: :get)
+    unless route[:controller] == "pages" && route[:action] == "show"
+      errors.add(:slug, "is reserved (clashes with an existing route)")
+    end
+  rescue ActionController::RoutingError
+    # No route matches at all — slug is safe to use
   end
 end

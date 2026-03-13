@@ -101,8 +101,8 @@ Rails.application.routes.draw do
     resources :transactions, only: [ :index ]
   end
 
-  # Static pages (must be near end to catch /:slug)
-  get "pages/:slug", to: "pages#show", as: :page
+  # Redirect old /pages/:slug URLs
+  get "pages/:slug", to: redirect("/%{slug}")
 
   # Member directory
   resources :profiles, only: [ :index, :show ]
@@ -165,6 +165,9 @@ Rails.application.routes.draw do
 
   # Forum
   mount Thredded::Engine => "/forum"
+
+  # Static pages (catch-all, must be last before root)
+  get ":slug", to: "pages#show", as: :page
 
   # Defines the root path route ("/")
   root "home#index"
