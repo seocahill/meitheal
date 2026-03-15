@@ -10,9 +10,6 @@ class PagesController < ApplicationController
   def find_page
     page = Page.find_by!(slug: params[:slug])
 
-    # Resume session to get current user (if any)
-    authenticated?
-
     # Visibility checks
     case page.visibility
     when "draft"

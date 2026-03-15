@@ -87,7 +87,6 @@ class EventsController < ApplicationController
   end
 
   def can_view_draft?(event)
-    # Must call authenticated? to ensure session is resumed for unauthenticated routes
     authenticated? && (event.user == Current.user || Current.user.can_edit?)
   end
 

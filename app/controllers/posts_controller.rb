@@ -74,7 +74,6 @@ class PostsController < ApplicationController
   end
 
   def can_view_draft?(post)
-    # Must call authenticated? to ensure session is resumed for unauthenticated routes
     authenticated? && (post.user == Current.user || Current.user.can_edit?)
   end
 
