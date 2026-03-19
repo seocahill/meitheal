@@ -1,6 +1,6 @@
-<h1>Daily Pending Approvals</h1>
+<h1>Daily Summary</h1>
 
-<p>The following items are awaiting your approval:</p>
+<p>The following items are awaiting your action:</p>
 
 <% if @pending_users.any? %>
   <h2>Users pending approval (<%= @pending_users.count %>)</h2>
@@ -30,4 +30,24 @@
     <% end %>
   </ul>
   <p><%= link_to "Review pending proposals", admin_proposals_url %></p>
+<% end %>
+
+<% if @pending_bookings.any? %>
+  <h2>Bookings awaiting confirmation (<%= @pending_bookings.count %>)</h2>
+  <ul>
+    <% @pending_bookings.each do |booking| %>
+      <li><strong><%= booking.title %></strong> — <%= booking.user.email_address %>, <%= booking.starts_at.strftime("%d %B %Y at %H:%M") %></li>
+    <% end %>
+  </ul>
+  <p><%= link_to "View calendar", calendar_url %></p>
+<% end %>
+
+<% if @draft_events.any? %>
+  <h2>Events awaiting publication (<%= @draft_events.count %>)</h2>
+  <ul>
+    <% @draft_events.each do |event| %>
+      <li><strong><%= event.title %></strong> — created by <%= event.user.email_address %>, starts <%= event.starts_at.strftime("%d %B %Y") %></li>
+    <% end %>
+  </ul>
+  <p><%= link_to "View events", events_url %></p>
 <% end %>

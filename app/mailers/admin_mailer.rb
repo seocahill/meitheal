@@ -28,12 +28,15 @@ class AdminMailer < ApplicationMailer
     @pending_users = User.where(approved: false)
     @pending_funding_opportunities = FundingOpportunity.pending_approval
     @pending_proposals = Proposal.pending_review
+    @pending_bookings = Booking.pending
+    @draft_events = Event.draft
 
-    return if @pending_users.none? && @pending_funding_opportunities.none? && @pending_proposals.none?
+    return if [ @pending_users, @pending_funding_opportunities, @pending_proposals,
+                @pending_bookings, @draft_events ].all?(&:none?)
 
     mail(
       to: admin_emails,
-      subject: "Daily summary: items pending your approval"
+      subject: "Daily summary: items awaiting your action"
     )
   end
 end

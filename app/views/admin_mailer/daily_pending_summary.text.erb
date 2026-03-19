@@ -1,7 +1,7 @@
-Daily Pending Approvals
-======================
+Daily Summary
+=============
 
-The following items are awaiting your approval:
+The following items are awaiting your action:
 
 <% if @pending_users.any? %>
 Users pending approval (<%= @pending_users.count %>)
@@ -28,5 +28,23 @@ Proposals pending review (<%= @pending_proposals.count %>)
 <% end %>
 
 Review pending proposals: <%= admin_proposals_url %>
+
+<% end %>
+<% if @pending_bookings.any? %>
+Bookings awaiting confirmation (<%= @pending_bookings.count %>)
+<% @pending_bookings.each do |booking| %>
+  - <%= booking.title %> — <%= booking.user.email_address %>, <%= booking.starts_at.strftime("%d %B %Y at %H:%M") %>
+<% end %>
+
+View calendar: <%= calendar_url %>
+
+<% end %>
+<% if @draft_events.any? %>
+Events awaiting publication (<%= @draft_events.count %>)
+<% @draft_events.each do |event| %>
+  - <%= event.title %> — created by <%= event.user.email_address %>, starts <%= event.starts_at.strftime("%d %B %Y") %>
+<% end %>
+
+View events: <%= events_url %>
 
 <% end %>
