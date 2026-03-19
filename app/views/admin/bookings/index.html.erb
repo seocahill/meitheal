@@ -68,14 +68,14 @@
                   <span class="text-xs text-gray-400">N/A</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
                 <div class="flex justify-end gap-2">
                   <% if booking.pending? %>
-                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-900 font-medium" %>
+                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-green-600 hover:bg-green-700 transition-colors" %>
                   <% end %>
-                  <%= button_to "Edit", edit_booking_path(booking), method: :get, class: "text-purple-600 hover:text-purple-900 font-medium" %>
+                  <%= button_to "Edit", edit_booking_path(booking), method: :get, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors" %>
                   <% unless booking.cancelled? %>
-                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-900 font-medium" %>
+                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-colors" %>
                   <% end %>
                 </div>
               </td>
