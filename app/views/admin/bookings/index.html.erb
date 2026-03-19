@@ -96,9 +96,7 @@
   </div>
 
   <!-- Pagination -->
-  <% if @pagy.pages > 1 %>
-    <div class="mt-6">
-      <%== pagy_nav(@pagy) %>
-    </div>
-  <% end %>
+  <nav class="mt-8 text-center text-sm">
+    <%== @pagy.series_nav %>
+  </nav>
 </div>
