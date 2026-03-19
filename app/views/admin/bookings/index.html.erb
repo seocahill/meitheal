@@ -73,8 +73,11 @@
                   <% if booking.pending? %>
                     <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-900" %>
                   <% end %>
-                  <% if booking.confirmed? && !booking.paid %>
-                    <%= button_to "Mark Paid", mark_as_paid_booking_path(booking), method: :patch, class: "text-blue-600 hover:text-blue-900" %>
+                  <% if booking.confirmed? %>
+                    <%= button_to booking.paid ? "Mark Unpaid" : "Mark Paid",
+                        toggle_paid_admin_booking_path(booking),
+                        method: :patch,
+                        class: booking.paid ? "text-amber-600 hover:text-amber-900" : "text-blue-600 hover:text-blue-900" %>
                   <% end %>
                   <%= link_to "Edit", edit_booking_path(booking), class: "text-purple-600 hover:text-purple-900" %>
                   <% unless booking.cancelled? %>

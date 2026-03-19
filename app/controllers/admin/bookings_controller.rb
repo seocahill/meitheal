@@ -1,6 +1,7 @@
 class Admin::BookingsController < ApplicationController
   include Pagy::Method
   before_action :require_editor
+  before_action :set_booking, only: [ :toggle_paid ]
 
   def index
     scope = Booking.includes(:user, :space).order(starts_at: :desc)
@@ -33,5 +34,17 @@ class Admin::BookingsController < ApplicationController
     end
 
     @pagy, @bookings = pagy(scope, items: 20)
+  end
+
+  def toggle_paid
+    @booking.update!(paid: !@booking.paid)
+    status_text = @booking.paid? ? "paid" : "unpaid"
+    redirect_to admin_bookings_path, notice: "Booking marked as #{status_text}"
+  end
+
+  private
+
+  def set_booking
+    @booking = Booking.find(params[:id])
   end
 end

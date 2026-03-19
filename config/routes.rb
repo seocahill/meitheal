@@ -32,7 +32,11 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
-    resources :bookings, only: [ :index ]
+    resources :bookings, only: [ :index ] do
+      member do
+        patch :toggle_paid
+      end
+    end
     resources :faqs do
       member do
         patch :move_up

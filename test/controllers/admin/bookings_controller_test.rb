@@ -63,4 +63,45 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "Unpaid Booking"
   end
+
+  test "editor can toggle booking from unpaid to paid" do
+    sign_in_as(@editor)
+    booking = Booking.create!(
+      space: @space, user: @viewer, title: "Test Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch toggle_paid_admin_booking_path(booking)
+    assert_redirected_to admin_bookings_path
+    assert booking.reload.paid?
+  end
+
+  test "editor can toggle booking from paid to unpaid" do
+    sign_in_as(@editor)
+    booking = Booking.create!(
+      space: @space, user: @viewer, title: "Test Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: true,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch toggle_paid_admin_booking_path(booking)
+    assert_redirected_to admin_bookings_path
+    assert_not booking.reload.paid?
+  end
+
+  test "viewer cannot toggle paid status" do
+    sign_in_as(@viewer)
+    booking = Booking.create!(
+      space: @space, user: @viewer, title: "Test Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch toggle_paid_admin_booking_path(booking)
+    assert_redirected_to root_path
+  end
 end
