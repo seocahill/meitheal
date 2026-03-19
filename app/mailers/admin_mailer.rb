@@ -20,4 +20,20 @@ class AdminMailer < ApplicationMailer
       subject: "Funding opportunity pending approval: #{funding_opportunity.title}"
     )
   end
+
+  def daily_pending_summary
+    admin_emails = User.where(role: :owner).pluck(:email_address)
+    return if admin_emails.empty?
+
+    @pending_users = User.where(approved: false)
+    @pending_funding_opportunities = FundingOpportunity.pending_approval
+    @pending_proposals = Proposal.pending_review
+
+    return if @pending_users.none? && @pending_funding_opportunities.none? && @pending_proposals.none?
+
+    mail(
+      to: admin_emails,
+      subject: "Daily summary: items pending your approval"
+    )
+  end
 end

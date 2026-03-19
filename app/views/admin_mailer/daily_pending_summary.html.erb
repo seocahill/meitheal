@@ -1,0 +1,33 @@
+<h1>Daily Pending Approvals</h1>
+
+<p>The following items are awaiting your approval:</p>
+
+<% if @pending_users.any? %>
+  <h2>Users pending approval (<%= @pending_users.count %>)</h2>
+  <ul>
+    <% @pending_users.each do |user| %>
+      <li><%= user.profile&.name || user.email_address %> — registered <%= user.created_at.strftime("%d %B %Y") %></li>
+    <% end %>
+  </ul>
+  <p><%= link_to "Review pending users", admin_users_url(approved: "pending") %></p>
+<% end %>
+
+<% if @pending_funding_opportunities.any? %>
+  <h2>Funding opportunities pending approval (<%= @pending_funding_opportunities.count %>)</h2>
+  <ul>
+    <% @pending_funding_opportunities.each do |opportunity| %>
+      <li><strong><%= opportunity.title %></strong> — <%= opportunity.organization %> (deadline: <%= opportunity.deadline.strftime("%d %B %Y") %>)</li>
+    <% end %>
+  </ul>
+  <p><%= link_to "Review pending funding opportunities", admin_funding_opportunities_url %></p>
+<% end %>
+
+<% if @pending_proposals.any? %>
+  <h2>Proposals pending review (<%= @pending_proposals.count %>)</h2>
+  <ul>
+    <% @pending_proposals.each do |proposal| %>
+      <li><strong><%= proposal.title %></strong> — submitted by <%= proposal.user.email_address %> on <%= proposal.submitted_at&.strftime("%d %B %Y") || "unknown date" %></li>
+    <% end %>
+  </ul>
+  <p><%= link_to "Review pending proposals", admin_proposals_url %></p>
+<% end %>

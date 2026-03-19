@@ -1,0 +1,32 @@
+Daily Pending Approvals
+======================
+
+The following items are awaiting your approval:
+
+<% if @pending_users.any? %>
+Users pending approval (<%= @pending_users.count %>)
+<% @pending_users.each do |user| %>
+  - <%= user.profile&.name || user.email_address %> — registered <%= user.created_at.strftime("%d %B %Y") %>
+<% end %>
+
+Review pending users: <%= admin_users_url(approved: "pending") %>
+
+<% end %>
+<% if @pending_funding_opportunities.any? %>
+Funding opportunities pending approval (<%= @pending_funding_opportunities.count %>)
+<% @pending_funding_opportunities.each do |opportunity| %>
+  - <%= opportunity.title %> — <%= opportunity.organization %> (deadline: <%= opportunity.deadline.strftime("%d %B %Y") %>)
+<% end %>
+
+Review pending funding opportunities: <%= admin_funding_opportunities_url %>
+
+<% end %>
+<% if @pending_proposals.any? %>
+Proposals pending review (<%= @pending_proposals.count %>)
+<% @pending_proposals.each do |proposal| %>
+  - <%= proposal.title %> — submitted by <%= proposal.user.email_address %> on <%= proposal.submitted_at&.strftime("%d %B %Y") || "unknown date" %>
+<% end %>
+
+Review pending proposals: <%= admin_proposals_url %>
+
+<% end %>
