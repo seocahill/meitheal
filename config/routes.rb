@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
+    resources :bookings, only: [ :index ]
     resources :faqs do
       member do
         patch :move_up

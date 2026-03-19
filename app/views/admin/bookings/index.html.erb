@@ -1,0 +1,104 @@
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Manage Bookings</h1>
+    <%= link_to "View Calendar", calendar_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="flex flex-wrap gap-2 mb-6">
+    <%= link_to "Upcoming", admin_bookings_path, class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status].blank? && params[:paid].blank? ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to "Pending Confirmation", admin_bookings_path(status: "pending"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'pending' ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to "Confirmed", admin_bookings_path(status: "confirmed"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'confirmed' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to "Unpaid", admin_bookings_path(paid: "unpaid"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:paid] == 'unpaid' ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to "Paid", admin_bookings_path(paid: "paid"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:paid] == 'paid' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to "Cancelled", admin_bookings_path(status: "cancelled"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'cancelled' ? 'bg-gray-200 text-gray-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+  </div>
+
+  <div class="bg-white shadow rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Space</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% if @bookings.any? %>
+          <% @bookings.each do |booking| %>
+            <tr>
+              <td class="px-6 py-4">
+                <div class="font-medium text-gray-900"><%= booking.title %></div>
+                <% if booking.description.present? %>
+                  <div class="text-sm text-gray-500"><%= truncate(booking.description, length: 50) %></div>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <%= booking.space.name %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <%= booking.user.email_address %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <div><%= booking.starts_at.strftime("%b %d, %Y") %></div>
+                <div class="text-xs text-gray-500"><%= booking.starts_at.strftime("%l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% case booking.status %>
+                <% when "pending" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pending</span>
+                <% when "confirmed" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Confirmed</span>
+                <% when "cancelled" %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cancelled</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <% if booking.confirmed? %>
+                  <% if booking.paid %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Paid</span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Unpaid</span>
+                  <% end %>
+                <% else %>
+                  <span class="text-xs text-gray-400">N/A</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex justify-end gap-2">
+                  <% if booking.pending? %>
+                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-900" %>
+                  <% end %>
+                  <% if booking.confirmed? && !booking.paid %>
+                    <%= button_to "Mark Paid", mark_as_paid_booking_path(booking), method: :patch, class: "text-blue-600 hover:text-blue-900" %>
+                  <% end %>
+                  <%= link_to "Edit", edit_booking_path(booking), class: "text-purple-600 hover:text-purple-900" %>
+                  <% unless booking.cancelled? %>
+                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-900" %>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+              No bookings found matching the selected filters.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <% if @pagy.pages > 1 %>
+    <div class="mt-6">
+      <%== pagy_nav(@pagy) %>
+    </div>
+  <% end %>
+</div>
