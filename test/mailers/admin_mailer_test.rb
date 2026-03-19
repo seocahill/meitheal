@@ -26,6 +26,13 @@ class AdminMailerTest < ActionMailer::TestCase
   test "daily_pending_summary includes all pending item types" do
     # Fixtures provide: pending funding opp, submitted proposal, pending booking, draft event
     User.create!(email_address: "unapproved@example.com", password: "password", approved: false)
+    # Create unpaid booking for the summary
+    Booking.create!(
+      space: spaces(:front_room), user: users(:viewer), title: "Unpaid Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
 
     email = AdminMailer.daily_pending_summary
     assert_equal [ users(:owner).email_address ], email.to
@@ -37,6 +44,7 @@ class AdminMailerTest < ActionMailer::TestCase
     assert_includes body, "Proposals pending review"
     assert_includes body, "Bookings awaiting confirmation"
     assert_includes body, "Events awaiting publication"
+    assert_includes body, "Bookings awaiting payment"
   end
 
   test "daily_pending_summary omits sections with zero pending items" do
@@ -44,6 +52,7 @@ class AdminMailerTest < ActionMailer::TestCase
     User.where(approved: false).update_all(approved: true)
     FundingOpportunity.pending_approval.update_all(approved: true)
     Booking.pending.update_all(status: :confirmed)
+    Booking.confirmed.update_all(paid: true) # Mark all confirmed as paid
     Event.draft.update_all(published: true)
 
     email = AdminMailer.daily_pending_summary
@@ -51,6 +60,7 @@ class AdminMailerTest < ActionMailer::TestCase
     assert_not_includes body, "Users pending approval"
     assert_not_includes body, "Funding opportunities pending approval"
     assert_not_includes body, "Bookings awaiting confirmation"
+    assert_not_includes body, "Bookings awaiting payment"
     assert_not_includes body, "Events awaiting publication"
     assert_includes body, "Proposals pending review"
   end
@@ -60,6 +70,7 @@ class AdminMailerTest < ActionMailer::TestCase
     FundingOpportunity.pending_approval.update_all(approved: true)
     Proposal.pending_review.update_all(status: :approved)
     Booking.pending.update_all(status: :confirmed)
+    Booking.confirmed.update_all(paid: true)
     Event.draft.update_all(published: true)
 
     email = AdminMailer.daily_pending_summary

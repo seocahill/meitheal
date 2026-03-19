@@ -48,3 +48,12 @@ Events awaiting publication (<%= @draft_events.count %>)
 View events: <%= events_url %>
 
 <% end %>
+<% if @unpaid_bookings.any? %>
+Bookings awaiting payment (<%= @unpaid_bookings.count %>)
+<% @unpaid_bookings.each do |booking| %>
+  - <%= booking.title %> — <%= booking.user.email_address %>, <%= booking.space.name %>, <%= booking.starts_at.strftime("%d %B %Y") %>
+<% end %>
+
+View calendar: <%= calendar_url %>
+
+<% end %>

@@ -1,8 +1,8 @@
 class BookingsController < ApplicationController
   allow_unauthenticated_access only: [ :calendar ]
-  before_action :set_booking, only: [ :edit, :update, :destroy, :confirm, :cancel ]
+  before_action :set_booking, only: [ :edit, :update, :destroy, :confirm, :cancel, :mark_as_paid ]
   before_action :require_editable, only: [ :edit, :update, :destroy ]
-  before_action :require_editor, only: [ :confirm ]
+  before_action :require_editor, only: [ :confirm, :mark_as_paid ]
   before_action :require_cancellable, only: [ :cancel ]
   before_action :require_active_membership, only: [ :new, :create ]
 
@@ -62,6 +62,11 @@ class BookingsController < ApplicationController
   def cancel
     @booking.cancelled!
     redirect_to calendar_path, notice: "Booking cancelled."
+  end
+
+  def mark_as_paid
+    @booking.update!(paid: true)
+    redirect_to calendar_path, notice: "Booking marked as paid"
   end
 
   private

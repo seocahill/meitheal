@@ -10,7 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_06_144457) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_19_222617) do
+  create_table "_litestream_lock", id: false, force: :cascade do |t|
+    t.integer "id"
+  end
+
+  create_table "_litestream_seq", id: :integer, default: nil, force: :cascade do |t|
+    t.integer "seq"
+  end
+
+  create_table "_litestream_verification", id: :integer, default: nil, force: :cascade do |t|
+    t.binary "uuid"
+  end
+
   create_table "action_mailbox_inbound_emails", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "message_checksum", null: false
@@ -91,6 +103,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_144457) do
     t.datetime "created_at", null: false
     t.text "description"
     t.datetime "ends_at", null: false
+    t.boolean "paid", default: false, null: false
     t.integer "space_id", null: false
     t.datetime "starts_at", null: false
     t.integer "status", default: 0, null: false

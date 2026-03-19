@@ -49,6 +49,7 @@ class IcalImportService
       space: @space,
       user: @user,
       status: :confirmed,
+      paid: true,
       agree_booking_rules: "1",
       agree_ethics: "1"
     )

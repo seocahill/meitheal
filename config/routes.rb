@@ -148,6 +148,7 @@ Rails.application.routes.draw do
     member do
       patch :confirm
       patch :cancel
+      patch :mark_as_paid
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

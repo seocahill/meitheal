@@ -30,9 +30,10 @@ class AdminMailer < ApplicationMailer
     @pending_proposals = Proposal.pending_review
     @pending_bookings = Booking.pending
     @draft_events = Event.draft
+    @unpaid_bookings = Booking.confirmed.unpaid.includes(:user, :space)
 
     return if [ @pending_users, @pending_funding_opportunities, @pending_proposals,
-                @pending_bookings, @draft_events ].all?(&:none?)
+                @pending_bookings, @draft_events, @unpaid_bookings ].all?(&:none?)
 
     mail(
       to: admin_emails,

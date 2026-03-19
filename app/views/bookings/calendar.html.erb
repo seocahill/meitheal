@@ -106,7 +106,14 @@
           <% upcoming.each do |booking| %>
             <div class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
               <div>
-                <h3 class="font-semibold"><%= booking.title %></h3>
+                <h3 class="font-semibold">
+                  <%= booking.title %>
+                  <% if booking.paid %>
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">Paid</span>
+                  <% else %>
+                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">Unpaid</span>
+                  <% end %>
+                </h3>
                 <p class="text-sm text-gray-600">
                   <%= booking.starts_at.strftime("%A, %B %d at %l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %>
                 </p>
@@ -114,6 +121,9 @@
               </div>
               <% if current_user_can_edit? %>
                 <div class="flex gap-2">
+                  <% unless booking.paid %>
+                    <%= button_to "Mark as Paid", mark_as_paid_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-800" %>
+                  <% end %>
                   <%= link_to "Edit", edit_booking_path(booking), class: "text-gray-600 hover:text-gray-800" %>
                   <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "text-red-600 hover:text-red-800" %>
                 </div>

@@ -153,7 +153,7 @@ class BookingTest < ActiveSupport::TestCase
     Booking.create!(
       space: front_room, user: @user, title: "Front Room Event",
       starts_at: 1.week.from_now, ends_at: 1.week.from_now + 2.hours,
-      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+      status: :confirmed, paid: true, agree_booking_rules: "1", agree_ethics: "1"
     )
 
     booking = Booking.new(
@@ -189,7 +189,7 @@ class BookingTest < ActiveSupport::TestCase
     Booking.create!(
       space: whole_building, user: @user, title: "Morning Event",
       starts_at: 1.week.from_now, ends_at: 1.week.from_now + 2.hours,
-      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+      status: :confirmed, paid: true, agree_booking_rules: "1", agree_ethics: "1"
     )
 
     booking = Booking.new(
@@ -198,5 +198,104 @@ class BookingTest < ActiveSupport::TestCase
       agree_booking_rules: "1", agree_ethics: "1"
     )
     assert booking.valid?
+  end
+
+  # Payment tracking tests
+
+  test "paid defaults to false on create" do
+    booking = Booking.create!(
+      space: @space, user: @user, title: "Test",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert_equal false, booking.paid
+  end
+
+  test "unpaid scope returns only unpaid non-cancelled bookings" do
+    user1 = User.create!(email_address: "user1@test.com", password: "password", approved: true)
+    user2 = User.create!(email_address: "user2@test.com", password: "password", approved: true)
+    user3 = User.create!(email_address: "user3@test.com", password: "password", approved: true)
+
+    paid_booking = Booking.create!(
+      space: @space, user: user1, title: "Paid",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      paid: true, status: :confirmed,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    unpaid_confirmed = Booking.create!(
+      space: @space, user: user2, title: "Unpaid Confirmed",
+      starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour,
+      paid: false, status: :confirmed,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    unpaid_cancelled = Booking.create!(
+      space: @space, user: user3, title: "Unpaid Cancelled",
+      starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour,
+      paid: false, status: :cancelled,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    unpaid = Booking.unpaid
+    assert_includes unpaid, unpaid_confirmed
+    assert_not_includes unpaid, paid_booking
+    assert_not_includes unpaid, unpaid_cancelled
+  end
+
+  test "validation blocks new booking when user has unpaid confirmed bookings" do
+    Booking.create!(
+      space: @space, user: @user, title: "Unpaid Booking",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      paid: false, status: :confirmed,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    new_booking = Booking.new(
+      space: @space, user: @user, title: "New Booking",
+      starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert_not new_booking.valid?
+    assert_includes new_booking.errors[:base], "You have unpaid bookings. Please settle outstanding payments before making a new booking."
+  end
+
+  test "validation allows new booking when user has no unpaid bookings" do
+    booking = Booking.new(
+      space: @space, user: @user, title: "New Booking",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert booking.valid?
+  end
+
+  test "validation allows new booking when unpaid bookings are cancelled" do
+    Booking.create!(
+      space: @space, user: @user, title: "Cancelled Unpaid",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      paid: false, status: :cancelled,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    new_booking = Booking.new(
+      space: @space, user: @user, title: "New Booking",
+      starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert new_booking.valid?
+  end
+
+  test "validation allows new booking when user has paid all bookings" do
+    Booking.create!(
+      space: @space, user: @user, title: "Paid Booking",
+      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
+      paid: true, status: :confirmed,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    new_booking = Booking.new(
+      space: @space, user: @user, title: "New Booking",
+      starts_at: 2.days.from_now, ends_at: 2.days.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert new_booking.valid?
   end
 end

@@ -154,4 +154,55 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_not_includes response.body, new_admin_calendar_import_path
   end
+
+  # Payment tracking tests
+
+  test "editor can mark booking as paid" do
+    sign_in_as(@editor)
+    unpaid_booking = Booking.create!(
+      space: @space, user: @viewer, title: "Unpaid Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch mark_as_paid_booking_path(unpaid_booking)
+    assert_redirected_to calendar_path
+    assert_equal "Booking marked as paid", flash[:notice]
+
+    unpaid_booking.reload
+    assert unpaid_booking.paid
+  end
+
+  test "viewer cannot mark booking as paid" do
+    sign_in_as(@viewer)
+    other_user = User.create!(email_address: "other@test.com", password: "password", approved: true)
+    unpaid_booking = Booking.create!(
+      space: @space, user: other_user, title: "Unpaid Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch mark_as_paid_booking_path(unpaid_booking)
+    assert_redirected_to root_path
+    assert_equal "You don't have permission to do that.", flash[:alert]
+
+    unpaid_booking.reload
+    assert_not unpaid_booking.paid
+  end
+
+  test "marking as paid persists the status" do
+    sign_in_as(@editor)
+    unpaid_booking = Booking.create!(
+      space: @space, user: @viewer, title: "Unpaid Booking",
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    patch mark_as_paid_booking_path(unpaid_booking)
+    unpaid_booking.reload
+    assert_equal true, unpaid_booking.paid
+  end
 end
