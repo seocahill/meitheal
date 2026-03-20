@@ -23,6 +23,18 @@
       </div>
 
       <div>
+        <label for="purpose" class="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
+        <select id="purpose"
+                data-general-payment-target="purposeInput"
+                class="form-input w-full">
+          <option value="">Select a purpose...</option>
+          <option value="booking">Booking</option>
+          <option value="donation">Donation</option>
+          <option value="other_purpose">Other</option>
+        </select>
+      </div>
+
+      <div>
         <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
         <input type="text"
                id="description"

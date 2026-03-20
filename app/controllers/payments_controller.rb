@@ -7,10 +7,15 @@ class PaymentsController < ApplicationController
 
   def create_checkout
     amount_cents = (params[:amount_euro].to_f * 100).to_i
+    purpose = params[:purpose].to_s
     description = params[:description].to_s.strip
 
     if amount_cents <= 0
       return render json: { error: "Amount must be greater than zero" }, status: :unprocessable_entity
+    end
+
+    unless Payment.purposes.key?(purpose)
+      return render json: { error: "Please select a purpose" }, status: :unprocessable_entity
     end
 
     if description.blank?
@@ -33,6 +38,7 @@ class PaymentsController < ApplicationController
         amount_cents: amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
+        purpose: purpose,
         sumup_checkout_id: checkout["id"],
         user_email: user.email_address,
         user_name: user.name,

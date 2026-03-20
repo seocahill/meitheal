@@ -50,6 +50,7 @@ class MembershipPaymentsController < ApplicationController
         amount_cents: total_amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
+        purpose: :membership,
         sumup_checkout_id: checkout["id"],
         user_email: user.email_address,
         user_name: user.name,

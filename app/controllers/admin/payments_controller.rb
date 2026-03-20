@@ -40,6 +40,6 @@ class Admin::PaymentsController < ApplicationController
   end
 
   def payment_params
-    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :description, :notes)
+    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :purpose, :description, :notes)
   end
 end

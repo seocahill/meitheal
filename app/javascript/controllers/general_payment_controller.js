@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["cardWidget", "loading", "error", "payButton", "amountInput", "descriptionInput", "totalDisplay", "buttonTotal"]
+  static targets = ["cardWidget", "loading", "error", "payButton", "amountInput", "purposeInput", "descriptionInput", "totalDisplay", "buttonTotal"]
 
   connect() {
     this.checkoutId = null
@@ -16,10 +16,16 @@ export default class extends Controller {
 
   async initiatePayment() {
     const amountEuro = parseFloat(this.amountInputTarget.value) || 0
+    const purpose = this.purposeInputTarget.value
     const description = this.descriptionInputTarget.value.trim()
 
     if (amountEuro <= 0) {
       this.showError("Please enter an amount greater than zero")
+      return
+    }
+
+    if (!purpose) {
+      this.showError("Please select a purpose for this payment")
       return
     }
 
@@ -40,6 +46,7 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           amount_euro: amountEuro,
+          purpose: purpose,
           description: description
         })
       })
