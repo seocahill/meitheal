@@ -44,13 +44,13 @@ class MembershipPaymentsController < ApplicationController
         return_url: complete_membership_payment_url(@membership)
       )
 
-      # Store pending payment with donation details
       notes = donation_cents > 0 ? "includes €#{donation_cents / 100.0} donation" : nil
       @payment = @membership.payments.create!(
         amount_cents: total_amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
         purpose: :membership,
+        status: :pending,
         sumup_checkout_id: checkout["id"],
         user_email: user.email_address,
         user_name: user.name,
@@ -81,15 +81,15 @@ class MembershipPaymentsController < ApplicationController
 
           if checkout["status"] == "PAID"
             payment.update!(
+              status: :completed,
               sumup_transaction_id: checkout["transaction_id"]
             )
 
-            # Extend membership
             extend_membership!
 
             redirect_to my_profile_path, notice: "Payment successful! Your membership has been renewed."
           else
-            payment.update!(notes: "Payment #{checkout['status']}")
+            payment.update!(status: :failed)
             redirect_to my_profile_path, alert: "Payment was not completed. Status: #{checkout['status']}"
           end
         rescue => e

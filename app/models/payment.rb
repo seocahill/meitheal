@@ -3,6 +3,7 @@ class Payment < ApplicationRecord
 
   enum :payment_method, { cash: 0, bank_transfer: 1, other: 2, sumup: 3 }
   enum :purpose, { membership: 0, booking: 1, donation: 2, other_purpose: 3 }
+  enum :status, { completed: 0, pending: 1, failed: 2 }
 
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :paid_on, presence: true

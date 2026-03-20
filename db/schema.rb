@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_120716) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_121331) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -293,12 +293,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_120716) do
     t.date "paid_on", null: false
     t.integer "payment_method", null: false
     t.integer "purpose"
+    t.integer "status", default: 0, null: false
     t.string "sumup_checkout_id"
     t.string "sumup_transaction_id"
     t.datetime "updated_at", null: false
     t.string "user_email", null: false
     t.string "user_name", null: false
     t.index ["membership_id"], name: "index_payments_on_membership_id"
+    t.index ["status"], name: "index_payments_on_status"
     t.index ["user_email"], name: "index_payments_on_user_email"
   end
 

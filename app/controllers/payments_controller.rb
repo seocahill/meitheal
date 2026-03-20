@@ -33,17 +33,16 @@ class PaymentsController < ApplicationController
         return_url: complete_payment_url
       )
 
-      # Store pending payment
       @payment = @membership.payments.create!(
         amount_cents: amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
         purpose: purpose,
+        status: :pending,
         sumup_checkout_id: checkout["id"],
         user_email: user.email_address,
         user_name: user.name,
-        description: description,
-        notes: "Pending - checkout created"
+        description: description
       )
 
       render json: { checkout_id: checkout["id"] }
@@ -68,13 +67,13 @@ class PaymentsController < ApplicationController
 
           if checkout["status"] == "PAID"
             payment.update!(
-              sumup_transaction_id: checkout["transaction_id"],
-              notes: "Payment completed"
+              status: :completed,
+              sumup_transaction_id: checkout["transaction_id"]
             )
 
             redirect_to my_profile_path, notice: "Payment successful! Thank you."
           else
-            payment.update!(notes: "Payment #{checkout['status']}")
+            payment.update!(status: :failed)
             redirect_to my_profile_path, alert: "Payment was not completed. Status: #{checkout['status']}"
           end
         rescue => e
