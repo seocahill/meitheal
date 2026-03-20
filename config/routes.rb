@@ -32,6 +32,7 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
+    resources :payments, only: [:index]
     resources :bookings, only: [ :index ] do
       member do
         patch :toggle_paid

@@ -7,6 +7,9 @@ recent_payment:
   payment_method: 3
   notes: Annual fee
   sumup_transaction_id: txn-001
+  user_email: "active@example.com"
+  user_name: "Active User"
+  description: "Annual membership fee"
 
 old_payment:
   membership: expired_membership
@@ -14,3 +17,6 @@ old_payment:
   paid_on: <%= 6.months.ago.to_date %>
   payment_method: 1
   notes: Concession fee paid by transfer
+  user_email: "expired@example.com"
+  user_name: "Expired User"
+  description: "Concession fee"

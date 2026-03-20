@@ -17,6 +17,7 @@ class PaymentsController < ApplicationController
       return render json: { error: "Description is required" }, status: :unprocessable_entity
     end
 
+    user = Current.user
     checkout_reference = "payment-#{@membership.id}-#{Time.current.to_i}"
 
     begin
@@ -33,7 +34,10 @@ class PaymentsController < ApplicationController
         paid_on: Date.current,
         payment_method: :sumup,
         sumup_checkout_id: checkout["id"],
-        notes: "Pending - #{description}"
+        user_email: user.email_address,
+        user_name: user.name,
+        description: description,
+        notes: "Pending - checkout created"
       )
 
       render json: { checkout_id: checkout["id"] }
@@ -57,11 +61,9 @@ class PaymentsController < ApplicationController
           checkout = SumupCheckoutService.new.get_checkout(checkout_id)
 
           if checkout["status"] == "PAID"
-            # Extract description from notes
-            description = payment.notes.sub("Pending - ", "")
             payment.update!(
               sumup_transaction_id: checkout["transaction_id"],
-              notes: "Completed - #{description}"
+              notes: "Payment completed"
             )
 
             redirect_to my_profile_path, notice: "Payment successful! Thank you."

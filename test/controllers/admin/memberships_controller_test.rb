@@ -137,7 +137,8 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
         payment: {
           amount_cents: 2000,
           paid_on: Date.current,
-          payment_method: "cash"
+          payment_method: "cash",
+          description: "Annual membership fee"
         }
       }
     end

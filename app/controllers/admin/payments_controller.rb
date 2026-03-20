@@ -1,9 +1,25 @@
 class Admin::PaymentsController < ApplicationController
+  include Pagy::Method
   before_action :require_owner
-  before_action :set_membership
+  before_action :set_membership, except: [:index]
+
+  def index
+    scope = Payment.includes(:membership).order(paid_on: :desc, created_at: :desc)
+
+    # Apply filters
+    scope = scope.by_payment_method(params[:payment_method])
+    scope = scope.by_date_range(params[:start_date], params[:end_date])
+    scope = scope.search(params[:search])
+
+    @pagy, @payments = pagy(scope, items: 20)
+  end
 
   def create
+    user = @membership.user
     @payment = @membership.payments.build(payment_params)
+    @payment.user_email = user.email_address
+    @payment.user_name = user.name
+
     if @payment.save
       redirect_to admin_membership_path(@membership), notice: "Payment recorded."
     else
@@ -24,6 +40,6 @@ class Admin::PaymentsController < ApplicationController
   end
 
   def payment_params
-    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :notes)
+    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :description, :notes)
   end
 end

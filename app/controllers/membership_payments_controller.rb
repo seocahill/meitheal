@@ -29,6 +29,7 @@ class MembershipPaymentsController < ApplicationController
 
     checkout_reference = "membership-#{@membership.id}-#{Time.current.to_i}"
 
+    user = Current.user
     description = if donation_cents > 0
       "NCF #{@membership.membership_type.humanize} Membership + €#{donation_cents / 100.0} Donation"
     else
@@ -44,12 +45,15 @@ class MembershipPaymentsController < ApplicationController
       )
 
       # Store pending payment with donation details
-      notes = donation_cents > 0 ? "Pending - includes €#{donation_cents / 100.0} donation" : "Pending - checkout created"
+      notes = donation_cents > 0 ? "includes €#{donation_cents / 100.0} donation" : nil
       @payment = @membership.payments.create!(
         amount_cents: total_amount_cents,
         paid_on: Date.current,
         payment_method: :sumup,
         sumup_checkout_id: checkout["id"],
+        user_email: user.email_address,
+        user_name: user.name,
+        description: description,
         notes: notes
       )
 
@@ -75,15 +79,8 @@ class MembershipPaymentsController < ApplicationController
           checkout = SumupCheckoutService.new.get_checkout(checkout_id)
 
           if checkout["status"] == "PAID"
-            # Preserve donation info in notes if present
-            completed_notes = if payment.notes&.include?("donation")
-              payment.notes.sub("Pending - ", "Completed - ")
-            else
-              "Payment completed"
-            end
             payment.update!(
-              sumup_transaction_id: checkout["transaction_id"],
-              notes: completed_notes
+              sumup_transaction_id: checkout["transaction_id"]
             )
 
             # Extend membership

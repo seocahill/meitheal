@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_19_222617) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_105826) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -287,6 +287,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_222617) do
   create_table "payments", force: :cascade do |t|
     t.integer "amount_cents", null: false
     t.datetime "created_at", null: false
+    t.text "description", null: false
     t.integer "membership_id", null: false
     t.text "notes"
     t.date "paid_on", null: false
@@ -294,7 +295,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_19_222617) do
     t.string "sumup_checkout_id"
     t.string "sumup_transaction_id"
     t.datetime "updated_at", null: false
+    t.string "user_email", null: false
+    t.string "user_name", null: false
     t.index ["membership_id"], name: "index_payments_on_membership_id"
+    t.index ["user_email"], name: "index_payments_on_user_email"
   end
 
   create_table "posts", force: :cascade do |t|
