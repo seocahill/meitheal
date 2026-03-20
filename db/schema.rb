@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_105826) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_120716) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -292,6 +292,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_105826) do
     t.text "notes"
     t.date "paid_on", null: false
     t.integer "payment_method", null: false
+    t.integer "purpose"
     t.string "sumup_checkout_id"
     t.string "sumup_transaction_id"
     t.datetime "updated_at", null: false
