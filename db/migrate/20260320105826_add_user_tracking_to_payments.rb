@@ -13,7 +13,7 @@ class AddUserTrackingToPayments < ActiveRecord::Migration[8.1]
 
           user = payment.membership.user
           # Extract description from notes, removing status prefixes
-          desc = payment.notes.to_s.gsub(/^(Pending|Completed) - /, '')
+          desc = payment.notes
           desc = 'Payment' if desc.blank?
 
           payment.update_columns(
