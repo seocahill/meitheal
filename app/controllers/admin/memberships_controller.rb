@@ -17,6 +17,10 @@ class Admin::MembershipsController < ApplicationController
     else scope
     end
 
+    if params[:type].present? && Membership.membership_types.key?(params[:type])
+      scope = scope.where(membership_type: params[:type])
+    end
+
     @page = [ (params[:page] || 1).to_i, 1 ].max
     offset = (@page - 1) * PER_PAGE
     @memberships = scope.offset(offset).limit(PER_PAGE)
