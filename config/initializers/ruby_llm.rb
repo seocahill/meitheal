@@ -12,4 +12,4 @@ RubyLLM.configure do |config|
 end
 
 # Refresh model registry to pick up latest models
-RubyLLM.models.refresh!
+RubyLLM.models.refresh! unless Rails.env.test?
