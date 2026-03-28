@@ -99,9 +99,9 @@ class BrevoService
     raise ApiError, parse_brevo_error(e)
   end
 
-  # List available contact lists
+  # List available contact lists (only requires API key)
   def lists
-    ensure_configured!
+    raise ConfigurationError, "Missing configuration: BREVO_API_KEY" if @api_key.blank?
 
     result = contacts_api.get_lists
     result.lists || []
