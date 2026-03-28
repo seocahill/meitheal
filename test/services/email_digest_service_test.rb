@@ -1,56 +1,44 @@
 require "test_helper"
 
 class EmailDigestServiceTest < ActiveSupport::TestCase
-  test "returns nil when Zoho is not configured" do
-    zoho = ZohoMailService.new
-    zoho.define_singleton_method(:configured?) { false }
-
-    service = EmailDigestService.new(zoho_service: zoho)
-    assert_nil service.generate
-  end
-
   test "returns nil when LLM is not configured" do
     original_mistral = RubyLLM.config.mistral_api_key
     RubyLLM.configure { |c| c.mistral_api_key = nil }
 
-    zoho = stub_zoho(folders: inbox_folders, emails: [])
-    service = EmailDigestService.new(zoho_service: zoho)
+    service = EmailDigestService.new
     assert_nil service.generate
   ensure
     RubyLLM.configure { |c| c.mistral_api_key = original_mistral }
   end
 
-  test "returns nil when no recent emails in inbox" do
-    zoho = stub_zoho(folders: inbox_folders, emails: [])
-    service = EmailDigestService.new(zoho_service: zoho)
+  test "returns nil when no recent emails" do
+    service = EmailDigestService.new
     assert_nil service.generate
   end
 
   test "returns digest when recent emails exist" do
-    emails = [
-      { "messageId" => "msg1", "fromAddress" => "alice@example.com", "subject" => "Grant deadline tomorrow", "summary" => "The arts council grant closes Friday", "receivedTime" => recent_timestamp },
-      { "messageId" => "msg2", "fromAddress" => "bob@example.com", "subject" => "Studio booking query", "summary" => "Can I book the front room next week?", "receivedTime" => recent_timestamp }
-    ]
+    create_cached_email(subject: "Grant deadline tomorrow", received_at: 2.hours.ago)
 
-    zoho = stub_zoho(folders: inbox_folders, emails: emails)
     fake_chat = stub_chat("Here is your email digest summary")
-    service = EmailDigestService.new(zoho_service: zoho, chat: fake_chat)
+    service = EmailDigestService.new(chat: fake_chat)
 
     result = service.generate
     assert_equal "Here is your email digest summary", result
   end
 
   test "builds prompt with sender, subject, and summary for each email" do
-    emails = [
-      { "messageId" => "msg1", "fromAddress" => "alice@example.com", "subject" => "Important matter", "summary" => "Please review this", "receivedTime" => recent_timestamp }
-    ]
+    create_cached_email(
+      from_address: "alice@example.com",
+      subject: "Important matter",
+      summary: "Please review this",
+      received_at: 1.hour.ago
+    )
 
-    zoho = stub_zoho(folders: inbox_folders, emails: emails)
     captured_prompt = nil
     fake_chat = Object.new
     fake_chat.define_singleton_method(:ask) { |prompt| captured_prompt = prompt; OpenStruct.new(content: "digest") }
 
-    service = EmailDigestService.new(zoho_service: zoho, chat: fake_chat)
+    service = EmailDigestService.new(chat: fake_chat)
     service.generate
 
     assert_includes captured_prompt, "alice@example.com"
@@ -58,97 +46,57 @@ class EmailDigestServiceTest < ActiveSupport::TestCase
     assert_includes captured_prompt, "Please review this"
   end
 
-  test "filters out emails older than 24 hours" do
-    emails = [
-      { "messageId" => "msg1", "fromAddress" => "alice@example.com", "subject" => "Recent", "summary" => "New email", "receivedTime" => recent_timestamp },
-      { "messageId" => "msg2", "fromAddress" => "bob@example.com", "subject" => "Old", "summary" => "Old email", "receivedTime" => old_timestamp }
-    ]
+  test "only includes emails from last 24 hours" do
+    create_cached_email(subject: "Recent", received_at: 2.hours.ago)
+    create_cached_email(zoho_message_id: "old_msg", subject: "Old", received_at: 48.hours.ago)
 
-    zoho = stub_zoho(folders: inbox_folders, emails: emails)
     captured_prompt = nil
     fake_chat = Object.new
     fake_chat.define_singleton_method(:ask) { |prompt| captured_prompt = prompt; OpenStruct.new(content: "digest") }
 
-    service = EmailDigestService.new(zoho_service: zoho, chat: fake_chat)
+    service = EmailDigestService.new(chat: fake_chat)
     service.generate
 
     assert_includes captured_prompt, "Recent"
     assert_not_includes captured_prompt, "Old"
   end
 
-  test "handles Zoho API errors gracefully" do
-    zoho = Object.new
-    zoho.define_singleton_method(:configured?) { true }
-    zoho.define_singleton_method(:folders) { raise ZohoMailService::ApiError, "Connection failed" }
+  test "excludes archived emails" do
+    create_cached_email(subject: "Active email", received_at: 1.hour.ago, status: :unread)
+    create_cached_email(zoho_message_id: "archived_msg", subject: "Archived email", received_at: 1.hour.ago, status: :archived)
 
-    service = EmailDigestService.new(zoho_service: zoho)
-    assert_nil service.generate
+    captured_prompt = nil
+    fake_chat = Object.new
+    fake_chat.define_singleton_method(:ask) { |prompt| captured_prompt = prompt; OpenStruct.new(content: "digest") }
+
+    service = EmailDigestService.new(chat: fake_chat)
+    service.generate
+
+    assert_includes captured_prompt, "Active email"
+    assert_not_includes captured_prompt, "Archived email"
   end
 
   test "handles LLM errors gracefully" do
-    emails = [
-      { "messageId" => "msg1", "fromAddress" => "alice@example.com", "subject" => "Test", "summary" => "Content", "receivedTime" => recent_timestamp }
-    ]
+    create_cached_email(received_at: 1.hour.ago)
 
-    zoho = stub_zoho(folders: inbox_folders, emails: emails)
     failing_chat = Object.new
     failing_chat.define_singleton_method(:ask) { |_| raise StandardError, "LLM unavailable" }
 
-    service = EmailDigestService.new(zoho_service: zoho, chat: failing_chat)
-    assert_nil service.generate
-  end
-
-  test "finds inbox folder from folder list" do
-    folders = [
-      { "folderId" => "111", "folderName" => "Sent" },
-      { "folderId" => "222", "folderName" => "Inbox" },
-      { "folderId" => "333", "folderName" => "Drafts" }
-    ]
-
-    zoho = stub_zoho(folders: folders, emails: [])
-    service = EmailDigestService.new(zoho_service: zoho)
-    service.generate
-
-    assert_equal "222", zoho.last_folder_id
-  end
-
-  test "returns nil when inbox folder not found" do
-    folders = [
-      { "folderId" => "111", "folderName" => "Sent" },
-      { "folderId" => "333", "folderName" => "Drafts" }
-    ]
-
-    zoho = stub_zoho(folders: folders, emails: [])
-    service = EmailDigestService.new(zoho_service: zoho)
+    service = EmailDigestService.new(chat: failing_chat)
     assert_nil service.generate
   end
 
   private
 
-  def inbox_folders
-    [{ "folderId" => "12345", "folderName" => "Inbox" }]
-  end
-
-  def recent_timestamp
-    # Zoho returns epoch milliseconds
-    (Time.current.to_i - 1.hour.to_i) * 1000
-  end
-
-  def old_timestamp
-    (Time.current.to_i - 48.hours.to_i) * 1000
-  end
-
-  def stub_zoho(folders:, emails:)
-    zoho = Object.new
-    zoho.define_singleton_method(:configured?) { true }
-    zoho.define_singleton_method(:folders) { folders }
-    zoho.instance_variable_set(:@_emails, emails)
-    zoho.define_singleton_method(:last_folder_id) { @_last_folder_id }
-    zoho.define_singleton_method(:emails) do |folder_id:, limit: 50|
-      @_last_folder_id = folder_id
-      @_emails
-    end
-    zoho
+  def create_cached_email(attrs = {})
+    CachedEmail.create!({
+      zoho_message_id: attrs.delete(:zoho_message_id) || "msg_#{SecureRandom.hex(4)}",
+      zoho_folder_id: "folder_inbox",
+      from_address: "sender@example.com",
+      subject: "Test Email",
+      summary: "Test summary",
+      received_at: 1.hour.ago
+    }.merge(attrs))
   end
 
   def stub_chat(response_text)

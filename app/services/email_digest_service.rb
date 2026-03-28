@@ -1,25 +1,15 @@
 class EmailDigestService
-  INBOX_FOLDER_NAME = "Inbox".freeze
-
-  def initialize(zoho_service: ZohoMailService.new, chat: nil)
-    @zoho = zoho_service
+  def initialize(chat: nil)
     @chat = chat
   end
 
   def generate
-    return nil unless @zoho.configured?
     return nil unless llm_configured?
 
-    inbox_id = find_inbox_folder_id
-    return nil unless inbox_id
+    emails = recent_emails
+    return nil if emails.empty?
 
-    recent = recent_emails(inbox_id)
-    return nil if recent.empty?
-
-    summarize(recent)
-  rescue ZohoMailService::ApiError => e
-    Rails.logger.error("Email digest Zoho error: #{e.message}")
-    nil
+    summarize(emails)
   rescue => e
     Rails.logger.error("Email digest error: #{e.message}")
     nil
@@ -33,15 +23,8 @@ class EmailDigestService
       RubyLLM.config.anthropic_api_key.present?
   end
 
-  def find_inbox_folder_id
-    folder = @zoho.folders.find { |f| f["folderName"] == INBOX_FOLDER_NAME }
-    folder&.dig("folderId")
-  end
-
-  def recent_emails(folder_id)
-    cutoff = 24.hours.ago
-    emails = @zoho.emails(folder_id: folder_id, limit: 50)
-    emails.select { |e| Time.at(e["receivedTime"].to_i / 1000) > cutoff }
+  def recent_emails
+    CachedEmail.visible.where("received_at >= ?", 24.hours.ago).order(received_at: :desc)
   end
 
   def summarize(emails)
@@ -56,9 +39,9 @@ class EmailDigestService
   def build_prompt(emails)
     email_list = emails.map.with_index(1) do |email, i|
       <<~EMAIL
-        #{i}. From: #{email["fromAddress"]}
-           Subject: #{email["subject"]}
-           Summary: #{email["summary"]}
+        #{i}. From: #{email.from_address}
+           Subject: #{email.subject}
+           Summary: #{email.summary}
       EMAIL
     end.join("\n")
 
