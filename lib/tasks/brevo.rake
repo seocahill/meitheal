@@ -14,13 +14,17 @@ namespace :brevo do
     skipped = 0
 
     campaigns.each do |campaign|
-      if Newsletter.exists?(brevo_campaign_id: campaign.id)
-        puts "  SKIP: #{campaign.subject} (already imported)"
+      # Campaign list items are Hashes with symbol keys from the Brevo API
+      campaign_id = campaign[:id]
+      campaign_subject = campaign[:subject]
+
+      if Newsletter.exists?(brevo_campaign_id: campaign_id)
+        puts "  SKIP: #{campaign_subject} (already imported)"
         skipped += 1
         next
       end
 
-      details = brevo.campaign_content(campaign.id)
+      details = brevo.campaign_content(campaign_id)
       sent_at = begin
         Time.parse(details.sent_date)
       rescue
@@ -29,16 +33,16 @@ namespace :brevo do
 
       Newsletter.create!(
         subject: details.subject,
-        content: details.html_content || "",
+        content: BrevoService.strip_email_wrapper(details.html_content),
         status: :sent,
         sent_at: sent_at,
-        brevo_campaign_id: campaign.id
+        brevo_campaign_id: campaign_id
       )
 
       puts "  OK: #{details.subject}"
       imported += 1
     rescue => e
-      puts "  ERROR: #{campaign.subject} - #{e.message}"
+      puts "  ERROR: #{campaign_subject || campaign} - #{e.message}"
     end
 
     puts "\nDone: #{imported} imported, #{skipped} skipped"

@@ -13,6 +13,31 @@ class BrevoService
     @api_key.present? && @sender_email.present? && @list_id.present?
   end
 
+  # Extract body content from a full HTML email document,
+  # removing DOCTYPE, head, styles, and unsubscribe footer.
+  def self.strip_email_wrapper(html)
+    return "" if html.blank?
+
+    # Only parse as full document if it looks like one
+    unless html.include?("<html") || html.include?("<!DOCTYPE")
+      return html.strip
+    end
+
+    doc = Nokogiri::HTML(html)
+    body = doc.at_css("body")
+    return html.strip unless body
+
+    # Remove unsubscribe links and their surrounding elements
+    body.css("a[href*='unsubscribe']").each do |link|
+      link.parent.remove if link.parent
+    end
+
+    # Remove trailing <hr> elements (typically separating footer)
+    body.css("hr").each(&:remove)
+
+    body.inner_html.strip
+  end
+
   # Create a campaign draft in Brevo
   def create_campaign(newsletter)
     ensure_configured!

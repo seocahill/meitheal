@@ -44,14 +44,76 @@ class BrevoServiceTest < ActiveSupport::TestCase
   end
 
   test "sent_campaigns returns campaigns from API" do
-    fake_campaign = OpenStruct.new(id: 42, subject: "Test", sent_date: "2026-01-15", html_content: "<p>Hi</p>")
+    # The real API returns campaign list items as Hashes with symbol keys
+    fake_campaign = { id: 42, subject: "Test", sentDate: "2026-01-15" }
     fake_response = OpenStruct.new(campaigns: [ fake_campaign ])
 
     with_stubbed_campaigns_api(get_email_campaigns: fake_response) do |service|
       result = service.sent_campaigns
       assert_equal 1, result.size
-      assert_equal 42, result.first.id
+      assert_equal 42, result.first[:id]
     end
+  end
+
+  test "strip_email_wrapper extracts body content from full HTML email" do
+    html = <<~HTML
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>body { font-family: sans-serif; }</style>
+      </head>
+      <body>
+        <h1>Hello World</h1>
+        <p>Newsletter content here.</p>
+      </body>
+      </html>
+    HTML
+
+    result = BrevoService.strip_email_wrapper(html)
+    assert_includes result, "<h1>Hello World</h1>"
+    assert_includes result, "<p>Newsletter content here.</p>"
+    refute_includes result, "<!DOCTYPE"
+    refute_includes result, "<html"
+    refute_includes result, "<head"
+    refute_includes result, "<style"
+    refute_includes result, "</html>"
+  end
+
+  test "strip_email_wrapper removes unsubscribe footer" do
+    html = <<~HTML
+      <!DOCTYPE html>
+      <html>
+      <body>
+        <p>Content</p>
+        <hr style="margin-top: 40px;">
+        <p style="font-size: 12px;">
+          You're receiving this because you're subscribed.<br>
+          <a href="{{ unsubscribe }}">Unsubscribe</a>
+        </p>
+      </body>
+      </html>
+    HTML
+
+    result = BrevoService.strip_email_wrapper(html)
+    assert_includes result, "<p>Content</p>"
+    refute_includes result, "unsubscribe"
+    refute_includes result, "You're receiving this"
+  end
+
+  test "strip_email_wrapper returns content as-is when no wrapper present" do
+    html = "<h2>Just a heading</h2><p>Some text</p>"
+    result = BrevoService.strip_email_wrapper(html)
+    assert_includes result, "<h2>Just a heading</h2>"
+    assert_includes result, "<p>Some text</p>"
+  end
+
+  test "strip_email_wrapper handles nil gracefully" do
+    assert_equal "", BrevoService.strip_email_wrapper(nil)
+  end
+
+  test "strip_email_wrapper handles empty string" do
+    assert_equal "", BrevoService.strip_email_wrapper("")
   end
 
   test "campaign_content returns single campaign details" do
