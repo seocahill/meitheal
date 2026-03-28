@@ -106,3 +106,5 @@ gem "mission_control-jobs", "~> 1.1"
 
 # iCal file parsing for calendar import [https://github.com/icalendar/icalendar]
 gem "icalendar"
+
+gem "webmock", "~> 3.26", group: :test

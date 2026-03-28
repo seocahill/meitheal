@@ -65,15 +65,33 @@ class AdminMailerTest < ActionMailer::TestCase
     assert_includes body, "Proposals pending review"
   end
 
-  test "daily_pending_summary is not sent when nothing needs action" do
-    User.where(approved: false).update_all(approved: true)
-    FundingOpportunity.pending_approval.update_all(approved: true)
-    Proposal.pending_review.update_all(status: :approved)
-    Booking.pending.update_all(status: :confirmed)
-    Booking.confirmed.update_all(paid: true)
-    Event.draft.update_all(published: true)
+  test "daily_pending_summary includes email digest section when provided" do
+    email = AdminMailer.daily_pending_summary(email_digest: "ACTION: Reply to grant inquiry from Arts Council")
 
-    email = AdminMailer.daily_pending_summary
+    body = email.body.encoded
+    assert_includes body, "Email digest"
+    assert_includes body, "Reply to grant inquiry from Arts Council"
+  end
+
+  test "daily_pending_summary sends when only email digest exists" do
+    clear_all_pending_items
+
+    email = AdminMailer.daily_pending_summary(email_digest: "You have new emails to review")
+
+    assert_equal [ users(:owner).email_address ], email.to
+    assert_includes email.body.encoded, "Email digest"
+  end
+
+  test "daily_pending_summary omits email digest section when nil" do
+    email = AdminMailer.daily_pending_summary(email_digest: nil)
+
+    assert_not_includes email.body.encoded, "Email digest"
+  end
+
+  test "daily_pending_summary is not sent when nothing needs action and no digest" do
+    clear_all_pending_items
+
+    email = AdminMailer.daily_pending_summary(email_digest: nil)
     assert_nil email.to
   end
 
@@ -82,5 +100,16 @@ class AdminMailerTest < ActionMailer::TestCase
 
     email = AdminMailer.daily_pending_summary
     assert_nil email.to
+  end
+
+  private
+
+  def clear_all_pending_items
+    User.where(approved: false).update_all(approved: true)
+    FundingOpportunity.pending_approval.update_all(approved: true)
+    Proposal.pending_review.update_all(status: :approved)
+    Booking.pending.update_all(status: :confirmed)
+    Booking.confirmed.update_all(paid: true)
+    Event.draft.update_all(published: true)
   end
 end

@@ -1,5 +1,10 @@
 <h1>Daily Summary</h1>
 
+<% if @email_digest.present? %>
+  <h2>Email digest</h2>
+  <%= simple_format(@email_digest) %>
+<% end %>
+
 <p>The following items are awaiting your action:</p>
 
 <% if @pending_users.any? %>
