@@ -1,18 +1,24 @@
 <div class="max-w-4xl mx-auto px-4">
-  <div class="mb-8">
-    <% if @newsletter.sent? %>
-      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-        Sent <%= @newsletter.sent_at.strftime("%B %d, %Y") %>
-      </span>
-    <% else %>
-      <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-        Draft
-      </span>
-    <% end %>
-  </div>
+  <% if current_user_can_edit? %>
+    <div class="mb-8">
+      <% if @newsletter.sent? %>
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+          Sent <%= @newsletter.sent_at.strftime("%B %d, %Y") %>
+        </span>
+      <% else %>
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+          Draft
+        </span>
+      <% end %>
+    </div>
+  <% end %>
 
   <article class="bg-white shadow rounded-lg p-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-6"><%= @newsletter.subject %></h1>
+
+    <% if @newsletter.sent? && !current_user_can_edit? %>
+      <p class="text-sm text-gray-500 mb-6"><%= @newsletter.sent_at.strftime("%B %d, %Y") %></p>
+    <% end %>
 
     <div class="prose prose-lg max-w-none">
       <%= @newsletter.content %>
@@ -20,9 +26,13 @@
   </article>
 
   <div class="mt-6 flex gap-4">
-    <%= link_to "Back to Newsletters", newsletters_path, class: "text-gray-600 hover:text-gray-800" %>
-    <% unless @newsletter.sent? %>
-      <%= link_to "Edit", edit_newsletter_path(@newsletter), class: "text-pink-600 hover:text-pink-800" %>
+    <% if current_user_can_edit? %>
+      <%= link_to "Back to Newsletters", newsletters_path, class: "text-gray-600 hover:text-gray-800" %>
+      <% unless @newsletter.sent? %>
+        <%= link_to "Edit", edit_newsletter_path(@newsletter), class: "text-pink-600 hover:text-pink-800" %>
+      <% end %>
+    <% else %>
+      <%= link_to "Back to Archive", newsletter_page_path, class: "text-gray-600 hover:text-gray-800" %>
     <% end %>
   </div>
 </div>

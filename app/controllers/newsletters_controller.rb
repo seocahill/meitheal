@@ -1,5 +1,6 @@
 class NewslettersController < ApplicationController
-  before_action :require_editor
+  before_action :require_editor, except: [ :show ]
+  allow_unauthenticated_access only: [ :show ]
   before_action :set_newsletter, only: [ :show, :edit, :update, :destroy, :compose_with_ai, :import_email, :export_to_brevo ]
 
   def index
@@ -7,6 +8,9 @@ class NewslettersController < ApplicationController
   end
 
   def show
+    unless @newsletter.sent? || current_user_can_edit?
+      redirect_to newsletter_page_path, alert: "Newsletter not found."
+    end
   end
 
   def new

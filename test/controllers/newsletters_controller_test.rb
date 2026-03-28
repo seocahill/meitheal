@@ -66,6 +66,31 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @newsletter.subject
   end
 
+  test "unauthenticated user can view sent newsletter" do
+    sent = newsletters(:sent_newsletter)
+    get newsletter_path(sent)
+    assert_response :success
+    assert_includes response.body, sent.subject
+  end
+
+  test "unauthenticated user cannot view draft newsletter" do
+    get newsletter_path(@newsletter)
+    assert_redirected_to newsletter_page_path
+  end
+
+  test "sent newsletter show has back link to archive" do
+    sent = newsletters(:sent_newsletter)
+    get newsletter_path(sent)
+    assert_includes response.body, "Back to Archive"
+  end
+
+  test "editor viewing sent newsletter sees edit management links" do
+    sent = newsletters(:sent_newsletter)
+    sign_in_as(@editor)
+    get newsletter_path(sent)
+    assert_includes response.body, "Back to Newsletters"
+  end
+
   test "editor can edit newsletter" do
     sign_in_as(@editor)
     get edit_newsletter_path(@newsletter)
