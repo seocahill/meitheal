@@ -1,8 +1,7 @@
 module InboxHelper
-  def format_zoho_time(timestamp_ms)
-    return "" unless timestamp_ms
+  def format_received_time(time)
+    return "" unless time
 
-    time = Time.at(timestamp_ms.to_i / 1000)
     if time.to_date == Date.current
       time.strftime("%l:%M %p").strip
     elsif time.to_date == Date.yesterday
@@ -12,6 +11,11 @@ module InboxHelper
     else
       time.strftime("%b %d")
     end
+  end
+
+  def format_zoho_time(timestamp_ms)
+    return "" unless timestamp_ms
+    format_received_time(Time.at(timestamp_ms.to_i / 1000))
   end
 
   def format_zoho_datetime(timestamp_ms)
