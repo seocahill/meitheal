@@ -1,2 +1,0 @@
-class EmailArchive < ApplicationRecord
-end

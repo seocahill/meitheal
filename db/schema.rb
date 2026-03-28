@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_121331) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_28_233427) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -116,20 +116,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_121331) do
     t.index ["user_id"], name: "index_bookings_on_user_id"
   end
 
+  create_table "cached_emails", force: :cascade do |t|
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "from_address", null: false
+    t.datetime "received_at", null: false
+    t.integer "status", default: 0, null: false
+    t.string "subject", null: false
+    t.text "summary"
+    t.datetime "updated_at", null: false
+    t.string "zoho_folder_id", null: false
+    t.string "zoho_message_id", null: false
+    t.index ["received_at"], name: "index_cached_emails_on_received_at"
+    t.index ["zoho_message_id"], name: "index_cached_emails_on_zoho_message_id", unique: true
+  end
+
   create_table "chats", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "model_id"
     t.datetime "updated_at", null: false
     t.index ["model_id"], name: "index_chats_on_model_id"
-  end
-
-  create_table "email_archives", force: :cascade do |t|
-    t.datetime "archived_at", default: -> { "CURRENT_TIMESTAMP" }
-    t.datetime "created_at", null: false
-    t.string "folder_id"
-    t.string "message_id", null: false
-    t.datetime "updated_at", null: false
-    t.index ["message_id"], name: "index_email_archives_on_message_id", unique: true
   end
 
   create_table "email_group_memberships", force: :cascade do |t|
