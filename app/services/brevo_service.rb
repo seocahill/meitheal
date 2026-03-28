@@ -61,6 +61,23 @@ class BrevoService
     raise ApiError, parse_brevo_error(e)
   end
 
+  # Add or update a contact in the configured list
+  def add_contact(email, name: nil)
+    ensure_configured!
+
+    contact = Brevo::CreateContact.new(
+      email: email,
+      listIds: [ @list_id ],
+      updateEnabled: true,
+      attributes: name.present? ? { "FIRSTNAME" => name } : {}
+    )
+
+    contacts_api.create_contact(contact)
+  rescue Brevo::ApiError => e
+    Rails.logger.error("Brevo API error adding contact: #{e.message}")
+    raise ApiError, parse_brevo_error(e)
+  end
+
   # List available contact lists
   def lists
     ensure_configured!
