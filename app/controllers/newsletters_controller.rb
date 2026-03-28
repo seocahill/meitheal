@@ -10,7 +10,7 @@ class NewslettersController < ApplicationController
   end
 
   def new
-    @newsletter = Newsletter.new
+    @newsletter = Newsletter.build_template
   end
 
   def create

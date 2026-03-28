@@ -39,6 +39,13 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new newsletter is pre-populated with template" do
+    sign_in_as(@editor)
+    get new_newsletter_path
+    assert_response :success
+    assert_includes response.body, "From the Editors"
+  end
+
   test "editor can create newsletter" do
     sign_in_as(@editor)
     assert_difference "Newsletter.count" do
