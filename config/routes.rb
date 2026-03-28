@@ -134,7 +134,6 @@ Rails.application.routes.draw do
   resources :newsletters do
     member do
       post :compose_with_ai
-      post :import_email
       post :export_to_brevo
     end
   end

@@ -1,15 +1,13 @@
-<div class="max-w-7xl mx-auto px-4 sm:px-6" data-controller="ai-compose">
+<div class="max-w-4xl mx-auto px-4 sm:px-6" data-controller="ai-compose">
   <h1 class="text-3xl font-bold text-gray-900 mb-8">Edit Newsletter</h1>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Main content area: editor + tools below -->
-    <div class="lg:col-span-2 space-y-6">
-      <div class="card p-6">
-        <%= render "form", newsletter: @newsletter %>
-      </div>
+  <div class="space-y-6">
+    <div class="card p-6">
+      <%= render "form", newsletter: @newsletter %>
+    </div>
 
-      <!-- AI Assistant and Export side by side on wide screens -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- AI Assistant and Export side by side on wide screens -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- AI Assistant -->
         <div class="card p-6">
           <h2 class="text-lg font-semibold text-gray-900 mb-4">AI Assistant</h2>
@@ -94,44 +92,5 @@
         </div>
       </div>
     </div>
-
-    <!-- Sidebar: Inbox emails only -->
-    <% if @inbox_emails.any? %>
-      <div class="lg:col-span-1">
-        <div class="card p-6 lg:sticky lg:top-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-2">Import from Inbox</h2>
-          <p class="text-sm text-gray-500 mb-4">Click Import to add email content to your newsletter using AI.</p>
-
-          <ul class="space-y-3 max-h-[calc(100vh-200px)] overflow-y-auto">
-            <% @inbox_emails.each do |email| %>
-              <li class="border-b border-gray-100 pb-3 last:border-0">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 truncate">
-                      <%= email["subject"] || "(No subject)" %>
-                    </p>
-                    <p class="text-xs text-gray-500 mt-1 truncate">
-                      <%= email["fromAddress"] || email["sender"] %>
-                    </p>
-                    <p class="text-xs text-gray-400 mt-0.5">
-                      <%= format_zoho_time(email["receivedTime"]) %>
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    data-action="click->ai-compose#importEmail"
-                    data-newsletter-id="<%= @newsletter.id %>"
-                    data-message-id="<%= email['messageId'] %>"
-                    data-folder-id="<%= @inbox_folder_id %>"
-                    class="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors disabled:opacity-50">
-                    Import
-                  </button>
-                </div>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </div>
-    <% end %>
   </div>
 </div>
