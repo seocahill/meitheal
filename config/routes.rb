@@ -173,6 +173,10 @@ Rails.application.routes.draw do
   # Forum
   mount Thredded::Engine => "/forum"
 
+  # Newsletter (public archive + signup)
+  get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
+  post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
+
   # Static pages (catch-all, must be last before root)
   get ":slug", to: "pages#show", as: :page
 

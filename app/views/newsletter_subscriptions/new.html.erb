@@ -1,0 +1,40 @@
+<div class="max-w-2xl mx-auto px-4 sm:px-6">
+  <h1 class="text-3xl font-bold text-gray-900 mb-2">Newsletter</h1>
+  <p class="text-gray-600 mb-8">Stay up to date with events, funding opportunities, and news from THENCF.</p>
+
+  <div class="card p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Subscribe</h2>
+
+    <%= form_with url: newsletter_subscribe_path, method: :post, class: "space-y-4" do |form| %>
+      <div>
+        <label class="form-label">Email address</label>
+        <%= form.email_field :email, value: @email, required: true, autofocus: true, placeholder: "Enter your email address", class: "form-input", autocomplete: "email" %>
+      </div>
+
+      <p class="text-xs text-gray-500">
+        By subscribing, you agree to receive newsletters from THENCF. You can unsubscribe at any time.
+      </p>
+
+      <%= recaptcha_v3(action: "newsletter_signup", turbo: true) if Rails.env.production? %>
+
+      <div>
+        <%= form.submit "Subscribe", class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @sent_newsletters.any? %>
+    <div class="card p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Past Issues</h2>
+
+      <ul class="space-y-3">
+        <% @sent_newsletters.each do |newsletter| %>
+          <li class="flex justify-between items-center">
+            <%= link_to newsletter.subject, newsletter_path(newsletter), class: "text-purple-600 hover:text-purple-700 font-medium" %>
+            <span class="text-sm text-gray-500"><%= newsletter.sent_at.strftime("%B %d, %Y") %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>
