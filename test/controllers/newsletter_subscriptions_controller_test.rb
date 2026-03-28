@@ -1,6 +1,17 @@
 require "test_helper"
 
 class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @original_brevo_new = BrevoService.method(:new)
+    stub_brevo = Object.new
+    stub_brevo.define_singleton_method(:configured?) { false }
+    BrevoService.define_singleton_method(:new) { stub_brevo }
+  end
+
+  teardown do
+    BrevoService.define_singleton_method(:new, @original_brevo_new)
+  end
+
   test "new shows signup form and archive" do
     get newsletter_page_path
     assert_response :success

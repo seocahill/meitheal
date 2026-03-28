@@ -6,6 +6,15 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
     @editor = users(:editor)
     @viewer = users(:viewer)
     @newsletter = newsletters(:monthly_update)
+
+    @original_zoho_new = ZohoMailService.method(:new)
+    stub_zoho = Object.new
+    stub_zoho.define_singleton_method(:configured?) { false }
+    ZohoMailService.define_singleton_method(:new) { stub_zoho }
+  end
+
+  teardown do
+    ZohoMailService.define_singleton_method(:new, @original_zoho_new)
   end
 
   # Access control
