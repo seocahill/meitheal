@@ -78,6 +78,27 @@ class BrevoService
     raise ApiError, parse_brevo_error(e)
   end
 
+  # List sent campaigns
+  def sent_campaigns(limit: 50)
+    ensure_configured!
+
+    result = campaigns_api.get_email_campaigns(status: "sent", limit: limit, sort: "desc")
+    result.campaigns || []
+  rescue Brevo::ApiError => e
+    Rails.logger.error("Brevo API error: #{e.message}")
+    raise ApiError, parse_brevo_error(e)
+  end
+
+  # Get a single campaign's full details
+  def campaign_content(campaign_id)
+    ensure_configured!
+
+    campaigns_api.get_email_campaign(campaign_id)
+  rescue Brevo::ApiError => e
+    Rails.logger.error("Brevo API error: #{e.message}")
+    raise ApiError, parse_brevo_error(e)
+  end
+
   # List available contact lists
   def lists
     ensure_configured!
