@@ -55,6 +55,66 @@ class NewsletterTest < ActiveSupport::TestCase
     assert newsletter.content.present?
   end
 
+  test "build_template returns unsaved newsletter with default subject" do
+    newsletter = Newsletter.build_template
+    assert newsletter.new_record?
+    assert_equal "#{Date.current.strftime('%B %Y')} Newsletter", newsletter.subject
+  end
+
+  test "build_template includes editorial placeholder" do
+    newsletter = Newsletter.build_template
+    assert_includes newsletter.content.to_s, "From the Editors"
+  end
+
+  test "build_template includes upcoming published events" do
+    event = events(:published_event)
+    newsletter = Newsletter.build_template
+    assert_includes newsletter.content.to_s, "Upcoming Events"
+    assert_includes newsletter.content.to_s, event.title
+  end
+
+  test "build_template excludes draft events" do
+    draft = events(:draft_event)
+    newsletter = Newsletter.build_template
+    refute_includes newsletter.content.to_s, draft.title
+  end
+
+  test "build_template includes approved open funding opportunities" do
+    grant = funding_opportunities(:arts_council_grant)
+    newsletter = Newsletter.build_template
+    assert_includes newsletter.content.to_s, "Funding Opportunities"
+    assert_includes newsletter.content.to_s, grant.title
+  end
+
+  test "build_template excludes expired funding opportunities" do
+    expired = funding_opportunities(:expired_grant)
+    newsletter = Newsletter.build_template
+    refute_includes newsletter.content.to_s, expired.title
+  end
+
+  test "build_template excludes pending funding opportunities" do
+    pending_grant = funding_opportunities(:pending_grant)
+    newsletter = Newsletter.build_template
+    refute_includes newsletter.content.to_s, pending_grant.title
+  end
+
+  test "build_template includes news placeholder" do
+    newsletter = Newsletter.build_template
+    assert_includes newsletter.content.to_s, "News"
+  end
+
+  test "build_template omits events section when none upcoming" do
+    Event.where(published: true).update_all(starts_at: 1.day.ago)
+    newsletter = Newsletter.build_template
+    refute_includes newsletter.content.to_s, "Upcoming Events"
+  end
+
+  test "build_template omits funding section when none open" do
+    FundingOpportunity.update_all(deadline: 1.day.ago)
+    newsletter = Newsletter.build_template
+    refute_includes newsletter.content.to_s, "Funding Opportunities"
+  end
+
   test "belongs to optional chat for LLM assistance" do
     newsletter = Newsletter.create!(subject: "Test", content: "Content")
     assert_nil newsletter.chat
