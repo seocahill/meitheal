@@ -43,7 +43,7 @@ class Newsletter < ApplicationRecord
       sections << "<h2>Funding Opportunities</h2>\n<ul>\n#{items.join("\n")}\n</ul>"
     end
 
-    sections << "<h2>News</h2>\n<p>[Import news items using the sidebar, or add content here]</p>"
+    sections << "<h2>News</h2>\n<p>[Generating news section...]</p>"
 
     sections.join("\n\n")
   end

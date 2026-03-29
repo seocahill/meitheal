@@ -20,6 +20,7 @@ class NewslettersController < ApplicationController
   def create
     @newsletter = Newsletter.new(newsletter_params)
     if @newsletter.save
+      GenerateNewsletterContentJob.perform_later(@newsletter)
       redirect_to edit_newsletter_path(@newsletter), notice: "Newsletter created. Start composing!"
     else
       render :new, status: :unprocessable_entity

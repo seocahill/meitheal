@@ -59,6 +59,18 @@ class NewslettersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_newsletter_path(Newsletter.last)
   end
 
+  test "creating newsletter enqueues content generation job" do
+    sign_in_as(@editor)
+    assert_enqueued_with(job: GenerateNewsletterContentJob) do
+      post newsletters_path, params: {
+        newsletter: {
+          subject: "New Newsletter",
+          content: "<h2>News</h2>\n<p>[Generating news section...]</p>"
+        }
+      }
+    end
+  end
+
   test "show displays newsletter" do
     sign_in_as(@editor)
     get newsletter_path(@newsletter)
