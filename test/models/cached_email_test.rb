@@ -134,6 +134,23 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert_equal newest, results.first
   end
 
+  test "can have attachments via Active Storage" do
+    email = CachedEmail.create!(
+      zoho_message_id: "msg_attach",
+      zoho_folder_id: "folder_456",
+      from_address: "sender@example.com",
+      subject: "With attachments",
+      received_at: 1.hour.ago
+    )
+    email.attachments.attach(
+      io: StringIO.new("file content"),
+      filename: "test.pdf",
+      content_type: "application/pdf"
+    )
+    assert_equal 1, email.attachments.count
+    assert_equal "test.pdf", email.attachments.first.filename.to_s
+  end
+
   test "visible scope excludes archived emails" do
     visible = CachedEmail.create!(
       zoho_message_id: "msg_visible",

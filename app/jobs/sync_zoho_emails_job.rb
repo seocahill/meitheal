@@ -30,7 +30,7 @@ class SyncZohoEmailsJob < ApplicationJob
 
     body = fetch_body(folder_id, message_id)
 
-    CachedEmail.create!(
+    cached = CachedEmail.create!(
       zoho_message_id: message_id,
       zoho_folder_id: folder_id,
       from_address: email_data["fromAddress"],
@@ -39,6 +39,28 @@ class SyncZohoEmailsJob < ApplicationJob
       body: body,
       received_at: Time.at(email_data["receivedTime"].to_i / 1000)
     )
+
+    sync_attachments(cached, folder_id, message_id)
+  end
+
+  def sync_attachments(cached_email, folder_id, message_id)
+    attachment_list = @zoho.attachments(folder_id: folder_id, message_id: message_id)
+    attachment_list.each do |att|
+      data = @zoho.download_attachment(
+        folder_id: folder_id,
+        message_id: message_id,
+        attachment_id: att["attachmentId"]
+      )
+      cached_email.attachments.attach(
+        io: StringIO.new(data[:content]),
+        filename: data[:filename],
+        content_type: data[:content_type]
+      )
+    rescue ZohoMailService::ApiError => e
+      Rails.logger.warn("SyncZohoEmailsJob: Could not download attachment #{att['attachmentId']} for #{message_id}: #{e.message}")
+    end
+  rescue ZohoMailService::ApiError => e
+    Rails.logger.warn("SyncZohoEmailsJob: Could not fetch attachments for #{message_id}: #{e.message}")
   end
 
   def fetch_body(folder_id, message_id)

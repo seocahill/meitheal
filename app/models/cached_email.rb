@@ -1,4 +1,6 @@
 class CachedEmail < ApplicationRecord
+  has_many_attached :attachments
+
   enum :status, { unread: 0, read: 1, archived: 2 }, default: :unread
 
   validates :zoho_message_id, presence: true, uniqueness: true

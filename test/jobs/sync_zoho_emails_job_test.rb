@@ -33,6 +33,9 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     @stub_zoho.define_singleton_method(:email) do |folder_id:, message_id:|
       { "content" => "<p>Email body for #{message_id}</p>" }
     end
+
+    @stub_zoho.define_singleton_method(:attachments) { |folder_id:, message_id:| [] }
+    @stub_zoho.define_singleton_method(:download_attachment) { |folder_id:, message_id:, attachment_id:| raise "Should not be called" }
   end
 
   test "creates cached emails from Zoho inbox" do
@@ -91,6 +94,52 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     assert_nothing_raised do
       SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
     end
+  end
+
+  test "downloads and attaches email attachments" do
+    attachment_info = [
+      { "attachmentId" => "att_001", "attachmentName" => "poster.jpg", "attachmentSize" => 1234, "contentType" => "image/jpeg" },
+      { "attachmentId" => "att_002", "attachmentName" => "proposal.pdf", "attachmentSize" => 5678, "contentType" => "application/pdf" }
+    ]
+
+    @stub_zoho.define_singleton_method(:attachments) do |folder_id:, message_id:|
+      message_id == "msg_001" ? attachment_info : []
+    end
+
+    @stub_zoho.define_singleton_method(:download_attachment) do |folder_id:, message_id:, attachment_id:|
+      {
+        content: "binary content for #{attachment_id}",
+        filename: attachment_info.find { |a| a["attachmentId"] == attachment_id }["attachmentName"],
+        content_type: attachment_info.find { |a| a["attachmentId"] == attachment_id }["contentType"]
+      }
+    end
+
+    SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+
+    email = CachedEmail.find_by(zoho_message_id: "msg_001")
+    assert_equal 2, email.attachments.count
+    assert_equal "poster.jpg", email.attachments.first.filename.to_s
+
+    email2 = CachedEmail.find_by(zoho_message_id: "msg_002")
+    assert_equal 0, email2.attachments.count
+  end
+
+  test "continues syncing when attachment download fails" do
+    @stub_zoho.define_singleton_method(:attachments) do |folder_id:, message_id:|
+      [{ "attachmentId" => "att_001", "attachmentName" => "file.pdf", "attachmentSize" => 100, "contentType" => "application/pdf" }]
+    end
+
+    @stub_zoho.define_singleton_method(:download_attachment) do |folder_id:, message_id:, attachment_id:|
+      raise ZohoMailService::ApiError, "Download failed"
+    end
+
+    assert_difference "CachedEmail.count", 2 do
+      SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+    end
+
+    # Emails created but no attachments
+    email = CachedEmail.find_by(zoho_message_id: "msg_001")
+    assert_equal 0, email.attachments.count
   end
 
   test "continues syncing when individual email content fetch fails" do

@@ -28,23 +28,23 @@
     </div>
 
     <!-- Attachments -->
-    <% if @attachments.present? %>
+    <% if @email.attachments.any? %>
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
         <div class="flex items-center gap-2 mb-3">
           <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
           </svg>
-          <span class="text-sm font-medium text-gray-700"><%= @attachments.size %> attachment<%= @attachments.size == 1 ? '' : 's' %></span>
+          <span class="text-sm font-medium text-gray-700"><%= @email.attachments.size %> attachment<%= @email.attachments.size == 1 ? '' : 's' %></span>
         </div>
         <div class="flex flex-wrap gap-2">
-          <% @attachments.each do |attachment| %>
-            <%= link_to attachment_admin_inbox_path(@email, attachment_id: attachment["attachmentId"]),
+          <% @email.attachments.each do |attachment| %>
+            <%= link_to rails_blob_path(attachment, disposition: "attachment"),
                 class: "inline-flex items-center gap-2 px-3 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-sm" do %>
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
               </svg>
-              <span class="text-gray-700"><%= attachment["attachmentName"] %></span>
-              <span class="text-gray-400 text-xs">(<%= number_to_human_size(attachment["attachmentSize"]) %>)</span>
+              <span class="text-gray-700"><%= attachment.filename %></span>
+              <span class="text-gray-400 text-xs">(<%= number_to_human_size(attachment.byte_size) %>)</span>
             <% end %>
           <% end %>
         </div>

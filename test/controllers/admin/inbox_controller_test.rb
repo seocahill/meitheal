@@ -5,12 +5,6 @@ class Admin::InboxControllerTest < ActionDispatch::IntegrationTest
     @owner = users(:owner)
     sign_in_as(@owner)
 
-    # Stub ZohoMailService so show action doesn't hit real API for attachments
-    @original_zoho_new = ZohoMailService.method(:new)
-    stub_zoho = Object.new
-    stub_zoho.define_singleton_method(:configured?) { false }
-    ZohoMailService.define_singleton_method(:new) { stub_zoho }
-
     @email = CachedEmail.create!(
       zoho_message_id: "msg_test_001",
       zoho_folder_id: "folder_inbox",
@@ -31,10 +25,6 @@ class Admin::InboxControllerTest < ActionDispatch::IntegrationTest
       received_at: 1.day.ago,
       status: :archived
     )
-  end
-
-  teardown do
-    ZohoMailService.define_singleton_method(:new, @original_zoho_new)
   end
 
   # Access control
@@ -85,6 +75,18 @@ class Admin::InboxControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Exhibition Update"
     assert_includes response.body, "alice@example.com"
     assert_includes response.body, "Full email body here"
+  end
+
+  test "show displays cached attachments" do
+    @email.attachments.attach(
+      io: StringIO.new("pdf content"),
+      filename: "report.pdf",
+      content_type: "application/pdf"
+    )
+    get admin_inbox_path(@email)
+    assert_response :success
+    assert_includes response.body, "report.pdf"
+    assert_includes response.body, "1 attachment"
   end
 
   test "show marks email as read" do

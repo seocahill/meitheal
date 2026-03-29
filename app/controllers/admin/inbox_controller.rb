@@ -1,6 +1,6 @@
 class Admin::InboxController < ApplicationController
   before_action :require_owner
-  before_action :set_email, only: [ :show, :archive, :unarchive, :create_todo, :create_newsletter, :create_funding, :attachment ]
+  before_action :set_email, only: [ :show, :archive, :unarchive, :create_todo, :create_newsletter, :create_funding ]
 
   PER_PAGE = 5
 
@@ -16,29 +16,6 @@ class Admin::InboxController < ApplicationController
 
   def show
     @email.read! if @email.unread?
-    @attachments = fetch_attachments
-  end
-
-  def attachment
-    zoho = ZohoMailService.new
-    unless zoho.configured?
-      redirect_to admin_inbox_index_path, alert: "Zoho Mail API not configured."
-      return
-    end
-
-    begin
-      attachment_data = zoho.download_attachment(
-        folder_id: @email.zoho_folder_id,
-        message_id: @email.zoho_message_id,
-        attachment_id: params[:attachment_id]
-      )
-      send_data attachment_data[:content],
-                filename: attachment_data[:filename],
-                type: attachment_data[:content_type],
-                disposition: "attachment"
-    rescue ZohoMailService::ApiError => e
-      redirect_to admin_inbox_path(@email), alert: "Could not download attachment: #{e.message}"
-    end
   end
 
   def archive
@@ -94,14 +71,5 @@ class Admin::InboxController < ApplicationController
 
   def set_email
     @email = CachedEmail.find(params[:id])
-  end
-
-  def fetch_attachments
-    zoho = ZohoMailService.new
-    return [] unless zoho.configured?
-
-    zoho.attachments(folder_id: @email.zoho_folder_id, message_id: @email.zoho_message_id)
-  rescue ZohoMailService::ApiError
-    []
   end
 end

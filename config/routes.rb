@@ -88,7 +88,6 @@ Rails.application.routes.draw do
         post :create_funding
         post :archive
         post :unarchive
-        get "attachments/:attachment_id", action: :attachment, as: :attachment
       end
       collection do
         post :batch_archive
