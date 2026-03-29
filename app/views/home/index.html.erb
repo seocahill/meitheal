@@ -20,6 +20,7 @@
         <%= link_to "Bookings", calendar_path, class: "menu-highlight inline-block" %>
         <%= link_to "Contact", contact_path, class: "menu-highlight inline-block" %>
         <%= link_to "Shop", "https://thencf-cultural-cooperative.sumupstore.com/", class: "menu-highlight inline-block", target: "_blank" %>
+        <%= link_to "Newsletter", newsletter_page_path, class: "menu-highlight inline-block"%>
         <% if authenticated? %>
           <%= link_to "My Account", my_profile_path, class: "menu-highlight inline-block" %>
         <% end %>
