@@ -18,6 +18,7 @@ Rails.application.routes.draw do
 
   resource :session
   resource :registration, only: [ :new, :create ]
+  get "membership", to: redirect("/registration/new")
   resources :passwords, param: :token
 
   resources :events do
