@@ -125,7 +125,36 @@ class BrevoServiceTest < ActiveSupport::TestCase
     end
   end
 
+  test "list_contacts returns contacts from configured list" do
+    fake_contacts = [
+      OpenStruct.new(email: "alice@example.com", attributes: { "FIRSTNAME" => "Alice" }),
+      OpenStruct.new(email: "bob@example.com", attributes: { "FIRSTNAME" => "Bob" })
+    ]
+    fake_response = OpenStruct.new(contacts: fake_contacts)
+
+    with_stubbed_contacts_api(get_contacts_from_list: fake_response) do |service|
+      result = service.list_contacts(limit: 500, offset: 0)
+      assert_equal 2, result.size
+      assert_equal "alice@example.com", result.first.email
+    end
+  end
+
   private
+
+  def with_stubbed_contacts_api(responses = {})
+    fake_contacts_api = Object.new
+    responses.each do |method, response|
+      fake_contacts_api.define_singleton_method(method) { |*_args, **_opts| response }
+    end
+
+    service = BrevoService.new
+    service.instance_variable_set(:@api_key, "test-key")
+    service.instance_variable_set(:@sender_email, "test@example.com")
+    service.instance_variable_set(:@list_id, 1)
+    service.instance_variable_set(:@contacts_api, fake_contacts_api)
+
+    yield service
+  end
 
   def with_stubbed_campaigns_api(responses = {})
     fake_campaigns_api = Object.new

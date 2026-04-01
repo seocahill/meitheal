@@ -135,6 +135,21 @@ class BrevoService
     raise ApiError, parse_brevo_error(e)
   end
 
+  # List all contacts from the configured list
+  def list_contacts(limit: 500, offset: 0)
+    ensure_configured!
+
+    result = contacts_api.get_contacts_from_list(
+      @list_id,
+      limit: limit,
+      offset: offset
+    )
+    result.contacts || []
+  rescue Brevo::ApiError => e
+    Rails.logger.error("Brevo API error: #{e.message}")
+    raise ApiError, parse_brevo_error(e)
+  end
+
   private
 
   def ensure_configured!

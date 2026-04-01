@@ -25,6 +25,10 @@ production:
     class: SyncZohoEmailsJob
     queue: default
     schedule: every 30 minutes
+  sync_brevo_contacts:
+    class: SyncBrevoContactsJob
+    queue: default
+    schedule: every 6 hours
   # refresh_funding_opportunities:
   #   class: RefreshFundingOpportunitiesJob
   #   queue: default
