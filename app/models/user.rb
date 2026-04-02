@@ -12,6 +12,8 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
+  validates :email_address, uniqueness: true
+
   # Roles: viewer (default) < editor < owner
   # viewer: can view content
   # editor: can view and edit content

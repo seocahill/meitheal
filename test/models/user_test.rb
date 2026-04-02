@@ -43,6 +43,13 @@ class UserTest < ActiveSupport::TestCase
     assert_not viewer.can_edit?
   end
 
+  test "requires unique email_address" do
+    User.create!(email_address: "taken@example.com", password: "password123")
+    duplicate = User.new(email_address: "taken@example.com", password: "password456")
+    assert_not duplicate.valid?
+    assert_includes duplicate.errors[:email_address], "has already been taken"
+  end
+
   test "can_manage? returns true only for owners" do
     owner = User.new(role: :owner)
     editor = User.new(role: :editor)
