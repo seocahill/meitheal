@@ -19,6 +19,7 @@
     <%= stylesheet_link_tag "theme", "data-turbo-track": "reload", preload: false %>
     <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload", preload: false %>
     <%= javascript_importmap_tags %>
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
   </head>
 
   <body class="bg-gray-50 min-h-screen">

@@ -98,7 +98,7 @@ gem "dotenv", "~> 3.2"
 
 gem "recaptcha", "~> 5.21"
 
-gem "dockerfile-rails", ">= 1.7", :group => :development
+gem "dockerfile-rails", ">= 1.7", group: :development
 
 gem "litestream", "~> 0.14.0"
 
@@ -108,3 +108,6 @@ gem "mission_control-jobs", "~> 1.1"
 gem "icalendar"
 
 gem "webmock", "~> 3.26", group: :test
+
+gem "sentry-ruby"
+gem "sentry-rails"
