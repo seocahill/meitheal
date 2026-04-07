@@ -84,4 +84,34 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to admin_users_path
   end
+
+  # Approval tests
+  test "approve creates associate membership for user without one" do
+    sign_in_as(@owner)
+    unapproved = User.create!(email_address: "pending@example.com", password: "password", approved: false)
+
+    assert_difference "Membership.count", 1 do
+      post approve_admin_user_path(unapproved)
+    end
+
+    unapproved.reload
+    assert unapproved.approved?
+    membership = unapproved.memberships.first
+    assert membership.associate?
+    assert_equal Date.current, membership.starts_on
+    assert_nil membership.expires_on
+  end
+
+  test "approve does not create duplicate membership if user already has one" do
+    sign_in_as(@owner)
+    # editor already has a membership (expired_membership fixture)
+    @editor.update!(approved: false)
+
+    assert_no_difference "Membership.count" do
+      post approve_admin_user_path(@editor)
+    end
+
+    @editor.reload
+    assert @editor.approved?
+  end
 end

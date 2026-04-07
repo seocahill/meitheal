@@ -14,6 +14,7 @@ module Admin
 
     def approve
       @user.update!(approved: true)
+      @user.memberships.create!(membership_type: :associate, starts_on: Date.current) unless @user.memberships.exists?
       UserMailer.account_approved(@user).deliver_later
       redirect_to admin_users_path, notice: "#{@user.profile&.name || @user.email_address} has been approved and notified."
     end

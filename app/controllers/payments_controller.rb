@@ -92,5 +92,11 @@ class PaymentsController < ApplicationController
 
   def set_membership
     @membership = Current.user.memberships.first
+    return if @membership
+
+    respond_to do |format|
+      format.html { redirect_to root_path, alert: "You need a membership to make payments." }
+      format.json { render json: { error: "No membership found. Please contact us for help." }, status: :unprocessable_entity }
+    end
   end
 end
