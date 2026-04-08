@@ -41,15 +41,15 @@
 yarn-debug.log*
 .yarn-integrity
 
-# Ignore Kamal deployment files.
-/.kamal/secrets
+# Kamal secrets file contains only references (env vars/file paths), not actual secrets — safe to commit.
+# The actual secret values live in /secrets/* which remains gitignored.
 CLAUDE.md
 
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
-
-secrets
 # Ignore key files for decrypting credentials and more.
 /config/credentials/*.key
+
+/secrets/*
 
