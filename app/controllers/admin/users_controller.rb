@@ -1,5 +1,5 @@
 module Admin
-  class UsersController < ApplicationController
+  class UsersController < BaseController
     include Pagy::Method
 
     before_action :require_owner

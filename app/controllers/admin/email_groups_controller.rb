@@ -1,4 +1,4 @@
-class Admin::EmailGroupsController < ApplicationController
+class Admin::EmailGroupsController < Admin::BaseController
   before_action :require_owner
   before_action :set_email_group, only: [ :show, :edit, :update, :destroy, :add_member, :remove_member ]
 

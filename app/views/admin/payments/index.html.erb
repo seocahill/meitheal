@@ -50,7 +50,7 @@
               </td>
               <td class="px-4 py-3 whitespace-nowrap">
                 <span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                  <%= payment.purpose.humanize.sub("Other purpose", "Other") %>
+                  <%= payment.purpose&.humanize&.sub("Other purpose", "Other") %>
                 </span>
               </td>
               <td class="px-4 py-3 text-sm text-gray-900">

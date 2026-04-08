@@ -1,4 +1,4 @@
-class Admin::MembershipsController < ApplicationController
+class Admin::MembershipsController < Admin::BaseController
   before_action :require_owner
   before_action :set_membership, only: [ :show, :edit, :update, :destroy, :mark_as_paid ]
 

@@ -1,4 +1,4 @@
-class Admin::PagesController < ApplicationController
+class Admin::PagesController < Admin::BaseController
   before_action :require_editor
   before_action :set_page, only: [ :show, :edit, :update, :destroy, :publish, :unpublish ]
 

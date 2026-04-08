@@ -1,4 +1,4 @@
-class Admin::TodosController < ApplicationController
+class Admin::TodosController < Admin::BaseController
   before_action :require_owner
   before_action :set_todo, only: [ :edit, :update, :destroy, :toggle ]
 

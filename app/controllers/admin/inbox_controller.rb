@@ -1,4 +1,4 @@
-class Admin::InboxController < ApplicationController
+class Admin::InboxController < Admin::BaseController
   before_action :require_owner
   before_action :set_email, only: [ :show, :archive, :unarchive, :create_todo, :create_newsletter, :create_funding ]
 

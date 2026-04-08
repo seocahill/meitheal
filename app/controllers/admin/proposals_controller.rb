@@ -1,4 +1,4 @@
-class Admin::ProposalsController < ApplicationController
+class Admin::ProposalsController < Admin::BaseController
   before_action :require_owner
   before_action :set_proposal, only: [ :show, :approve, :reject ]
 

@@ -1,4 +1,4 @@
-class Admin::PaymentsController < ApplicationController
+class Admin::PaymentsController < Admin::BaseController
   include Pagy::Method
   before_action :require_owner
   before_action :set_membership, except: [:index]

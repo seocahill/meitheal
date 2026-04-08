@@ -169,6 +169,36 @@
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Authenticated sidebar navigation */
+.sidebar-nav-link {
+  display: block;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 0.375rem;
+  transition: all 0.15s ease;
+}
+
+.sidebar-nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-nav-active {
+  color: white !important;
+  background-color: rgba(147, 51, 234, 0.35);
+}
+
+.sidebar-nav-section {
+  padding: 1rem 0.75rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 /* Primary button */
 .btn-primary {
   background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);

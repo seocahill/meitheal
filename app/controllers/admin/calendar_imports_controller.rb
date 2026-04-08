@@ -1,4 +1,4 @@
-class Admin::CalendarImportsController < ApplicationController
+class Admin::CalendarImportsController < Admin::BaseController
   before_action :require_owner
 
   def new

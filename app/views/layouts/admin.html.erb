@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Admin" %> &mdash; THENCF</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload", preload: false %>
+    <%= stylesheet_link_tag "theme", "data-turbo-track": "reload", preload: false %>
+    <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload", preload: false %>
+    <%= javascript_importmap_tags %>
+    <%= Sentry.get_trace_propagation_meta.html_safe %>
+  </head>
+
+  <body class="bg-gray-50 h-screen flex overflow-hidden">
+
+    <%# Left sidebar %>
+    <aside class="w-56 flex-shrink-0 flex flex-col bg-gray-900 overflow-y-auto">
+
+      <%# Brand %>
+      <div class="h-14 flex items-center px-4 flex-shrink-0 nav-gradient">
+        <%= link_to root_path, class: "text-white font-bold text-lg leading-none" do %>
+          THENCF
+        <% end %>
+        <span class="ml-2 text-white/50 text-sm font-medium">Admin</span>
+      </div>
+
+      <%# Navigation %>
+      <nav class="flex-1 p-2 space-y-0.5">
+        <% active = ->(path) { controller_path == path } %>
+
+        <div class="admin-nav-section">Communications</div>
+        <%= link_to "Inbox", admin_inbox_index_path, class: "admin-nav-link #{active.("admin/inbox") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Email Groups", admin_email_groups_path, class: "admin-nav-link #{active.("admin/email_groups") ? "admin-nav-active" : ""}" %>
+
+        <div class="admin-nav-section">Members</div>
+        <%= link_to "Users", admin_users_path, class: "admin-nav-link #{active.("admin/users") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Memberships", admin_memberships_path, class: "admin-nav-link #{active.("admin/memberships") ? "admin-nav-active" : ""}" %>
+
+        <div class="admin-nav-section">Financial</div>
+        <%= link_to "Payments", admin_payments_path, class: "admin-nav-link #{active.("admin/payments") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Transactions", admin_transactions_path, class: "admin-nav-link #{active.("admin/transactions") ? "admin-nav-active" : ""}" %>
+
+        <div class="admin-nav-section">Operations</div>
+        <%= link_to "Bookings", admin_bookings_path, class: "admin-nav-link #{active.("admin/bookings") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Proposals", admin_proposals_path, class: "admin-nav-link #{active.("admin/proposals") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Funding", admin_funding_opportunities_path, class: "admin-nav-link #{active.("admin/funding_opportunities") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Todos", admin_todos_path, class: "admin-nav-link #{active.("admin/todos") ? "admin-nav-active" : ""}" %>
+
+        <div class="admin-nav-section">Content</div>
+        <%= link_to "Pages", admin_pages_path, class: "admin-nav-link #{active.("admin/pages") ? "admin-nav-active" : ""}" %>
+        <%= link_to "FAQs", admin_faqs_path, class: "admin-nav-link #{active.("admin/faqs") ? "admin-nav-active" : ""}" %>
+      </nav>
+
+      <%# User / sign out %>
+      <div class="p-3 border-t border-white/10 flex-shrink-0">
+        <div class="text-gray-500 text-xs mb-2 truncate"><%= Current.user.email_address %></div>
+        <%= button_to "Sign Out", session_path, method: :delete,
+            class: "text-sm text-gray-400 hover:text-white transition-colors" %>
+      </div>
+    </aside>
+
+    <%# Main content area %>
+    <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+
+      <%# Thin top bar %>
+      <header class="bg-white border-b border-gray-200 h-12 flex items-center justify-between px-6 flex-shrink-0">
+        <% if content_for?(:title) %>
+          <h1 class="text-sm font-semibold text-gray-700"><%= yield :title %></h1>
+        <% else %>
+          <div></div>
+        <% end %>
+        <%= link_to "← Back to site", root_path, class: "text-sm text-gray-400 hover:text-gray-600 transition-colors" %>
+      </header>
+
+      <%# Flash messages %>
+      <% if notice.present? %>
+        <div class="mx-6 mt-4">
+          <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 px-4 py-3 rounded-r-lg text-sm">
+            <%= notice %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if alert.present? %>
+        <div class="mx-6 mt-4">
+          <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 px-4 py-3 rounded-r-lg text-sm">
+            <%= alert %>
+          </div>
+        </div>
+      <% end %>
+
+      <main class="flex-1 py-6">
+        <%= yield %>
+      </main>
+    </div>
+
+  </body>
+</html>

@@ -1,5 +1,5 @@
 module Admin
-  class FundingOpportunitiesController < ApplicationController
+  class FundingOpportunitiesController < BaseController
     before_action :require_owner
     before_action :set_funding_opportunity, only: [ :approve ]
 

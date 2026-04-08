@@ -1,4 +1,4 @@
-class Admin::TransactionsController < ApplicationController
+class Admin::TransactionsController < Admin::BaseController
   before_action :require_owner
 
   def index

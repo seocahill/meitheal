@@ -1,4 +1,4 @@
-class Admin::FaqsController < ApplicationController
+class Admin::FaqsController < Admin::BaseController
   before_action :require_authentication
   before_action :require_admin
   before_action :set_faq, only: [ :edit, :update, :destroy, :move_up, :move_down ]

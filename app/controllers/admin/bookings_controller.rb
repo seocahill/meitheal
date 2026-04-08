@@ -1,4 +1,4 @@
-class Admin::BookingsController < ApplicationController
+class Admin::BookingsController < Admin::BaseController
   include Pagy::Method
   before_action :require_editor
   before_action :set_booking, only: [ :toggle_paid ]
