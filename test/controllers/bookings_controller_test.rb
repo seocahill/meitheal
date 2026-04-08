@@ -192,6 +192,46 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_not unpaid_booking.paid
   end
 
+  # Range display tests
+
+  test "calendar shows multi-day booking on its start date" do
+    multi_day = Booking.create!(
+      space: @space, user: @owner, title: "Multi Day Event",
+      starts_at: Date.current.beginning_of_month + 5.days,
+      ends_at: Date.current.beginning_of_month + 8.days,
+      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+    )
+    get calendar_path(month: Date.current.strftime("%Y-%m"))
+    assert_response :success
+    assert_includes response.body, multi_day.title
+  end
+
+  test "calendar shows multi-day booking on intermediate days" do
+    start_date = Date.current.beginning_of_month + 5.days
+    multi_day = Booking.create!(
+      space: @space, user: @owner, title: "Multi Day Intermediate",
+      starts_at: start_date,
+      ends_at: start_date + 3.days,
+      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+    )
+    get calendar_path(month: Date.current.strftime("%Y-%m"))
+    assert_response :success
+    # The title should appear at least twice (start day + intermediate days)
+    assert response.body.scan(multi_day.title).length >= 2
+  end
+
+  test "calendar fetches booking that starts before month but ends within it" do
+    multi_day = Booking.create!(
+      space: @space, user: @owner, title: "Spans Month Boundary",
+      starts_at: Date.current.beginning_of_month - 2.days,
+      ends_at: Date.current.beginning_of_month + 1.day,
+      status: :confirmed, agree_booking_rules: "1", agree_ethics: "1"
+    )
+    get calendar_path(month: Date.current.strftime("%Y-%m"))
+    assert_response :success
+    assert_includes response.body, multi_day.title
+  end
+
   test "marking as paid persists the status" do
     sign_in_as(@editor)
     unpaid_booking = Booking.create!(

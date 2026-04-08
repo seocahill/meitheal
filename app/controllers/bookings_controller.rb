@@ -10,7 +10,7 @@ class BookingsController < ApplicationController
     @month = params[:month] ? Date.parse(params[:month] + "-01") : Date.current.beginning_of_month
     # Show both pending and confirmed bookings
     @bookings = Booking.where(status: [ :pending, :confirmed ])
-      .where("starts_at >= ? AND starts_at < ?", @month.beginning_of_month, @month.end_of_month.end_of_day)
+      .where("starts_at < ? AND ends_at > ?", @month.end_of_month.end_of_day, @month.beginning_of_month.beginning_of_day)
       .includes(:space, :user)
       .order(:starts_at)
     @spaces = Space.active.order(:name)

@@ -75,7 +75,7 @@
       <% end_date = @month.end_of_month.end_of_week(:sunday) %>
 
       <% (start_date..end_date).each do |date| %>
-        <% day_bookings = @bookings.select { |b| b.starts_at.to_date == date } %>
+        <% day_bookings = @bookings.select { |b| b.starts_at.to_date <= date && b.ends_at.to_date >= date } %>
         <div class="min-h-[100px] border-b border-r p-2 <%= 'bg-gray-50' unless date.month == @month.month %>">
           <div class="text-sm <%= date == Date.current ? 'bg-pink-600 text-white rounded-full w-6 h-6 flex items-center justify-center' : 'text-gray-500' %>">
             <%= date.day %>
@@ -83,8 +83,13 @@
           <div class="mt-1 space-y-1">
             <% day_bookings.each do |booking| %>
               <% color_class = booking.confirmed? ? 'bg-green-100 text-green-800 border-green-200' : 'bg-amber-100 text-amber-800 border-amber-200' %>
+              <% is_start = booking.starts_at.to_date == date %>
               <div class="text-xs p-1 rounded border <%= color_class %> truncate" title="<%= booking.title %> - <%= booking.space.name %><%= ' (pending)' if booking.pending? %>">
-                <span class="font-medium"><%= booking.starts_at.strftime("%H:%M") %></span>
+                <% if is_start %>
+                  <span class="font-medium"><%= booking.starts_at.strftime("%H:%M") %></span>
+                <% else %>
+                  <span class="font-medium">→</span>
+                <% end %>
                 <%= booking.title %>
               </div>
             <% end %>
