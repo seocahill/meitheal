@@ -374,7 +374,7 @@ trix-editor .attachment__metadata {
     background-color: #eee;
     overflow-x: auto; }
   .trix-content img {
-    max-width: 100%;
+    width: 100%;
     height: auto; }
   .trix-content .attachment {
     display: inline-block;
@@ -390,8 +390,7 @@ trix-editor .attachment__metadata {
     .trix-content .attachment__caption .attachment__name + .attachment__size::before {
       content: ' \2022 '; }
   .trix-content .attachment--preview {
-    width: 100%;
-    text-align: center; }
+    width: 100%; }
     .trix-content .attachment--preview .attachment__caption {
       color: #666;
       font-size: 0.9em;
