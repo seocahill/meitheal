@@ -8,8 +8,8 @@
     <div class="space-y-4">
       <div>
         <label for="amount_euro" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">&euro;</span>
+        <div class="flex items-center gap-2">
+          <span class="text-gray-500 text-sm">&euro;</span>
           <input type="number"
                  id="amount_euro"
                  min="1"
@@ -17,7 +17,7 @@
                  placeholder="0.00"
                  data-action="input->general-payment#updateTotal"
                  data-general-payment-target="amountInput"
-                 class="form-input pl-8 w-full">
+                 class="form-input w-full">
         </div>
         <p class="form-hint">Enter the amount in euros</p>
       </div>
@@ -28,12 +28,18 @@
                 data-general-payment-target="purposeInput"
                 class="form-input w-full">
           <option value="">Select a purpose...</option>
-          <option value="membership">Membership</option>
           <option value="booking">Booking</option>
           <option value="donation">Donation</option>
           <option value="other_purpose">Other</option>
         </select>
       </div>
+
+      <% if @membership %>
+        <p class="form-hint">
+          Looking to pay for your membership?
+          <%= link_to "Go here", new_membership_payment_path(@membership), class: "text-purple-600 hover:underline" %>
+        </p>
+      <% end %>
 
       <div>
         <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
