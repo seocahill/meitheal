@@ -2,10 +2,10 @@ require "test_helper"
 
 class SyncBrevoContactsJobTest < ActiveJob::TestCase
   setup do
-    # Brevo contacts (email and attributes)
+    # Brevo contacts use symbol keys — the gem deserializes with symbolize_names: true
     @brevo_contacts = [
-      { "email" => "alice@example.com", "attributes" => { "FIRSTNAME" => "Alice" } },
-      { "email" => "bob@example.com", "attributes" => { "FIRSTNAME" => "Bob" } }
+      { email: "alice@example.com", attributes: { FIRSTNAME: "Alice" } },
+      { email: "bob@example.com", attributes: { FIRSTNAME: "Bob" } }
     ]
 
     @stub_brevo = build_stub_brevo
@@ -78,7 +78,7 @@ class SyncBrevoContactsJobTest < ActiveJob::TestCase
 
   test "syncs contacts case-insensitively" do
     # Brevo has uppercase, local has lowercase
-    @brevo_contacts = [{ "email" => "DAVID@EXAMPLE.COM", "attributes" => {} }]
+    @brevo_contacts = [ { email: "DAVID@EXAMPLE.COM", attributes: {} } ]
     User.create!(
       email_address: "david@example.com",
       password: "password123",

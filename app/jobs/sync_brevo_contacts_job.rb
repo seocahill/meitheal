@@ -10,7 +10,7 @@ class SyncBrevoContactsJob < ApplicationJob
     local_users = User.where(approved: true)
 
     # Build email sets for comparison (normalized)
-    brevo_emails = brevo_contacts.map { |c| c["email"].downcase }.to_set
+    brevo_emails = brevo_contacts.map { |c| c[:email].downcase }.to_set
     local_emails = local_users.map { |u| u.email_address.downcase }.to_set
 
     # Sync local → Brevo (users not in Brevo)
@@ -23,7 +23,7 @@ class SyncBrevoContactsJob < ApplicationJob
 
     # Sync Brevo → local (contacts not in local DB)
     brevo_contacts.each do |contact|
-      email_normalized = contact["email"].downcase
+      email_normalized = contact[:email].downcase
       next if local_emails.include?(email_normalized)
 
       sync_contact_to_local(contact)
@@ -59,8 +59,8 @@ class SyncBrevoContactsJob < ApplicationJob
   end
 
   def sync_contact_to_local(contact)
-    email = contact["email"]
-    first_name = contact.dig("attributes", "FIRSTNAME")
+    email = contact[:email]
+    first_name = contact.dig(:attributes, :FIRSTNAME)
 
     # Create user with secure random password
     password = SecureRandom.hex(32)
