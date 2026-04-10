@@ -1,0 +1,37 @@
+<%= form_with model: post, class: "space-y-6" do |form| %>
+  <% if post.errors.any? %>
+    <div class="form-error">
+      <h2><%= pluralize(post.errors.count, "error") %> prohibited this post from being saved:</h2>
+      <ul class="list-disc list-inside mt-2">
+        <% post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, class: "form-label" %>
+    <%= form.text_field :title, class: "form-input", placeholder: "Post title" %>
+  </div>
+
+  <div>
+    <%= form.label :excerpt, class: "form-label" %>
+    <%= form.text_area :excerpt, class: "form-input", rows: 3, placeholder: "A short summary shown in listings (optional)" %>
+  </div>
+
+  <div>
+    <%= form.label :body, class: "form-label mb-2" %>
+    <%= form.rich_text_area :body %>
+  </div>
+
+  <div>
+    <%= form.label :featured_image, class: "form-label" %>
+    <%= form.file_field :featured_image, class: "form-input", accept: "image/*" %>
+  </div>
+
+  <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+    <%= link_to "Cancel", posts_path, class: "text-gray-600 hover:text-gray-900" %>
+    <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
+  </div>
+<% end %>

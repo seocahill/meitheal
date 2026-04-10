@@ -27,6 +27,8 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@owner)
     get new_post_url
     assert_response :success
+    assert_select "input[name='post[title]']"
+    assert_select "textarea[name='post[excerpt]']"
   end
 
   test "should create post when authenticated" do
@@ -37,10 +39,20 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to post_url("new-post")
   end
 
+  test "should render new with errors on invalid create" do
+    sign_in_as(@owner)
+    assert_no_difference("Post.count") do
+      post posts_url, params: { post: { title: "" } }
+    end
+    assert_response :unprocessable_entity
+    assert_select "input[name='post[title]']"
+  end
+
   test "should get edit when authenticated" do
     sign_in_as(@owner)
     get edit_post_url(@post.slug)
     assert_response :success
+    assert_select "input[name='post[title]']"
   end
 
   test "should update post when authenticated" do
