@@ -21,7 +21,6 @@ class MembershipPaymentsController < ApplicationController
       return render json: { error: "Invalid membership type" }, status: :unprocessable_entity
     end
 
-    @membership.update!(membership_type: selected_type)
     membership_fee_cents = MEMBERSHIP_PRICES[selected_type]
     donation_cents = (params[:donation_cents] || 0).to_i
     donation_cents = 0 if donation_cents < 0  # Prevent negative donations
@@ -31,9 +30,9 @@ class MembershipPaymentsController < ApplicationController
 
     user = Current.user
     description = if donation_cents > 0
-      "NCF #{@membership.membership_type.humanize} Membership + €#{donation_cents / 100.0} Donation"
+      "NCF #{selected_type.to_s.humanize} Membership + €#{donation_cents / 100.0} Donation"
     else
-      "NCF #{@membership.membership_type.humanize} Membership"
+      "NCF #{selected_type.to_s.humanize} Membership"
     end
 
     begin
@@ -55,7 +54,8 @@ class MembershipPaymentsController < ApplicationController
         user_email: user.email_address,
         user_name: user.name,
         description: description,
-        notes: notes
+        notes: notes,
+        pending_membership_type: selected_type.to_s
       )
 
       render json: { checkout_id: checkout["id"] }
@@ -85,7 +85,7 @@ class MembershipPaymentsController < ApplicationController
               sumup_transaction_id: checkout["transaction_id"]
             )
 
-            extend_membership!
+            apply_membership_upgrade!(payment)
 
             redirect_to my_profile_path, notice: "Payment successful! Your membership has been renewed."
           else
@@ -110,13 +110,16 @@ class MembershipPaymentsController < ApplicationController
     @membership = Current.user.memberships.find(params[:membership_id])
   end
 
-  def extend_membership!
+  def apply_membership_upgrade!(payment)
     new_expiry = if @membership.expires_on.present? && @membership.expires_on > Date.current
                    @membership.expires_on + 1.year
     else
                    1.year.from_now.to_date
     end
 
-    @membership.update!(expires_on: new_expiry)
+    updates = { expires_on: new_expiry }
+    updates[:membership_type] = payment.pending_membership_type if payment.pending_membership_type.present?
+
+    @membership.update!(updates)
   end
 end
