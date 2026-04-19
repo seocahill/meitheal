@@ -21,6 +21,7 @@ class Booking < ApplicationRecord
     where("starts_at >= ? AND starts_at < ?", date.beginning_of_day, date.end_of_day)
   }
   scope :unpaid, -> { where(paid: false).where.not(status: :cancelled) }
+  scope :overdue, -> { where("ends_at < ?", 2.weeks.ago) }
 
   def editable_by?(user)
     return false unless user
@@ -62,7 +63,7 @@ class Booking < ApplicationRecord
   end
 
   def no_unpaid_bookings_for_user
-    if user&.bookings&.confirmed&.unpaid&.any?
+    if user&.bookings&.confirmed&.unpaid&.overdue&.any?
       errors.add(:base, "You have unpaid bookings. Please settle outstanding payments before making a new booking.")
     end
   end
