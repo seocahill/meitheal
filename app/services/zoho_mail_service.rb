@@ -78,6 +78,18 @@ class ZohoMailService
     []
   end
 
+  # Download an inline image embedded in an email body.
+  # The content_id corresponds to the `cid` parameter in Zoho's /mail/ImageDisplay URLs.
+  def download_inline_image(folder_id:, message_id:, content_id:)
+    response = raw_connection.get("/api/accounts/#{@account_id}/folders/#{folder_id}/messages/#{message_id}/inline") do |req|
+      req.params = { contentId: content_id }
+    end
+
+    raise ApiError, "Could not download inline image (#{response.status})" unless response.status == 200
+
+    response.body
+  end
+
   def download_attachment(folder_id:, message_id:, attachment_id:)
     # First get attachment info for filename and content type
     attachments_list = attachments(folder_id: folder_id, message_id: message_id)

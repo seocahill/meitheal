@@ -151,6 +151,33 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert_equal "test.pdf", email.attachments.first.filename.to_s
   end
 
+  test "displayable_body strips Zoho inline image references" do
+    body = '<p>Hello</p><img src="/mail/ImageDisplay?na=123&nmsgId=456&f=1.png&mode=inline&cid=ii_abc"><p>Bye</p>'
+    email = CachedEmail.new(body: body)
+    result = email.displayable_body
+    assert_no_match "ImageDisplay", result
+    assert_no_match "<img", result
+    assert_match "<p>Hello</p>", result
+    assert_match "<p>Bye</p>", result
+  end
+
+  test "displayable_body preserves externally-hosted images" do
+    body = '<p>Content</p><img src="https://example.com/image.jpg" alt="poster">'
+    email = CachedEmail.new(body: body)
+    assert_includes email.displayable_body, "https://example.com/image.jpg"
+  end
+
+  test "displayable_body returns body unchanged when no inline images" do
+    body = "<p>Plain text email</p>"
+    email = CachedEmail.new(body: body)
+    assert_equal body, email.displayable_body
+  end
+
+  test "displayable_body handles nil body" do
+    email = CachedEmail.new(body: nil)
+    assert_nil email.displayable_body
+  end
+
   test "visible scope excludes archived emails" do
     visible = CachedEmail.create!(
       zoho_message_id: "msg_visible",

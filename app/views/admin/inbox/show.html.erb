@@ -55,7 +55,7 @@
     <div class="p-6">
       <% if @email.body.present? %>
         <div class="prose prose-sm max-w-none email-content">
-          <%= sanitize(@email.body, tags: %w[p br div span a img h1 h2 h3 h4 h5 h6 ul ol li table tr td th thead tbody strong em b i u blockquote pre code hr], attributes: %w[href src alt class style]) %>
+          <%= sanitize(@email.displayable_body, tags: %w[p br div span a img h1 h2 h3 h4 h5 h6 ul ol li table tr td th thead tbody strong em b i u blockquote pre code hr], attributes: %w[href src alt class style]) %>
         </div>
       <% else %>
         <p class="text-gray-500 italic">No content available.</p>

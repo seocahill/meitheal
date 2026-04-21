@@ -36,6 +36,7 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
 
     @stub_zoho.define_singleton_method(:attachments) { |folder_id:, message_id:| [] }
     @stub_zoho.define_singleton_method(:download_attachment) { |folder_id:, message_id:, attachment_id:| raise "Should not be called" }
+    @stub_zoho.define_singleton_method(:download_inline_image) { |folder_id:, message_id:, content_id:| raise "Should not be called" }
   end
 
   test "creates cached emails from Zoho inbox" do
@@ -140,6 +141,50 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     # Emails created but no attachments
     email = CachedEmail.find_by(zoho_message_id: "msg_001")
     assert_equal 0, email.attachments.count
+  end
+
+  test "downloads inline images and rewrites body URLs" do
+    inline_src = "/mail/ImageDisplay?na=123&nmsgId=msg_001&f=poster.jpg&mode=inline&cid=ii_abc123&"
+    @stub_zoho.define_singleton_method(:email) do |folder_id:, message_id:|
+      { "content" => "<p>Hello</p><img src=\"#{inline_src}\"><p>Bye</p>" }
+    end
+
+    downloaded_cids = []
+    @stub_zoho.define_singleton_method(:download_inline_image) do |folder_id:, message_id:, content_id:|
+      downloaded_cids << content_id
+      "fake-png-bytes"
+    end
+
+    SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+
+    assert_includes downloaded_cids, "ii_abc123"
+
+    email = CachedEmail.find_by(zoho_message_id: "msg_001")
+    # Body should not contain Zoho's ImageDisplay URL any more
+    assert_no_match "ImageDisplay", email.body
+    # Body should contain a rails blob path instead
+    assert_match "/rails/active_storage", email.body
+    # Surrounding content preserved
+    assert_match "<p>Hello</p>", email.body
+  end
+
+  test "continues syncing when inline image download fails" do
+    inline_src = "/mail/ImageDisplay?na=123&nmsgId=msg_001&f=img.png&mode=inline&cid=ii_bad&"
+    @stub_zoho.define_singleton_method(:email) do |folder_id:, message_id:|
+      { "content" => "<p>Text</p><img src=\"#{inline_src}\">" }
+    end
+
+    @stub_zoho.define_singleton_method(:download_inline_image) do |folder_id:, message_id:, content_id:|
+      raise ZohoMailService::ApiError, "Not found"
+    end
+
+    assert_difference "CachedEmail.count", 2 do
+      assert_nothing_raised { SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho) }
+    end
+
+    # Body left unchanged — displayable_body strips the broken tag at render time
+    email = CachedEmail.find_by(zoho_message_id: "msg_001")
+    assert_match "ImageDisplay", email.body
   end
 
   test "continues syncing when individual email content fetch fails" do
