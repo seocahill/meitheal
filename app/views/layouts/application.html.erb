@@ -54,7 +54,7 @@
 
           <div class="sidebar-nav-section">Participate</div>
           <%= link_to "Funding", funding_opportunities_path, class: sidebar_nav_class("funding_opportunities") %>
-          <%= link_to "Book Space", new_booking_path, class: sidebar_nav_class("bookings") %>
+          <%= link_to "Book Space", calendar_path, class: sidebar_nav_class("bookings") %>
           <%= link_to "Make a Payment", new_payment_path, class: sidebar_nav_class("payments") %>
 
           <% if current_user_can_edit? %>
