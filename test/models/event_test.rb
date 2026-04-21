@@ -104,4 +104,30 @@ class EventTest < ActiveSupport::TestCase
     event = Event.new(user: @viewer)
     assert_not event.publishable_by?(@viewer)
   end
+
+  test "ensure_qr_code attaches a PNG qr code" do
+    event = Event.create!(title: "Test", starts_at: 1.week.from_now, user: @viewer)
+    assert_not event.qr_code.attached?
+
+    event.ensure_qr_code("https://thencf.art/events/#{event.id}")
+
+    assert event.qr_code.attached?
+    assert_equal "image/png", event.qr_code.content_type
+  end
+
+  test "ensure_qr_code does not overwrite an existing attachment" do
+    event = Event.create!(title: "Test", starts_at: 1.week.from_now, user: @viewer)
+    event.ensure_qr_code("https://thencf.art/events/#{event.id}")
+    original_key = event.qr_code.key
+
+    event.ensure_qr_code("https://thencf.art/events/#{event.id}")
+
+    assert_equal original_key, event.qr_code.key
+  end
+
+  test "ensure_qr_code is a no-op for unpersisted events" do
+    event = Event.new(title: "Test", starts_at: 1.week.from_now, user: @viewer)
+    assert_nothing_raised { event.ensure_qr_code("https://thencf.art/events/new") }
+    assert_not event.qr_code.attached?
+  end
 end

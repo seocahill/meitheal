@@ -23,8 +23,10 @@ class EventsController < ApplicationController
 
   def show
     unless @event.published? || can_view_draft?(@event)
-      redirect_to events_path, alert: "Event not found."
+      redirect_to events_path, alert: "Event not found." and return
     end
+
+    @event.ensure_qr_code(event_url(@event))
   end
 
   def new

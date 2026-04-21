@@ -69,8 +69,21 @@
     <% end %>
   </article>
 
+  <% if @event.qr_code.attached? %>
+    <div class="mt-10 pt-8 border-t border-gray-200 not-prose print:mt-4">
+      <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Share this event</p>
+      <div class="flex items-start gap-4">
+        <%= image_tag @event.qr_code, alt: "QR code for #{@event.title}", class: "w-28 h-28", width: 112, height: 112 %>
+        <div class="text-sm text-gray-600 self-center">
+          <p>Scan to view event details</p>
+          <p class="mt-1 font-mono text-xs text-gray-400 break-all"><%= event_url(@event) %></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <% if @event.editable_by?(Current.user) %>
-    <div class="flex flex-wrap gap-4 mt-12 pt-8 border-t border-gray-200">
+    <div class="flex flex-wrap gap-4 mt-12 pt-8 border-t border-gray-200 print:hidden">
       <%= link_to "Edit", edit_event_path(@event), class: "px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm" %>
       <% if @event.publishable_by?(Current.user) %>
         <% if @event.published? %>

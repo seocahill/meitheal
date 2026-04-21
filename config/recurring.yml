@@ -29,6 +29,10 @@ production:
     class: SyncBrevoContactsJob
     queue: default
     schedule: every 6 hours
+  sync_brevo_newsletters:
+    class: SyncBrevoNewslettersJob
+    queue: default
+    schedule: every monday at 8am
   # refresh_funding_opportunities:
   #   class: RefreshFundingOpportunitiesJob
   #   queue: default

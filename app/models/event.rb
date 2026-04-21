@@ -1,6 +1,7 @@
 class Event < ApplicationRecord
   belongs_to :user
   has_one_attached :image
+  has_one_attached :qr_code
   has_rich_text :rich_description
 
   validates :title, presence: true
@@ -20,6 +21,14 @@ class Event < ApplicationRecord
   def publishable_by?(user)
     return false unless user
     user.can_edit?
+  end
+
+  def ensure_qr_code(url)
+    return unless persisted?
+    return if qr_code.attached?
+
+    png = RQRCode::QRCode.new(url).as_png(size: 300)
+    qr_code.attach(io: StringIO.new(png.to_s), filename: "qr-code.png", content_type: "image/png")
   end
 
   # Returns the description content - old markdown column if present, otherwise rich text

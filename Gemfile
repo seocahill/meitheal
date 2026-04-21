@@ -111,3 +111,6 @@ gem "webmock", "~> 3.26", group: :test
 
 gem "sentry-ruby"
 gem "sentry-rails"
+
+# QR code generation [https://github.com/whomwah/rqrcode]
+gem "rqrcode"

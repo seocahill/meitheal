@@ -1,5 +1,5 @@
 <div class="max-w-2xl mx-auto px-4 sm:px-6">
-  <h1 class="text-3xl font-bold text-gray-900 mb-2">Newsletter</h1>
+  <h1 class="text-3xl font-bold text-gray-900 mb-2">Newsletter Mailing List</h1>
   <p class="text-gray-600 mb-8">Stay up to date with events, funding opportunities, and news from THENCF.</p>
 
   <div class="card p-6 mb-8">
@@ -21,6 +21,19 @@
         <%= form.submit "Subscribe", class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
       </div>
     <% end %>
+  </div>
+
+  <div class="card p-6 mb-8">
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Share this page</h2>
+    <div class="flex items-start gap-4">
+      <div class="flex-shrink-0">
+        <%= qr_code_svg(newsletter_page_url) %>
+      </div>
+      <div class="text-sm text-gray-600 self-center">
+        <p>Scan to sign up for the newsletter</p>
+        <p class="mt-1 font-mono text-xs text-gray-400"><%= newsletter_page_url %></p>
+      </div>
+    </div>
   </div>
 
   <% if @sent_newsletters.any? %>
