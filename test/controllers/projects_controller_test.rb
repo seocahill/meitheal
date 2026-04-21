@@ -33,6 +33,21 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_match @draft_project.title, response.body
   end
 
+  test "index labels draft projects as draft: for discussion" do
+    sign_in_as(@viewer)
+    get projects_url
+    assert_match "draft: for discussion", response.body
+  end
+
+  test "index does not show draft label on published projects" do
+    sign_in_as(@viewer)
+    get projects_url
+    # The published project title should appear without the badge next to it
+    assert_match @project.title, response.body
+    # Only one badge total (for the one draft)
+    assert_equal 1, response.body.scan("draft: for discussion").length
+  end
+
   test "should get show for published project" do
     get project_url(@project.slug)
     assert_response :success
