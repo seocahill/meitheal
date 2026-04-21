@@ -175,6 +175,7 @@ Rails.application.routes.draw do
   # Newsletter (public archive + signup)
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
+  get "newsletter/qr.svg", to: "newsletter_subscriptions#qr_code", as: :newsletter_qr_code
 
   # Static pages (catch-all, must be last before root)
   get ":slug", to: "pages#show", as: :page

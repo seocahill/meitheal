@@ -7,7 +7,8 @@ class ProjectsController < ApplicationController
   before_action :require_publishable, only: [ :publish, :unpublish ]
 
   def index
-    @pagy, @posts = pagy(Post.project.published.recent, items: 10)
+    scope = authenticated? ? Post.project : Post.project.published
+    @pagy, @posts = pagy(scope.recent, items: 10)
   end
 
   def show

@@ -8,6 +8,11 @@ class NewsletterSubscriptionsController < ApplicationController
     @sent_newsletters = Newsletter.sent.order(sent_at: :desc)
   end
 
+  def qr_code
+    svg = RQRCode::QRCode.new(newsletter_page_url).as_svg(module_size: 6, use_path: true, standalone: true)
+    send_data svg, type: "image/svg+xml", disposition: "inline", filename: "newsletter-qr.svg"
+  end
+
   def create
     @email = params[:email]&.strip&.downcase
 

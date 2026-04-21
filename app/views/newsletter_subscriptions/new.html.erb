@@ -26,12 +26,14 @@
   <div class="card p-6 mb-8">
     <h2 class="text-lg font-semibold text-gray-900 mb-3">Share this page</h2>
     <div class="flex items-start gap-4">
-      <div class="flex-shrink-0">
-        <%= qr_code_svg(newsletter_page_url) %>
-      </div>
-      <div class="text-sm text-gray-600 self-center">
+      <%= image_tag newsletter_qr_code_path, alt: "QR code for newsletter signup", class: "w-28 h-28 flex-shrink-0" %>
+      <div class="text-sm text-gray-600 self-center space-y-2">
         <p>Scan to sign up for the newsletter</p>
-        <p class="mt-1 font-mono text-xs text-gray-400"><%= newsletter_page_url %></p>
+        <p class="font-mono text-xs text-gray-400"><%= newsletter_page_url %></p>
+        <div class="flex gap-3 pt-1">
+          <%= link_to "Download", newsletter_qr_code_path, download: "newsletter-qr.svg", class: "text-purple-600 hover:text-purple-700 font-medium text-xs" %>
+          <%= link_to "Print", newsletter_qr_code_path, target: "_blank", rel: "noopener", class: "text-purple-600 hover:text-purple-700 font-medium text-xs" %>
+        </div>
       </div>
     </div>
   </div>

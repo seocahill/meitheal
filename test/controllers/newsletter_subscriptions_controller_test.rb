@@ -12,6 +12,22 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     BrevoService.define_singleton_method(:new, @original_brevo_new)
   end
 
+  test "qr_code serves SVG with correct content type" do
+    get newsletter_qr_code_path
+    assert_response :success
+    assert_equal "image/svg+xml", response.content_type
+  end
+
+  test "qr_code response includes SVG markup" do
+    get newsletter_qr_code_path
+    assert_includes response.body, "<svg"
+  end
+
+  test "qr_code is publicly accessible" do
+    get newsletter_qr_code_path
+    assert_response :success
+  end
+
   test "new shows signup form and archive" do
     get newsletter_page_path
     assert_response :success

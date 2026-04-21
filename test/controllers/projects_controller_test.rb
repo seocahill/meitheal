@@ -22,6 +22,17 @@ class ProjectsControllerTest < ActionDispatch::IntegrationTest
     assert_match "Test Project One", response.body
   end
 
+  test "index hides draft projects from unauthenticated users" do
+    get projects_url
+    assert_no_match @draft_project.title, response.body
+  end
+
+  test "index shows draft projects to logged in users" do
+    sign_in_as(@viewer)
+    get projects_url
+    assert_match @draft_project.title, response.body
+  end
+
   test "should get show for published project" do
     get project_url(@project.slug)
     assert_response :success
