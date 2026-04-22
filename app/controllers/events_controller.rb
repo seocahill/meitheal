@@ -46,10 +46,10 @@ class EventsController < ApplicationController
   end
 
   def update
-    # Viewers can't change published status even on their own events
+    # Viewers can't change published status or reassign ownership
     filtered_params = event_params
     unless Current.user.can_edit?
-      filtered_params = filtered_params.except(:published)
+      filtered_params = filtered_params.except(:published, :user_id)
     end
 
     if @event.update(filtered_params)
@@ -84,7 +84,7 @@ class EventsController < ApplicationController
     params.require(:event).permit(
       :title, :starts_at, :ends_at, :doors_at, :description, :rich_description, :bio,
       :links, :ticket_price_cents, :ticket_url, :capacity,
-      :venue_name, :venue_address, :published, :image
+      :venue_name, :venue_address, :published, :image, :user_id
     )
   end
 

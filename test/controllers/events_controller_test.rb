@@ -135,6 +135,28 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_not @published_event.published?
   end
 
+  # User reassignment tests
+  test "editor can reassign event to another user" do
+    sign_in_as(@editor)
+    other_viewer = users(:owner)
+    patch event_path(@draft_event), params: {
+      event: { user_id: other_viewer.id }
+    }
+    assert_redirected_to event_path(@draft_event)
+    @draft_event.reload
+    assert_equal other_viewer, @draft_event.user
+  end
+
+  test "viewer cannot reassign event user" do
+    sign_in_as(@viewer)
+    original_user = @draft_event.user
+    patch event_path(@draft_event), params: {
+      event: { user_id: users(:editor).id }
+    }
+    @draft_event.reload
+    assert_equal original_user, @draft_event.user
+  end
+
   # Delete tests
   test "owner can delete any event" do
     sign_in_as(@owner)

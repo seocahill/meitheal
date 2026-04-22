@@ -37,6 +37,13 @@
     <%= form.rich_text_area :rich_description %>
   </div>
 
+  <% if Current.user&.can_edit? %>
+    <div>
+      <%= form.label :user_id, "Event Owner", class: "form-label" %>
+      <%= form.select :user_id, User.order(:email_address).map { |u| [u.email_address, u.id] }, {}, class: "form-input" %>
+    </div>
+  <% end %>
+
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
     <%= link_to "Cancel", events_path, class: "text-gray-600 hover:text-gray-900" %>
     <%= form.submit class: "btn-primary text-white px-6 py-2.5 rounded-xl font-medium cursor-pointer" %>
