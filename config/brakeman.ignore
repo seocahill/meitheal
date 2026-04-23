@@ -1,0 +1,40 @@
+{
+  "ignored_warnings": [
+    {
+      "warning_type": "Mass Assignment",
+      "warning_code": 105,
+      "fingerprint": "5b366e502a07ce1dd70a81ad49f449c27f894ce4cc2d2e49fe62dc393f009ab0",
+      "check_name": "PermitAttributes",
+      "file": "app/controllers/admin/users_controller.rb",
+      "line": 63,
+      "note": "Admin-only endpoint — assigning role and approved is intentional"
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "77cfb352d1fed2b2d84b83761d0a49a4632efb296213c831c2c739c13c0d4964",
+      "check_name": "LinkToHref",
+      "file": "app/views/events/show.html.erb",
+      "line": 53,
+      "note": "ticket_url is validated to http/https scheme on Event model"
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "5aaea5c8dcb0c7ff957f7c18c0e825c9eb69ca40792fecf9dec519e967c63938",
+      "check_name": "LinkToHref",
+      "file": "app/views/funding_opportunities/show.html.erb",
+      "line": 50,
+      "note": "url is validated to http/https scheme on FundingOpportunity model"
+    },
+    {
+      "warning_type": "Cross-Site Scripting",
+      "warning_code": 4,
+      "fingerprint": "3dc1b1cd78f79fa24437b68f3dc6dd5673e20f38bb15fbb8f52b51d34d56bcc2",
+      "check_name": "LinkToHref",
+      "file": "app/views/profiles/show.html.erb",
+      "line": 26,
+      "note": "website is validated to http/https scheme on Profile model"
+    }
+  ]
+}

@@ -5,6 +5,7 @@ class Profile < ApplicationRecord
 
   validates :user_id, uniqueness: true
   validates :name, presence: true
+  validates :website, format: { with: /\Ahttps?:\/\/\S+\z/i, message: "must be a valid http or https URL" }, allow_blank: true
 
   scope :visible, -> { where(visible: true) }
   scope :in_public_gallery, -> { where(public_gallery: true) }
