@@ -79,7 +79,6 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: arm64
-  remote: ssh://root@46.225.112.39
 
 # Use a different ssh user than root
 # ssh:
