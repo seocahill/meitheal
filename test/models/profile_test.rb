@@ -31,7 +31,7 @@ class ProfileTest < ActiveSupport::TestCase
 
   test "skills_list returns array from comma-separated string" do
     profile = Profile.new(skills: "painting, sculpture, digital art")
-    assert_equal ["painting", "sculpture", "digital art"], profile.skills_list
+    assert_equal [ "painting", "sculpture", "digital art" ], profile.skills_list
   end
 
   test "skills_list handles nil" do

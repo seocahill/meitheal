@@ -12,7 +12,7 @@ class Space < ApplicationRecord
   # Composite space (e.g. Whole Building) conflicts with all its components.
   def linked_space_ids
     if component_of_id.present?
-      [component_of_id]
+      [ component_of_id ]
     else
       component_spaces.pluck(:id)
     end

@@ -101,7 +101,7 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     get admin_memberships_path, params: { status: "active" }
     assert_response :success
     assert_select "tbody div", text: "owner@example.com"
-    assert_select "tbody div", {count: 0, text: "editor@example.com"}
+    assert_select "tbody div", { count: 0, text: "editor@example.com" }
   end
 
   test "index filters to expired memberships" do
@@ -109,7 +109,7 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     get admin_memberships_path, params: { status: "expired" }
     assert_response :success
     assert_select "tbody div", text: "editor@example.com"
-    assert_select "tbody div", {count: 0, text: "owner@example.com"}
+    assert_select "tbody div", { count: 0, text: "owner@example.com" }
   end
 
   # Pagination

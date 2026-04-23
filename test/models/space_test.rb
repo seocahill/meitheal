@@ -24,7 +24,7 @@ class SpaceTest < ActiveSupport::TestCase
     front_room = spaces(:front_room)
     whole_building = spaces(:whole_building)
 
-    assert_equal [whole_building.id], front_room.linked_space_ids
+    assert_equal [ whole_building.id ], front_room.linked_space_ids
   end
 
   test "linked_space_ids returns component IDs for composite space" do

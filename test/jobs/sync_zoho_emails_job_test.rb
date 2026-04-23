@@ -24,7 +24,7 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     ]
 
     @stub_zoho.define_singleton_method(:configured?) { true }
-    folders = [@inbox_folder]
+    folders = [ @inbox_folder ]
     @stub_zoho.define_singleton_method(:folders) { folders }
 
     zoho_emails = @zoho_emails
@@ -127,7 +127,7 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
 
   test "continues syncing when attachment download fails" do
     @stub_zoho.define_singleton_method(:attachments) do |folder_id:, message_id:|
-      [{ "attachmentId" => "att_001", "attachmentName" => "file.pdf", "attachmentSize" => 100, "contentType" => "application/pdf" }]
+      [ { "attachmentId" => "att_001", "attachmentName" => "file.pdf", "attachmentSize" => 100, "contentType" => "application/pdf" } ]
     end
 
     @stub_zoho.define_singleton_method(:download_attachment) do |folder_id:, message_id:, attachment_id:|

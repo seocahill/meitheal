@@ -12,7 +12,7 @@ class BrevoServiceTest < ActiveSupport::TestCase
 
   test "add_contact builds CreateContact with correct email and list_id" do
     captured = nil
-    with_stubbed_brevo(-> (contact) { captured = contact; OpenStruct.new(id: 1) }) do |service|
+    with_stubbed_brevo(->(contact) { captured = contact; OpenStruct.new(id: 1) }) do |service|
       service.add_contact("test@example.com")
     end
 
@@ -24,7 +24,7 @@ class BrevoServiceTest < ActiveSupport::TestCase
 
   test "add_contact sets FIRSTNAME attribute when name provided" do
     captured = nil
-    with_stubbed_brevo(-> (contact) { captured = contact; OpenStruct.new(id: 1) }) do |service|
+    with_stubbed_brevo(->(contact) { captured = contact; OpenStruct.new(id: 1) }) do |service|
       service.add_contact("test@example.com", name: "Jane")
     end
 
@@ -32,7 +32,7 @@ class BrevoServiceTest < ActiveSupport::TestCase
   end
 
   test "add_contact wraps Brevo::ApiError as BrevoService::ApiError" do
-    error_handler = -> (_) { raise Brevo::ApiError.new(code: 400, response_body: '{"message":"Invalid email"}') }
+    error_handler = ->(_) { raise Brevo::ApiError.new(code: 400, response_body: '{"message":"Invalid email"}') }
 
     error = assert_raises(BrevoService::ApiError) do
       with_stubbed_brevo(error_handler) do |service|
