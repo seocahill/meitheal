@@ -5,6 +5,7 @@ class FundingOpportunity < ApplicationRecord
   validates :title, presence: true
   validates :organization, presence: true
   validates :deadline, presence: true
+  validates :url, format: { with: /\Ahttps?:\/\/\S+\z/i, message: "must be a valid http or https URL" }, allow_blank: true
 
   def editable_by?(user)
     return false unless user

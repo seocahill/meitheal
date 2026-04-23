@@ -1,7 +1,7 @@
 class Admin::PaymentsController < Admin::BaseController
   include Pagy::Method
   before_action :require_owner
-  before_action :set_membership, except: [:index]
+  before_action :set_membership, except: [ :index ]
 
   def index
     scope = Payment.includes(:membership).order(paid_on: :desc, created_at: :desc)

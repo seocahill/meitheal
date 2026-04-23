@@ -6,6 +6,7 @@ class Event < ApplicationRecord
 
   validates :title, presence: true
   validates :starts_at, presence: true
+  validates :ticket_url, format: { with: /\Ahttps?:\/\/\S+\z/i, message: "must be a valid http or https URL" }, allow_blank: true
 
   scope :published, -> { where(published: true) }
   scope :draft, -> { where(published: false) }

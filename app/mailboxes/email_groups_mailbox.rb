@@ -22,7 +22,7 @@ class EmailGroupsMailbox < ApplicationMailbox
 
     unless @group
       bounced!
-      return
+      nil
     end
   end
 

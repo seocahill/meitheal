@@ -12,7 +12,7 @@ class CreateProposals < ActiveRecord::Migration[8.1]
 
       t.timestamps
 
-      t.index [:user_id, :funding_opportunity_id], unique: true
+      t.index [ :user_id, :funding_opportunity_id ], unique: true
     end
   end
 end
