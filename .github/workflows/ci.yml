@@ -119,6 +119,13 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan 46.225.112.39 >> ~/.ssh/known_hosts
 
+      - name: Test SSH connectivity
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/deploy_key
+          chmod 600 /tmp/deploy_key
+          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -i /tmp/deploy_key root@46.225.112.39 echo ok
+          rm /tmp/deploy_key
+
       - name: Deploy with Kamal
         env:
           KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
