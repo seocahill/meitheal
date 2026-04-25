@@ -1,11 +1,16 @@
 <div class="max-w-4xl mx-auto px-4 sm:px-6">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Inbox</h1>
-    <div class="flex gap-2">
+    <div class="flex gap-2 items-center flex-wrap">
+      <span class="text-sm text-gray-500">Per page:</span>
+      <% [5, 10, 25, 50].each do |n| %>
+        <%= link_to n, admin_inbox_index_path(limit: n, show_archived: @show_archived || nil),
+            class: "px-2 py-1 text-sm border rounded #{@pagy.limit == n ? 'bg-purple-600 text-white border-purple-600' : 'border-gray-300 hover:bg-gray-50'}" %>
+      <% end %>
       <% if @show_archived %>
-        <%= link_to "Show Active", admin_inbox_index_path, class: "px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
+        <%= link_to "Show Active", admin_inbox_index_path(limit: @pagy.limit), class: "px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
       <% else %>
-        <%= link_to "Show Archived", admin_inbox_index_path(show_archived: true), class: "px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
+        <%= link_to "Show Archived", admin_inbox_index_path(show_archived: true, limit: @pagy.limit), class: "px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
       <% end %>
     </div>
   </div>
@@ -91,19 +96,14 @@
         <% end %>
 
         <!-- Pagination -->
-        <% if @page > 1 || @has_more %>
-          <div class="px-4 py-3 flex items-center justify-between">
-            <div class="text-sm text-gray-500">
-              Page <%= @page %>
+        <% if @pagy.pages > 1 %>
+          <div class="px-4 py-3 flex items-center justify-between flex-wrap gap-3">
+            <div class="pagy-info text-sm text-gray-500">
+              Page <%= @pagy.page %> of <%= @pagy.pages %> (<%= @pagy.count %> total)
             </div>
-            <div class="flex gap-2">
-              <% if @page > 1 %>
-                <%= link_to "Previous", admin_inbox_index_path(page: @page - 1, show_archived: @show_archived || nil), class: "px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
-              <% end %>
-              <% if @has_more %>
-                <%= link_to "Next", admin_inbox_index_path(page: @page + 1, show_archived: @show_archived || nil), class: "px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50" %>
-              <% end %>
-            </div>
+            <nav class="pagy text-sm" aria-label="Pagination">
+              <%== @pagy.series_nav %>
+            </nav>
           </div>
         <% end %>
       <% end %>
