@@ -106,6 +106,9 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -116,16 +119,8 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan 46.225.112.39 >> ~/.ssh/known_hosts
 
-      - name: Test SSH connectivity
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/deploy_key
-          chmod 600 /tmp/deploy_key
-          ssh -vvv -o BatchMode=yes -o StrictHostKeyChecking=no -i /tmp/deploy_key root@46.225.112.39 echo ok
-          rm /tmp/deploy_key
-
       - name: Deploy with Kamal
         env:
-          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: bundle exec kamal deploy
