@@ -12,4 +12,5 @@ RubyLLM.configure do |config|
 end
 
 # Refresh model registry to pick up latest models
-RubyLLM.models.refresh! unless Rails.env.test?
+# Skip in test env and when the API key is absent (e.g. during Docker build)
+RubyLLM.models.refresh! unless Rails.env.test? || ENV["MISTRAL_API_KEY"].blank?

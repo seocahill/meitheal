@@ -26,7 +26,9 @@ proxy:
 
 # Where you keep your container images.
 registry:
-  server: localhost:5555
+  username: seocahill
+  password:
+    - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
@@ -71,7 +73,6 @@ asset_path: /rails/public/assets
 # Configure the image builder.
 builder:
   arch: arm64
-  remote: ssh://root@46.225.112.39
 
 # Use a different ssh user than root
 # ssh:
