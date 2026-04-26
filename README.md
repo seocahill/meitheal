@@ -18,7 +18,7 @@ Members can book shared studio/event spaces. The system detects overlapping book
 Editors can publish events and news posts with rich text and images. Content can be scheduled and toggled between draft and published states.
 
 ### Funding opportunities
-A curated directory of grants and funding calls, with deadline tracking and category filtering. A background job uses an LLM (Mistral) to research and populate new opportunities from sources like Mayo Arts Service, the Arts Council, and European funding bodies.
+A curated directory of grants and funding calls, with deadline tracking and category filtering. Funding opportunities can be manually added by any member (in order to ensure equally access for all). A background job uses an LLM (Mistral) supplements this by researching and suggesting new opportunities from sources like Mayo Arts Service, the Arts Council, and European funding bodies. 
 
 ### Proposals
 Members can submit funding proposals against opportunities. Proposals move through a draft → submitted → approved/rejected workflow, with document upload support.
@@ -89,7 +89,7 @@ Copy `.env.example` (if present) and fill in:
 - `BREVO_API_KEY` — Brevo email marketing
 - `SUMUP_API_KEY` — SumUp payment processing
 - `ZOHO_*` — Zoho Mail OAuth credentials
-- `MISTRAL_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` — LLM access
+- `MISTRAL_API_KEY` — LLM access
 - `AWS_*` — S3 for file storage (production)
 - `RECAPTCHA_*` — reCAPTCHA site/secret keys
 - `SENTRY_DSN` — Error reporting
