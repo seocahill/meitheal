@@ -4,7 +4,7 @@ class EmailDigestService
   end
 
   def generate
-    return nil unless llm_configured?
+    return nil unless @chat || llm_configured?
 
     emails = recent_emails
     return nil if emails.empty?
