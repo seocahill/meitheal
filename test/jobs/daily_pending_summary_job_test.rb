@@ -3,6 +3,19 @@ require "test_helper"
 class DailyPendingSummaryJobTest < ActiveJob::TestCase
   include ActionMailer::TestHelper
 
+  test "dispatches mail via MailerDeliveryJob so transient SMTP failures can be retried" do
+    stub_service = Object.new
+    stub_service.define_singleton_method(:generate) { nil }
+    original_new = EmailDigestService.method(:new)
+    EmailDigestService.define_singleton_method(:new) { |**_| stub_service }
+
+    assert_enqueued_with(job: MailerDeliveryJob) do
+      DailyPendingSummaryJob.perform_now
+    end
+  ensure
+    EmailDigestService.define_singleton_method(:new, original_new)
+  end
+
   test "job enqueues the daily pending summary email" do
     stub_service = Object.new
     stub_service.define_singleton_method(:generate) { nil }
