@@ -1,0 +1,47 @@
+<h1>Ticket Confirmation</h1>
+
+<p>Hi <%= @ticket.buyer_name %>,</p>
+
+<p>Thank you — your payment was successful! Here are your booking details:</p>
+
+<table>
+  <tr>
+    <td><strong>Event</strong></td>
+    <td><%= @event.title %></td>
+  </tr>
+  <tr>
+    <td><strong>Date</strong></td>
+    <td><%= @event.starts_at.strftime("%A %d %B %Y") %></td>
+  </tr>
+  <% if @event.doors_at.present? %>
+  <tr>
+    <td><strong>Doors</strong></td>
+    <td><%= @event.doors_at.strftime("%-l:%M%P") %></td>
+  </tr>
+  <% end %>
+  <tr>
+    <td><strong>Tickets</strong></td>
+    <td><%= @ticket.quantity %></td>
+  </tr>
+  <tr>
+    <td><strong>Total paid</strong></td>
+    <td>&euro;<%= number_with_precision(@ticket.amount_cents / 100.0, precision: 2) %></td>
+  </tr>
+  <% if @event.venue_name.present? %>
+  <tr>
+    <td><strong>Venue</strong></td>
+    <td><%= @event.venue_name %><% if @event.venue_address.present? %>, <%= @event.venue_address %><% end %></td>
+  </tr>
+  <% end %>
+</table>
+
+<p>Please bring this email as proof of purchase.</p>
+
+<p>
+  <%= link_to "View event details", event_url(@event) %>
+</p>
+
+<p>
+  See you there!<br>
+  THENCF
+</p>

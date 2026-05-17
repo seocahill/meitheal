@@ -26,6 +26,10 @@ Rails.application.routes.draw do
       patch :publish
       patch :unpublish
     end
+    resource :tickets, controller: "event_tickets", only: [ :new ] do
+      post :create_checkout
+      get :complete
+    end
   end
 
   get "faq", to: "faqs#index", as: :faq

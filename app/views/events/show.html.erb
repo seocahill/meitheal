@@ -40,15 +40,37 @@
       </div>
     <% end %>
 
-    <% if @event.ticket_price_cents.present? || @event.ticket_url.present? %>
+    <% if @event.ticketing_enabled? || @event.ticket_price_cents.present? || @event.ticket_url.present? %>
       <div class="mt-8 p-4 bg-gray-50 rounded not-prose">
         <p class="font-semibold text-lg mb-2">Tickets</p>
         <% if @event.ticket_price_cents.present? && @event.ticket_price_cents > 0 %>
-          <p class="text-gray-700">Price: €<%= @event.ticket_price_cents / 100.0 %></p>
+          <p class="text-gray-700">Price: €<%= number_with_precision(@event.ticket_price_cents / 100.0, precision: 2) %></p>
         <% elsif @event.ticket_price_cents == 0 %>
           <p class="text-gray-700">Free admission</p>
         <% end %>
-        <% if @event.ticket_url.present? %>
+
+        <% if @event.ticketing_enabled? %>
+          <% if @event.capacity.present? %>
+            <% remaining = @event.tickets_remaining %>
+            <p class="text-sm text-gray-500 mt-1">
+              <% if @event.sold_out? %>
+                <span class="text-red-600 font-medium">Sold out</span>
+              <% else %>
+                <%= remaining %> tickets remaining
+              <% end %>
+            </p>
+          <% end %>
+
+          <div class="mt-3">
+            <% if @event.sold_out? %>
+              <span class="px-4 py-2 bg-gray-300 text-gray-600 rounded font-medium text-sm cursor-not-allowed">Sold Out</span>
+            <% elsif @event.tickets_available_from.present? && @event.tickets_available_from > Time.current %>
+              <p class="text-sm text-gray-500">On sale from <%= @event.tickets_available_from.strftime("%A %d %B at %-l:%M%P") %></p>
+            <% else %>
+              <%= link_to "Buy Tickets →", new_event_tickets_path(@event), class: "px-4 py-2 btn-primary text-white rounded font-medium text-sm inline-block" %>
+            <% end %>
+          </div>
+        <% elsif @event.ticket_url.present? %>
           <p class="mt-2">
             <%= link_to "Buy Tickets →", @event.ticket_url, class: "underline font-medium", target: "_blank", rel: "noopener" %>
           </p>

@@ -1,5 +1,6 @@
 class Event < ApplicationRecord
   belongs_to :user
+  has_many :tickets, dependent: :destroy
   has_one_attached :image
   has_one_attached :qr_code
   has_rich_text :rich_description
@@ -30,6 +31,28 @@ class Event < ApplicationRecord
 
     png = RQRCode::QRCode.new(url).as_png(size: 300)
     qr_code.attach(io: StringIO.new(png.to_s), filename: "qr-code.png", content_type: "image/png")
+  end
+
+  def tickets_sold
+    tickets.paid.sum(:quantity)
+  end
+
+  def tickets_remaining
+    return nil unless capacity.present?
+    [ capacity - tickets_sold, 0 ].max
+  end
+
+  def sold_out?
+    return false unless capacity.present?
+    tickets_remaining == 0
+  end
+
+  def ticketing_available?
+    return false unless ticketing_enabled?
+    return false unless ticket_price_cents.present? && ticket_price_cents > 0
+    return false if sold_out?
+    return false if tickets_available_from.present? && tickets_available_from > Time.current
+    true
   end
 
   # Returns the description content - old markdown column if present, otherwise rich text

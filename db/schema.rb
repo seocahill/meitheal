@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_10_134011) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_113902) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -170,6 +170,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_134011) do
     t.datetime "starts_at", null: false
     t.integer "ticket_price_cents"
     t.string "ticket_url"
+    t.boolean "ticketing_enabled", default: false, null: false
+    t.datetime "tickets_available_from"
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
@@ -607,6 +609,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_134011) do
     t.index ["user_id", "postable_id"], name: "thredded_user_topic_read_states_user_postable", unique: true
   end
 
+  create_table "tickets", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.string "buyer_email", null: false
+    t.string "buyer_name", null: false
+    t.datetime "created_at", null: false
+    t.integer "event_id", null: false
+    t.integer "quantity", default: 1, null: false
+    t.integer "status", default: 0, null: false
+    t.string "sumup_checkout_id"
+    t.string "sumup_transaction_id"
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_tickets_on_event_id"
+    t.index ["status"], name: "index_tickets_on_status"
+    t.index ["sumup_checkout_id"], name: "index_tickets_on_sumup_checkout_id"
+  end
+
   create_table "tool_calls", force: :cascade do |t|
     t.json "arguments", default: {}
     t.datetime "created_at", null: false
@@ -656,5 +674,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_10_134011) do
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "users", on_delete: :cascade
+  add_foreign_key "tickets", "events"
   add_foreign_key "tool_calls", "messages"
 end
