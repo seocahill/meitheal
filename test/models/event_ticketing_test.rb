@@ -79,4 +79,38 @@ class EventTicketingTest < ActiveSupport::TestCase
     @event.update!(tickets_available_from: nil)
     assert @event.ticketing_available?
   end
+
+  # ticket_availability_label
+  test "ticket_availability_label is nil when no capacity set" do
+    @event.update!(capacity: nil)
+    assert_nil @event.ticket_availability_label
+  end
+
+  test "ticket_availability_label shows 'Tickets still available' when above 20% threshold" do
+    # fixture has 1 paid ticket out of 50 capacity — well above 20% remaining
+    assert_equal "Tickets still available", @event.ticket_availability_label
+  end
+
+  test "ticket_availability_label shows count when 80% or more are sold" do
+    @event.update!(capacity: 5)
+    # sell 4 more (fixture already has 1 paid) → 5 sold out of 5... use capacity 6 so 1 remains
+    @event.update!(capacity: 6)
+    Ticket.create!(event: @event, buyer_name: "Extra", buyer_email: "e@e.com",
+                   quantity: 4, amount_cents: 4000, status: :paid)
+    # 5 sold, 1 remaining out of 6 = 83% sold → show count
+    assert_equal "1 ticket left", @event.ticket_availability_label
+  end
+
+  test "ticket_availability_label uses plural when multiple tickets left but below threshold" do
+    @event.update!(capacity: 10)
+    Ticket.create!(event: @event, buyer_name: "Extra", buyer_email: "e@e.com",
+                   quantity: 7, amount_cents: 7000, status: :paid)
+    # 8 sold, 2 remaining out of 10 = 80% sold = exactly at threshold → show count
+    assert_equal "2 tickets left", @event.ticket_availability_label
+  end
+
+  test "ticket_availability_label is nil when sold out" do
+    @event.update!(capacity: 1)
+    assert_nil @event.ticket_availability_label
+  end
 end

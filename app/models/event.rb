@@ -47,6 +47,17 @@ class Event < ApplicationRecord
     tickets_remaining == 0
   end
 
+  def ticket_availability_label
+    return nil unless capacity.present?
+    return nil if sold_out?
+    remaining = tickets_remaining
+    if remaining <= (capacity * 0.2).ceil
+      "#{remaining} #{remaining == 1 ? "ticket" : "tickets"} left"
+    else
+      "Tickets still available"
+    end
+  end
+
   def ticketing_available?
     return false unless ticketing_enabled?
     return false unless ticket_price_cents.present? && ticket_price_cents > 0

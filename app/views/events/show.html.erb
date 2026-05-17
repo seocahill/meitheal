@@ -51,12 +51,12 @@
 
         <% if @event.ticketing_enabled? %>
           <% if @event.capacity.present? %>
-            <% remaining = @event.tickets_remaining %>
-            <p class="text-sm text-gray-500 mt-1">
+            <% label = @event.ticket_availability_label %>
+            <p class="text-sm mt-1">
               <% if @event.sold_out? %>
                 <span class="text-red-600 font-medium">Sold out</span>
-              <% else %>
-                <%= remaining %> tickets remaining
+              <% elsif label %>
+                <span class="<%= label == "Tickets still available" ? "text-gray-500" : "text-orange-600 font-medium" %>"><%= label %></span>
               <% end %>
             </p>
           <% end %>
