@@ -98,7 +98,7 @@ class EventsController < ApplicationController
   def convert_price_to_cents(attrs)
     euros_str = params.dig(:event, :ticket_price_cents_euros)
     return attrs unless params.dig(:event)&.key?("ticket_price_cents_euros")
-    cents = euros_str.present? ? (euros_str.to_f * 100).round : nil
+    cents = euros_str.present? ? (euros_str.to_d * 100).to_i : nil
     attrs.merge(ticket_price_cents: cents)
   end
 
