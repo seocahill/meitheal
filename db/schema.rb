@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_113902) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_17_134357) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -160,7 +160,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_113902) do
 
   create_table "events", force: :cascade do |t|
     t.text "bio"
-    t.integer "capacity"
+    t.integer "capacity", default: 50
     t.datetime "created_at", null: false
     t.text "description"
     t.datetime "doors_at"
