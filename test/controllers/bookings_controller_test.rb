@@ -21,6 +21,16 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "calendar with invalid month param falls back to current month" do
+    get calendar_path(month: "not-a-date")
+    assert_response :success
+  end
+
+  test "calendar with overlong month param falls back to current month" do
+    get calendar_path(month: "a" * 133)
+    assert_response :success
+  end
+
   # Booking management
   test "new requires authentication" do
     get new_booking_path
@@ -31,6 +41,24 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@viewer)
     get new_booking_path
     assert_response :success
+  end
+
+  test "new booking form defaults starts_at to noon today" do
+    sign_in_as(@viewer)
+    travel_to Time.zone.parse("2026-05-19 09:30") do
+      get new_booking_path
+      assert_response :success
+      assert_includes response.body, "2026-05-19T12:00"
+    end
+  end
+
+  test "new booking form defaults ends_at to 2 hours after noon today" do
+    sign_in_as(@viewer)
+    travel_to Time.zone.parse("2026-05-19 09:30") do
+      get new_booking_path
+      assert_response :success
+      assert_includes response.body, "2026-05-19T14:00"
+    end
   end
 
   test "authenticated user can create booking" do
