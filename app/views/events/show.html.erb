@@ -40,30 +40,22 @@
       </div>
     <% end %>
 
-    <% if @event.ticket_price_cents.present? || @event.ticket_url.present? %>
-      <div class="mt-8 p-4 bg-gray-50 rounded not-prose">
-        <p class="font-semibold text-lg mb-2">Tickets</p>
-        <% if @event.ticket_price_cents.present? && @event.ticket_price_cents > 0 %>
-          <p class="text-gray-700">Price: €<%= @event.ticket_price_cents / 100.0 %></p>
-        <% elsif @event.ticket_price_cents == 0 %>
-          <p class="text-gray-700">Free admission</p>
-        <% end %>
-        <% if @event.ticket_url.present? %>
-          <p class="mt-2">
-            <%= link_to "Buy Tickets →", @event.ticket_url, class: "underline font-medium", target: "_blank", rel: "noopener" %>
-          </p>
-        <% end %>
-      </div>
-    <% end %>
-
-    <% if @event.venue_name.present? || @event.venue_address.present? %>
-      <div class="mt-8">
-        <p class="font-semibold">Location</p>
-        <% if @event.venue_name.present? %>
-          <p><%= @event.venue_name %></p>
-        <% end %>
-        <% if @event.venue_address.present? %>
-          <p class="text-gray-600"><%= @event.venue_address %></p>
+    <% if @event.ticketing_enabled? || @event.ticket_url.present? %>
+      <div class="mt-8 not-prose">
+        <% if @event.ticketing_enabled? %>
+          <% scarcity_label = @event.capacity.present? ? @event.ticket_availability_label : nil %>
+          <% if @event.sold_out? %>
+            <span class="block w-full text-center px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium text-sm cursor-not-allowed">Sold Out</span>
+          <% elsif @event.tickets_available_from.present? && @event.tickets_available_from > Time.current %>
+            <p class="text-sm text-gray-500">On sale from <strong class="text-gray-700"><%= @event.tickets_available_from.strftime("%A %d %B at %-l:%M%P") %></strong></p>
+          <% else %>
+            <%= link_to "Get Tickets →", new_event_tickets_path(@event), class: "block w-full text-center px-6 py-3 btn-primary rounded-xl font-semibold text-sm", style: "color: white;" %>
+            <% if scarcity_label && scarcity_label != "Tickets still available" %>
+              <p class="text-center text-xs text-orange-600 font-medium mt-2"><%= scarcity_label %></p>
+            <% end %>
+          <% end %>
+        <% elsif @event.ticket_url.present? %>
+          <%= link_to "Get Tickets →", @event.ticket_url, class: "block w-full text-center px-6 py-3 btn-primary rounded-xl font-semibold text-sm", style: "color: white;", target: "_blank", rel: "noopener" %>
         <% end %>
       </div>
     <% end %>
