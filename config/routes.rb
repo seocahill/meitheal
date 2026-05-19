@@ -29,6 +29,7 @@ Rails.application.routes.draw do
     resource :tickets, controller: "event_tickets", only: [ :new ] do
       post :create_checkout
       get :complete
+      get :receipt
     end
   end
 
@@ -37,6 +38,7 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
+    resources :ticket_sales, only: [ :index, :show ]
     resources :payments, only: [ :index ]
     resources :bookings, only: [ :index ] do
       member do

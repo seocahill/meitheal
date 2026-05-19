@@ -27,15 +27,7 @@
     <td><strong>Total paid</strong></td>
     <td>&euro;<%= number_with_precision(@ticket.amount_cents / 100.0, precision: 2) %></td>
   </tr>
-  <% if @event.venue_name.present? %>
-  <tr>
-    <td><strong>Venue</strong></td>
-    <td><%= @event.venue_name %><% if @event.venue_address.present? %>, <%= @event.venue_address %><% end %></td>
-  </tr>
-  <% end %>
 </table>
-
-<p>Please bring this email as proof of purchase.</p>
 
 <p>
   <%= link_to "View event details", event_url(@event) %>

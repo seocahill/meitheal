@@ -11,11 +11,6 @@ Doors:        <%= @event.doors_at.strftime("%-l:%M%P") %>
 <% end %>
 Tickets:      <%= @ticket.quantity %>
 Total paid:   €<%= number_with_precision(@ticket.amount_cents / 100.0, precision: 2) %>
-<% if @event.venue_name.present? %>
-Venue:        <%= @event.venue_name %><% if @event.venue_address.present? %>, <%= @event.venue_address %><% end %>
-<% end %>
-
-Please bring this email as proof of purchase.
 
 View event details: <%= event_url(@event) %>
 
