@@ -12,10 +12,10 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 4,
-      "fingerprint": "77cfb352d1fed2b2d84b83761d0a49a4632efb296213c831c2c739c13c0d4964",
+      "fingerprint": "d3c33680b235bdcd2dc7bf561f5730b48bfa6ab71b23f736e3d63ac9ba375a70",
       "check_name": "LinkToHref",
       "file": "app/views/events/show.html.erb",
-      "line": 53,
+      "line": 58,
       "note": "ticket_url is validated to http/https scheme on Event model"
     },
     {
