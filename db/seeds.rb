@@ -141,18 +141,27 @@ end
 Payment.find_or_create_by!(membership: mem_admin, paid_on: 1.year.ago.to_date) do |p|
   p.amount_cents = 300_00
   p.payment_method = :bank_transfer
+  p.user_email = admin.email_address
+  p.user_name = "Admin User"
+  p.description = "Annual associate membership"
   p.notes = "Annual membership"
 end
 
 Payment.find_or_create_by!(membership: mem_editor, paid_on: 6.months.ago.to_date) do |p|
   p.amount_cents = 150_00
   p.payment_method = :bank_transfer
+  p.user_email = editor.email_address
+  p.user_name = "Editor Person"
+  p.description = "Associate membership (6 months)"
   p.notes = "Half-year"
 end
 
 Payment.find_or_create_by!(membership: mem_member, paid_on: 2.months.ago.to_date) do |p|
   p.amount_cents = 75_00
   p.payment_method = :cash
+  p.user_email = member.email_address
+  p.user_name = "Member One"
+  p.description = "Youth membership (concession rate)"
   p.notes = "Concession"
 end
 
