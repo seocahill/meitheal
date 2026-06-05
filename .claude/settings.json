@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kamal app exec --reuse \"cat /tmp/may_newsletter.html\" 2>&1 | grep -v '^\\\\s*INFO\\\\|^Get current\\\\|^Launching\\\\|^App Host\\\\|^  INFO\\\\|^  ERROR' > /tmp/may_newsletter.html *)",
+      "Read(//tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
+    ]
+  }
+}

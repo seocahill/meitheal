@@ -1,6 +1,9 @@
 <div class="max-w-6xl mx-auto px-4 sm:px-6">
   <div class="flex justify-between items-center mb-8">
-    <h1 class="text-3xl font-bold text-gray-900">Members</h1>
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Members</h1>
+      <p class="text-sm text-gray-500 mt-1"><%= @total_member_count %> members in the community</p>
+    </div>
     <% if authenticated? %>
       <%= link_to "My Profile", my_profile_path, class: "btn-primary text-white px-5 py-2.5 rounded-xl font-medium" %>
     <% end %>
