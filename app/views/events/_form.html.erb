@@ -17,7 +17,7 @@
 
   <div>
     <%= form.label :image, "Event Image/Poster", class: "form-label" %>
-    <% if event.image.attached? %>
+    <% if event.image.attached? && event.image.blob.persisted? %>
       <div class="mt-2 mb-2">
         <%= image_tag event.image, class: "max-w-xs rounded-xl" %>
       </div>

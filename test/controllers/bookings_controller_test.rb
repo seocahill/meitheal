@@ -129,6 +129,24 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert pending_booking.confirmed?
   end
 
+  test "confirm records the approving user" do
+    pending_booking = bookings(:pending_booking)
+    sign_in_as(@editor)
+    patch confirm_booking_path(pending_booking)
+    pending_booking.reload
+    assert_equal @editor, pending_booking.approved_by
+  end
+
+  test "confirm records the approval time" do
+    pending_booking = bookings(:pending_booking)
+    sign_in_as(@editor)
+    freeze_time do
+      patch confirm_booking_path(pending_booking)
+      pending_booking.reload
+      assert_equal Time.current, pending_booking.approved_at
+    end
+  end
+
   test "viewer cannot confirm bookings" do
     pending_booking = bookings(:pending_booking)
     sign_in_as(@viewer)

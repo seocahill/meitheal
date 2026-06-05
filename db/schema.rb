@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_17_134357) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_26_072047) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -100,6 +100,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_134357) do
   end
 
   create_table "bookings", force: :cascade do |t|
+    t.datetime "approved_at"
+    t.integer "approved_by_id"
     t.datetime "created_at", null: false
     t.text "description"
     t.datetime "ends_at", null: false
@@ -110,6 +112,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_134357) do
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["approved_by_id"], name: "index_bookings_on_approved_by_id"
     t.index ["space_id"], name: "index_bookings_on_space_id"
     t.index ["starts_at"], name: "index_bookings_on_starts_at"
     t.index ["status"], name: "index_bookings_on_status"
@@ -653,6 +656,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_17_134357) do
   add_foreign_key "archived_emails", "email_groups"
   add_foreign_key "bookings", "spaces"
   add_foreign_key "bookings", "users"
+  add_foreign_key "bookings", "users", column: "approved_by_id"
   add_foreign_key "chats", "models"
   add_foreign_key "email_group_memberships", "email_groups"
   add_foreign_key "email_group_memberships", "users"

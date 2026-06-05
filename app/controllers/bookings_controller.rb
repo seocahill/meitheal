@@ -59,7 +59,7 @@ class BookingsController < ApplicationController
   end
 
   def confirm
-    @booking.confirmed!
+    @booking.update!(status: :confirmed, approved_by: Current.user, approved_at: Time.current)
     redirect_to calendar_path, notice: "Booking confirmed."
   end
 
