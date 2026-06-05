@@ -4,7 +4,8 @@ class ProfilesController < ApplicationController
 
   # GET /profiles - Member directory
   def index
-    @total_member_count = Profile.visible.count
+    @total_member_count = Profile.count
+    @visible_member_count = Profile.visible.count
     @profiles = Profile.visible.with_content
 
     if params[:skill].present?

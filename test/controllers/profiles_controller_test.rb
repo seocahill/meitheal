@@ -15,10 +15,11 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @owner_profile.name
   end
 
-  test "index shows total member count" do
+  test "index shows total member count in heading and visible count in subheading" do
     get profiles_path
     assert_response :success
-    assert_match(/\d+ member/, response.body)
+    assert_match(/#{Profile.count} Members/, response.body)
+    assert_match(/#{Profile.visible.count} members with visible profiles/, response.body)
   end
 
   test "index hides profiles without any content by default" do
