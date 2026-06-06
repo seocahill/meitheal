@@ -45,7 +45,9 @@
         <%= link_to "Sign In", new_session_path, class: "menu-highlight inline-block text-white font-bold" %>
       <% end %>
 
-      <p class="text-white/60 text-sm mt-8">
+      <%= link_to t("switch_language"), alternate_locale_path, class: "inline-block text-white/60 hover:text-white text-sm mt-4" %>
+
+      <p class="text-white/60 text-sm mt-4">
         Ballina, Co. Mayo, Ireland
       </p>
     </div>
@@ -55,7 +57,7 @@
   <div class="hidden lg:flex flex-1 items-end justify-end p-12">
     <% if @upcoming_events.any? %>
       <div class="bg-black/30 backdrop-blur-sm rounded-2xl p-6 max-w-md">
-        <h2 class="text-white font-bold text-xl mb-4">Upcoming</h2>
+        <h2 class="text-white font-bold text-xl mb-4"><%= t("upcoming") %></h2>
         <div class="space-y-4">
           <% @upcoming_events.each do |event| %>
             <%= link_to event_path(event), class: "block group" do %>
@@ -71,7 +73,7 @@
             <% end %>
           <% end %>
         </div>
-        <%= link_to "View all events →", events_path, class: "inline-block mt-4 text-white/80 hover:text-white text-sm" %>
+        <%= link_to t("view_all_events"), events_path, class: "inline-block mt-4 text-white/80 hover:text-white text-sm" %>
       </div>
     <% end %>
   </div>

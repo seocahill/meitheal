@@ -1,4 +1,25 @@
 module ApplicationHelper
+  # Returns the URL for the alternate-language version of the current page.
+  # On a page with an Irish translation, links directly to it.
+  # Falls back to the other locale's home.
+  def alternate_locale_path
+    if I18n.locale == :ga
+      # Irish → English
+      if params[:slug].present? && Page.exists?(slug: params[:slug], locale: "en")
+        page_path(params[:slug])
+      else
+        root_path
+      end
+    else
+      # English → Irish
+      if params[:slug].present? && Page.exists?(slug: params[:slug], locale: "ga")
+        ga_page_path(params[:slug])
+      else
+        ga_root_path
+      end
+    end
+  end
+
   # Returns CSS classes for a sidebar nav link, adding active state when
   # the current request matches any of the given controller path prefixes.
   def sidebar_nav_class(*controller_paths)

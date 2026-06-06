@@ -157,8 +157,9 @@
                 <%= link_to "Newsletter", newsletter_page_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               </div>
             </div>
-            <div class="flex items-center">
-              <%= link_to "Sign In", new_session_path, class: "text-white font-medium text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30" %>
+            <div class="flex items-center gap-3">
+              <%= link_to t("switch_language"), alternate_locale_path, class: "text-white/80 hover:text-white text-sm font-medium" %>
+              <%= link_to t("sign_in"), new_session_path, class: "text-white font-medium text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30" %>
             </div>
           </div>
         </div>

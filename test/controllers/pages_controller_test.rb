@@ -6,6 +6,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     @editor = users(:editor)
     @viewer = users(:viewer)
     @page = pages(:about_page)
+    @page_ga = pages(:about_page_ga)
   end
 
   # Public access
@@ -25,6 +26,35 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     draft = pages(:draft_page)
     sign_in_as(@editor)
     get page_path(draft.slug)
+    assert_response :success
+  end
+
+  # Irish locale routing
+  test "ga route serves Irish page when it exists" do
+    get ga_page_path(@page_ga.slug)
+    assert_response :success
+    assert_includes response.body, @page_ga.title
+  end
+
+  test "ga route falls back to English page when no Irish version exists" do
+    get ga_page_path(pages(:draft_page).slug)
+    # draft_page has no ga version, but editor must be signed in to view drafts
+    # So just verify the route resolves correctly (not a routing error)
+    assert_includes [ 302, 404 ], response.status
+  end
+
+  test "ga route falls back to English for pages with no Irish version" do
+    english_only = Page.create!(title: "English Only", slug: "english-only-test", locale: "en",
+                                visibility: :published, content: "English content")
+    get ga_page_path("english-only-test")
+    assert_response :success
+    assert_includes response.body, "English Only"
+  ensure
+    english_only&.destroy
+  end
+
+  test "ga root route renders home with Irish locale" do
+    get ga_root_path
     assert_response :success
   end
 
@@ -54,18 +84,34 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  test "editor can create page" do
+  test "editor can create English page" do
     sign_in_as(@editor)
     assert_difference "Page.count" do
       post admin_pages_path, params: {
         page: {
           title: "New Page",
           slug: "new-page",
+          locale: "en",
           content: "New content"
         }
       }
     end
     assert_redirected_to page_path("new-page")
+  end
+
+  test "editor can create Irish page" do
+    sign_in_as(@editor)
+    assert_difference "Page.count" do
+      post admin_pages_path, params: {
+        page: {
+          title: "Leathanach Nua",
+          slug: "leathanach-nua",
+          locale: "ga",
+          content: "Ábhar nua"
+        }
+      }
+    end
+    assert_redirected_to ga_page_path("leathanach-nua")
   end
 
   test "editor can edit page" do

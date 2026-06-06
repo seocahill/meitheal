@@ -1,0 +1,27 @@
+ga:
+  # Form labels
+  email: "ríomhphost"
+  name: "ainm"
+  query: "iarratas"
+  submit: "cuir isteach"
+
+  # Nav / UI
+  home: "Baile"
+  about: "Maidir Linn"
+  events: "Eachtraí"
+  art: "Ealaín"
+  news: "Núacht"
+  faq: "Ceisteanna Coitianta"
+  space: "An Spás"
+  bookings: "Áirithintí"
+  contact: "Teagmháil"
+  members: "Baill"
+  membership: "Ballraíocht"
+  proposal: "Forógra"
+  projects: "Tionscadail"
+  newsletter: "Nuachtlitir"
+  sign_in: "Logáil isteach"
+  sign_out: "Logáil amach"
+  upcoming: "Ag teacht aníos"
+  view_all_events: "Féach ar gach eachtra →"
+  switch_language: "English"
