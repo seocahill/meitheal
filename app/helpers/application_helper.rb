@@ -1,17 +1,21 @@
 module ApplicationHelper
+  # Returns a page path that respects the current locale.
+  # /ga/slug in Irish, /slug in English.
+  def localized_page_path(slug)
+    I18n.locale == :ga ? ga_page_path(slug) : page_path(slug)
+  end
+
   # Returns the URL for the alternate-language version of the current page.
   # On a page with an Irish translation, links directly to it.
   # Falls back to the other locale's home.
   def alternate_locale_path
     if I18n.locale == :ga
-      # Irish → English
       if params[:slug].present? && Page.exists?(slug: params[:slug], locale: "en")
         page_path(params[:slug])
       else
         root_path
       end
     else
-      # English → Irish
       if params[:slug].present? && Page.exists?(slug: params[:slug], locale: "ga")
         ga_page_path(params[:slug])
       else

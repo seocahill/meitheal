@@ -9,20 +9,20 @@
 
       <!-- Vertical Navigation -->
       <nav class="flex flex-col gap-2 text-xl md:text-2xl font-bold text-white">
-        <%= link_to "About", page_path("about"), class: "menu-highlight inline-block" %>
-        <%= link_to "Events", events_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Membership", new_registration_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Art", artists_path, class: "menu-highlight inline-block" %>
-        <%= link_to "News", posts_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Funding", funding_opportunities_path, class: "menu-highlight inline-block" %>
-        <%= link_to "FAQ", faq_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Projects", projects_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Bookings", calendar_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Contact", contact_path, class: "menu-highlight inline-block" %>
-        <%= link_to "Shop", "https://thencf-cultural-cooperative.sumupstore.com/", class: "menu-highlight inline-block", target: "_blank" %>
-        <%= link_to "Newsletter", newsletter_page_path, class: "menu-highlight inline-block"%>
+        <%= link_to t("about"), localized_page_path("about"), class: "menu-highlight inline-block" %>
+        <%= link_to t("events"), events_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("membership"), new_registration_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("art"), artists_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("news"), posts_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("funding"), funding_opportunities_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("faq"), faq_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("projects"), projects_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("bookings"), calendar_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("contact"), contact_path, class: "menu-highlight inline-block" %>
+        <%= link_to t("shop"), "https://thencf-cultural-cooperative.sumupstore.com/", class: "menu-highlight inline-block", target: "_blank" %>
+        <%= link_to t("newsletter"), newsletter_page_path, class: "menu-highlight inline-block"%>
         <% if authenticated? %>
-          <%= link_to "My Account", my_profile_path, class: "menu-highlight inline-block" %>
+          <%= link_to t("my_account"), my_profile_path, class: "menu-highlight inline-block" %>
         <% end %>
       </nav>
     </div>
@@ -31,18 +31,18 @@
     <div class="mt-auto">
       <% if authenticated? %>
         <div class="flex flex-col gap-2 text-lg font-medium text-white mb-6">
-          <%= link_to "Forum", thredded_path, class: "menu-highlight inline-block" %>
+          <%= link_to t("forum"), thredded_path, class: "menu-highlight inline-block" %>
           <% if current_user_can_edit? %>
-            <%= link_to "Newsletters", newsletters_path, class: "menu-highlight inline-block text-sm" %>
-            <%= link_to "Pages", admin_pages_path, class: "menu-highlight inline-block text-sm" %>
+            <%= link_to t("newsletters"), newsletters_path, class: "menu-highlight inline-block text-sm" %>
+            <%= link_to t("pages"), admin_pages_path, class: "menu-highlight inline-block text-sm" %>
           <% end %>
           <% if current_user_can_manage? %>
-            <%= link_to "Admin", admin_users_path, class: "menu-highlight inline-block text-sm" %>
+            <%= link_to t("admin"), admin_users_path, class: "menu-highlight inline-block text-sm" %>
           <% end %>
         </div>
-        <%= button_to "Sign Out", session_path, method: :delete, class: "menu-highlight text-white font-bold text-sm cursor-pointer" %>
+        <%= button_to t("sign_out"), session_path, method: :delete, class: "menu-highlight text-white font-bold text-sm cursor-pointer" %>
       <% else %>
-        <%= link_to "Sign In", new_session_path, class: "menu-highlight inline-block text-white font-bold" %>
+        <%= link_to t("sign_in"), new_session_path, class: "menu-highlight inline-block text-white font-bold" %>
       <% end %>
 
       <%= link_to t("switch_language"), alternate_locale_path, class: "inline-block text-white/60 hover:text-white text-sm mt-4" %>
