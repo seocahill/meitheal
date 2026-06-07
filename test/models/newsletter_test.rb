@@ -127,4 +127,13 @@ class NewsletterTest < ActiveSupport::TestCase
     newsletter.update!(chat: chat)
     assert_equal chat, newsletter.chat
   end
+
+  test "destroying a chat nullifies newsletter chat_id without raising FK error" do
+    model = Model.create!(model_id: "test-model", provider: "test", name: "Test Model")
+    chat = Chat.create!(model: model)
+    newsletter = Newsletter.create!(subject: "Test", content: "Content", chat: chat)
+
+    assert_nothing_raised { chat.destroy! }
+    assert_nil newsletter.reload.chat_id
+  end
 end
