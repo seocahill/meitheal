@@ -5,13 +5,14 @@ ga:
   query: "iarratas"
   submit: "cuir isteach"
 
-  # Nav / UI
+  # Public nav
   home: "Baile"
-  about: "Maidir Linn"
-  events: "Eachtraí"
+  about: "Fúinn"
+  events: "Imeachtaí"
   art: "Ealaín"
   news: "Núacht"
   faq: "Ceisteanna Coitianta"
+  faqs: "Ceisteanna Coitianta"
   space: "An Spás"
   bookings: "Áirithintí"
   contact: "Teagmháil"
@@ -20,15 +21,40 @@ ga:
   proposal: "Forógra"
   projects: "Tionscadail"
   newsletter: "Nuachtlitir"
+  shop: "Siopa"
+  gallery: "Gailearaí"
+  funding: "Maoiniú"
+  switch_language: "English"
+
+  # Auth
   sign_in: "Logáil isteach"
   sign_out: "Logáil amach"
-  upcoming: "Ag teacht aníos"
-  view_all_events: "Féach ar gach eachtra →"
-  switch_language: "English"
-  funding: "Maoiniú"
-  shop: "Siopa"
-  forum: "Fóram"
   my_account: "Mo Chuntas"
+  forum: "Fóram"
+
+  # Authenticated sidebar — section headers
+  explore: "Taiscéal"
+  participate: "Rannpháirtíocht"
+  manage: "Bainistiú"
+  admin: "Riarachán"
+
+  # Authenticated sidebar — links
+  dashboard: "Deais"
   newsletters: "Nuachtlitreacha"
   pages: "Leathanaigh"
-  admin: "Riarachán"
+  book_space: "Áirithint Spáis"
+  make_payment: "Íocaíocht a Dhéanamh"
+  inbox: "Bosca Isteach"
+  email_groups: "Grúpaí Ríomhphoist"
+  users: "Úsáideoirí"
+  memberships: "Ballraíochtaí"
+  payments: "Íocaíochtaí"
+  transactions: "Idirbhearta"
+  ticket_sales: "Díolacháin Ticéad"
+  proposals: "Tograí"
+  funding_opps: "Deiseanna Maoinithe"
+  todos: "Liosta Oibre"
+
+  # Home page
+  upcoming: "Ag teacht aníos"
+  view_all_events: "Féach ar gach imeacht →"

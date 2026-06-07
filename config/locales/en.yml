@@ -5,13 +5,14 @@ en:
   query: "query"
   submit: "submit"
 
-  # Nav / UI
+  # Public nav
   home: "Home"
   about: "About"
   events: "Events"
   art: "Art"
   news: "News"
   faq: "FAQ"
+  faqs: "FAQs"
   space: "Space"
   bookings: "Bookings"
   contact: "Contact"
@@ -20,15 +21,40 @@ en:
   proposal: "Proposal"
   projects: "Projects"
   newsletter: "Newsletter"
+  shop: "Shop"
+  gallery: "Gallery"
+  funding: "Funding"
+  switch_language: "Gaeilge"
+
+  # Auth
   sign_in: "Sign In"
   sign_out: "Sign Out"
-  upcoming: "Upcoming"
-  view_all_events: "View all events →"
-  switch_language: "Gaeilge"
-  funding: "Funding"
-  shop: "Shop"
-  forum: "Forum"
   my_account: "My Account"
+  forum: "Forum"
+
+  # Authenticated sidebar — section headers
+  explore: "Explore"
+  participate: "Participate"
+  manage: "Manage"
+  admin: "Admin"
+
+  # Authenticated sidebar — links
+  dashboard: "Dashboard"
   newsletters: "Newsletters"
   pages: "Pages"
-  admin: "Admin"
+  book_space: "Book Space"
+  make_payment: "Make a Payment"
+  inbox: "Inbox"
+  email_groups: "Email Groups"
+  users: "Users"
+  memberships: "Memberships"
+  payments: "Payments"
+  transactions: "Transactions"
+  ticket_sales: "Ticket Sales"
+  proposals: "Proposals"
+  funding_opps: "Funding Opps"
+  todos: "Todos"
+
+  # Home page
+  upcoming: "Upcoming"
+  view_all_events: "View all events →"
