@@ -24,6 +24,7 @@ ga:
   shop: "Siopa"
   gallery: "Gailearaí"
   funding: "Maoiniú"
+  privacy: "Príobháideacht"
   switch_language: "English"
 
   # Auth
@@ -58,3 +59,74 @@ ga:
   # Home page
   upcoming: "Ag teacht aníos"
   view_all_events: "Féach ar gach imeacht →"
+
+  # Footer
+  org_tagline: "THENCF · Comhoibríocht Chultúrtha an Tuaiscirt · Béal Átha an Fheadha, Co. Mhaigh Eo"
+
+  # Common actions
+  read_more: "Léigh tuilleadh"
+  draft: "Dréacht"
+  search: "Cuardaigh"
+  clear: "Glan"
+
+  # Artist gallery
+  artist_gallery: "Gailearaí Ealaíontóirí"
+  no_artists: "Níl aon ealaíontóirí sa ghailearaí fós."
+
+  # Events
+  no_events: "Níl aon imeachtaí fós."
+  sold_out: "Díolta amach"
+  on_sale_from: "Ar díol ó"
+  get_tickets: "Faigh Ticéid →"
+  share_this_event: "Roinn an imeacht seo"
+  scan_for_event: "Scan le mionsonraí an imeachta a fheiceáil"
+  event_draft_notice: "Dréacht: Níl an imeacht seo foilsithe fós."
+
+  # FAQ
+  no_faqs: "Níl aon cheisteanna ar fáil fós."
+
+  # News / Posts
+  news_and_updates: "Nuacht & Nuashonruithe"
+  no_posts: "Níl aon phostáil fós."
+  post_draft_notice: "Dréacht: Níl an phostáil seo foilsithe fós."
+
+  # Contact
+  contact_us: "Déan Teagmháil Linn"
+  contact_description: "Líon an fhoirm thíos agus rachaimid i dteagmháil leat a luaithe agus is féidir."
+  message: "Teachtaireacht"
+  how_can_we_help: "Cén chaoi ar féidir linn cuidiú?"
+  send_message: "Seol Teachtaireacht"
+  location: "Suíomh"
+
+  # Members directory
+  members_with_profiles: "ball le próifílí infheicthe"
+  my_profile: "Mo Phróifíl"
+  search_by_name: "Cuardaigh de réir ainm..."
+  skill: "Scil"
+  filter_by_skill: "Scagadh de réir scile..."
+  no_members: "Níl aon bhall le feiceáil."
+
+  # Registration
+  join_us: "Bí linn"
+  membership_intro: "Tá ballraíocht THENCF saor in aisce agus tá fáilte roimh chuile dhuine."
+  your_name: "D'ainm"
+  email_address: "Seoladh ríomhphoist"
+  password: "Pasfhocal"
+  confirm_password: "Deimhnigh pasfhocal"
+  create_account: "Cruthaigh Cuntas"
+  already_have_account: "An bhfuil cuntas agat cheana?"
+  full_membership: "Lánbhallraíocht"
+  annual_contribution: "Ranníocaíocht Bhliantúil"
+  at_least_8_chars: "8 gcarachtar ar a laghad"
+
+  # Projects
+  no_projects: "Níl aon tionscadal fós."
+  draft_for_discussion: "dréacht: le plé"
+
+  # Funding
+  pending_approval: "Ag feitheamh le ceadú"
+  expired: "Caite"
+  days_left: "lá fágtha"
+  due: "Sprioc"
+  no_funding: "Níl aon deiseanna maoinithe ar fáil fós."
+  check_back_soon: "Déan seiceáil arís go luath le haghaidh deiseanna nua."

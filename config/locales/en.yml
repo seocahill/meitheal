@@ -24,6 +24,7 @@ en:
   shop: "Shop"
   gallery: "Gallery"
   funding: "Funding"
+  privacy: "Privacy"
   switch_language: "Gaeilge"
 
   # Auth
@@ -58,3 +59,74 @@ en:
   # Home page
   upcoming: "Upcoming"
   view_all_events: "View all events →"
+
+  # Footer
+  org_tagline: "THENCF · North Connacht Cultural Co-op · Ballina, Co. Mayo"
+
+  # Common actions
+  read_more: "Read more"
+  draft: "Draft"
+  search: "Search"
+  clear: "Clear"
+
+  # Artist gallery
+  artist_gallery: "Artist Gallery"
+  no_artists: "No artists in the gallery yet."
+
+  # Events
+  no_events: "No events yet."
+  sold_out: "Sold Out"
+  on_sale_from: "On sale from"
+  get_tickets: "Get Tickets →"
+  share_this_event: "Share this event"
+  scan_for_event: "Scan to view event details"
+  event_draft_notice: "Draft: This event is not yet published."
+
+  # FAQ
+  no_faqs: "No FAQs available yet."
+
+  # News / Posts
+  news_and_updates: "News & Updates"
+  no_posts: "No posts yet."
+  post_draft_notice: "Draft: This post is not yet published."
+
+  # Contact
+  contact_us: "Contact us"
+  contact_description: "Fill out the form below and we'll get back to you as soon as we can."
+  message: "Message"
+  how_can_we_help: "How can we help?"
+  send_message: "Send Message"
+  location: "Location"
+
+  # Members directory
+  members_with_profiles: "members with visible profiles"
+  my_profile: "My Profile"
+  search_by_name: "Search by name..."
+  skill: "Skill"
+  filter_by_skill: "Filter by skill..."
+  no_members: "No members found."
+
+  # Registration
+  join_us: "Join us"
+  membership_intro: "Membership of THENCF is free and all are welcome to join."
+  your_name: "Your name"
+  email_address: "Email address"
+  password: "Password"
+  confirm_password: "Confirm password"
+  create_account: "Create Account"
+  already_have_account: "Already have an account?"
+  full_membership: "Full membership"
+  annual_contribution: "Annual contribution"
+  at_least_8_chars: "At least 8 characters"
+
+  # Projects
+  no_projects: "No projects yet."
+  draft_for_discussion: "draft: for discussion"
+
+  # Funding
+  pending_approval: "Pending approval"
+  expired: "Expired"
+  days_left: "days left"
+  due: "Due"
+  no_funding: "No funding opportunities yet."
+  check_back_soon: "Check back soon for new opportunities."

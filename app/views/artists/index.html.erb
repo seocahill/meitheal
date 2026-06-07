@@ -1,12 +1,12 @@
 <section id="artist-gallery" class="my-8 mx-4 md:mx-8">
   <div class="max-w-7xl mx-auto mb-8">
-    <h2 class="text-3xl font-bold text-gray-900">Artist Gallery</h2>
+    <h2 class="text-3xl font-bold text-gray-900"><%= t("artist_gallery") %></h2>
   </div>
 
   <% if @profiles.empty? %>
     <div class="max-w-7xl mx-auto">
       <div class="card p-12 text-center">
-        <p class="text-gray-500 text-lg">No artists in the gallery yet.</p>
+        <p class="text-gray-500 text-lg"><%= t("no_artists") %></p>
       </div>
     </div>
   <% else %>
