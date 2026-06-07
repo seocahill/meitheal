@@ -53,6 +53,17 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     english_only&.destroy
   end
 
+  test "browser Accept-Language header sets locale when no session locale" do
+    get page_path(@page.slug), headers: { "HTTP_ACCEPT_LANGUAGE" => "ga,en;q=0.9" }
+    assert_equal "ga", session[:locale]
+  end
+
+  test "session locale takes priority over Accept-Language header" do
+    get switch_locale_path(:en)
+    get page_path(@page.slug), headers: { "HTTP_ACCEPT_LANGUAGE" => "ga,en;q=0.9" }
+    assert_equal "en", session[:locale]
+  end
+
   test "locale switcher sets session and redirects back" do
     get switch_locale_path(:ga)
     assert_redirected_to root_path

@@ -9,10 +9,18 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale(&action)
-    locale = params[:locale].presence || session[:locale] || I18n.default_locale.to_s
+    locale = params[:locale].presence || session[:locale] || browser_preferred_locale || I18n.default_locale.to_s
     locale = I18n.default_locale.to_s unless I18n.available_locales.map(&:to_s).include?(locale)
     session[:locale] = locale
     I18n.with_locale(locale, &action)
+  end
+
+  def browser_preferred_locale
+    available = I18n.available_locales.map(&:to_s)
+    request.env["HTTP_ACCEPT_LANGUAGE"]
+      &.scan(/[a-z]{2,3}(?:-[A-Za-z]{2,4})?/i)
+      &.map { |tag| tag.split("-").first.downcase }
+      &.find { |lang| available.include?(lang) }
   end
 
   # Changes to the importmap will invalidate the etag for HTML responses
