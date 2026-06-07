@@ -53,9 +53,24 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     english_only&.destroy
   end
 
-  test "ga root route renders home with Irish locale" do
-    get ga_root_path
+  test "locale switcher sets session and redirects back" do
+    get switch_locale_path(:ga)
+    assert_redirected_to root_path
+    assert_equal "ga", session[:locale]
+  end
+
+  test "session locale persists across requests" do
+    get switch_locale_path(:ga)
+    get page_path(@page.slug)
     assert_response :success
+    assert_equal "ga", session[:locale]
+  end
+
+  test "session locale serves Irish page content" do
+    get switch_locale_path(:ga)
+    get page_path(@page_ga.slug)
+    assert_response :success
+    assert_includes response.body, @page_ga.title
   end
 
   # Admin management
