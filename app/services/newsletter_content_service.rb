@@ -19,7 +19,8 @@ class NewsletterContentService
   private
 
   def llm_configured?
-    RubyLLM.config.mistral_api_key.present? ||
+    @chat.present? ||
+      RubyLLM.config.mistral_api_key.present? ||
       RubyLLM.config.openai_api_key.present? ||
       RubyLLM.config.anthropic_api_key.present?
   end
