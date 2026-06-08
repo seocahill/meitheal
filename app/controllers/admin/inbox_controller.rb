@@ -35,11 +35,7 @@ class Admin::InboxController < Admin::BaseController
   end
 
   def create_todo
-    todo = AdminTodo.create!(
-      title: "Follow up: #{@email.subject}",
-      description: "From: #{@email.from_address}\nReceived: #{@email.received_at.strftime('%B %d, %Y at %I:%M %p')}",
-      priority: :normal
-    )
+    AdminTodo.create!(@email.to_admin_todo_attrs)
     redirect_to admin_inbox_path(@email), notice: "Todo created."
   rescue => e
     redirect_to admin_inbox_path(@email), alert: "Could not create todo: #{e.message}"
