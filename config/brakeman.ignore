@@ -12,7 +12,7 @@
     {
       "warning_type": "Cross-Site Scripting",
       "warning_code": 4,
-      "fingerprint": "d3c33680b235bdcd2dc7bf561f5730b48bfa6ab71b23f736e3d63ac9ba375a70",
+      "fingerprint": "f3cd8d5bfa3dae9e77e39b1a759e219abd9e52bba2dc9f5233ae57ca5048d9a1",
       "check_name": "LinkToHref",
       "file": "app/views/events/show.html.erb",
       "line": 58,
