@@ -4,7 +4,7 @@ class NewsletterContentService
   end
 
   def generate_news
-    return nil unless llm_configured?
+    return nil if @chat.nil? && !llm_configured?
 
     emails = recent_emails
     return nil if emails.empty?
