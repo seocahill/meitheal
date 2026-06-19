@@ -94,6 +94,26 @@ class SyncBrevoNewslettersJobTest < ActiveJob::TestCase
     assert_nil Newsletter.find_by(brevo_campaign_id: 101)
   end
 
+  test "continues past raw Brevo::ApiError from campaign_content" do
+    # Reproduces THENCF-H: if the service layer fails to wrap a Brevo::ApiError,
+    # the job must not crash and must continue processing remaining campaigns.
+    @stub_brevo.define_singleton_method(:campaign_content) do |id|
+      raise Brevo::ApiError.new(code: 404, message: "Not Found") if id == 101
+      OpenStruct.new(
+        subject: "November Newsletter",
+        html_content: "<html><body><p>Hello November</p></body></html>",
+        sent_date: "2024-11-01T09:00:00Z"
+      )
+    end
+
+    assert_difference "Newsletter.count", 1 do
+      SyncBrevoNewslettersJob.perform_now(brevo_service: @stub_brevo)
+    end
+
+    assert Newsletter.find_by(brevo_campaign_id: 102)
+    assert_nil Newsletter.find_by(brevo_campaign_id: 101)
+  end
+
   test "strips email HTML wrapper from content" do
     SyncBrevoNewslettersJob.perform_now(brevo_service: @stub_brevo)
 
