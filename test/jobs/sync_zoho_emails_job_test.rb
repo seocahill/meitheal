@@ -97,6 +97,14 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     end
   end
 
+  test "handles network connection failures gracefully" do
+    @stub_zoho.define_singleton_method(:folders) { raise Faraday::ConnectionFailed.new("Connection reset by peer - SSL_connect") }
+
+    assert_nothing_raised do
+      SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+    end
+  end
+
   test "downloads and attaches email attachments" do
     attachment_info = [
       { "attachmentId" => "att_001", "attachmentName" => "poster.jpg", "attachmentSize" => 1234, "contentType" => "image/jpeg" },
