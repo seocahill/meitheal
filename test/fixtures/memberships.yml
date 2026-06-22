@@ -3,15 +3,15 @@
 active_membership:
   user: owner
   membership_type: 2
-  starts_on: <%= 1.month.ago.to_date %>
-  expires_on: <%= 11.months.from_now.to_date %>
+  starts_on: <%= 2.years.ago.to_date %>
+  expires_on: <%= 1.year.from_now.to_date %>
   notes: Annual membership
 
 viewer_membership:
   user: viewer
   membership_type: 2
-  starts_on: <%= 1.month.ago.to_date %>
-  expires_on: <%= 11.months.from_now.to_date %>
+  starts_on: <%= 2.years.ago.to_date %>
+  expires_on: <%= 1.year.from_now.to_date %>
   notes: Active viewer membership
 
 expired_membership:

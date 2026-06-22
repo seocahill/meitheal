@@ -13,17 +13,19 @@ class ZohoMailServiceTest < ActiveSupport::TestCase
   test "wraps Faraday::ConnectionFailed as ApiError" do
     stub_connection_with_error(Faraday::ConnectionFailed.new("Connection reset by peer - SSL_connect"))
 
-    assert_raises ZohoMailService::ApiError do
+    error = assert_raises ZohoMailService::ApiError do
       @service.folders
     end
+    assert_match "Connection reset by peer", error.message
   end
 
   test "wraps Faraday::TimeoutError as ApiError" do
     stub_connection_with_error(Faraday::TimeoutError.new("timeout"))
 
-    assert_raises ZohoMailService::ApiError do
+    error = assert_raises ZohoMailService::ApiError do
       @service.folders
     end
+    assert_match "timeout", error.message
   end
 
   private
