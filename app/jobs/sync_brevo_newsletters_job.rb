@@ -11,7 +11,7 @@ class SyncBrevoNewslettersJob < ApplicationJob
     campaigns.each do |campaign|
       import_campaign(campaign)
     end
-  rescue BrevoService::ApiError => e
+  rescue BrevoService::ApiError, Brevo::ApiError => e
     Rails.logger.error("SyncBrevoNewslettersJob Brevo error: #{e.message}")
   end
 
@@ -38,7 +38,7 @@ class SyncBrevoNewslettersJob < ApplicationJob
     )
 
     Rails.logger.info("SyncBrevoNewslettersJob: Imported #{details.subject}")
-  rescue BrevoService::ApiError => e
+  rescue BrevoService::ApiError, Brevo::ApiError => e
     Rails.logger.warn("SyncBrevoNewslettersJob: Could not import campaign #{campaign_subject}: #{e.message}")
   end
 

@@ -74,6 +74,36 @@ class SyncBrevoNewslettersJobTest < ActiveJob::TestCase
     end
   end
 
+  test "handles raw Brevo::ApiError from sent_campaigns without propagating" do
+    @stub_brevo.define_singleton_method(:sent_campaigns) do
+      raise Brevo::ApiError.new(code: 404, response_body: '{"message":"Not Found"}')
+    end
+
+    assert_nothing_raised do
+      SyncBrevoNewslettersJob.perform_now(brevo_service: @stub_brevo)
+    end
+  end
+
+  test "continues past individual campaign raw Brevo::ApiError" do
+    @stub_brevo.define_singleton_method(:campaign_content) do |id|
+      if id == 101
+        raise Brevo::ApiError.new(code: 404, response_body: '{"message":"Not Found"}')
+      end
+      OpenStruct.new(
+        subject: "November Newsletter",
+        html_content: "<html><body><p>Hello November</p></body></html>",
+        sent_date: "2024-11-01T09:00:00Z"
+      )
+    end
+
+    assert_difference "Newsletter.count", 1 do
+      SyncBrevoNewslettersJob.perform_now(brevo_service: @stub_brevo)
+    end
+
+    assert Newsletter.find_by(brevo_campaign_id: 102)
+    assert_nil Newsletter.find_by(brevo_campaign_id: 101)
+  end
+
   test "continues past individual campaign errors" do
     call_count = 0
     @stub_brevo.define_singleton_method(:campaign_content) do |id|

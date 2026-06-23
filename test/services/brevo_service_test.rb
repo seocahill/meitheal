@@ -125,6 +125,38 @@ class BrevoServiceTest < ActiveSupport::TestCase
     end
   end
 
+  test "campaign_content wraps Brevo::ApiError as BrevoService::ApiError" do
+    error = Brevo::ApiError.new(code: 404, response_body: '{"message":"Not Found"}')
+    fake_campaigns_api = Object.new
+    fake_campaigns_api.define_singleton_method(:get_email_campaign) { |*_| raise error }
+
+    service = BrevoService.new
+    service.instance_variable_set(:@api_key, "test-key")
+    service.instance_variable_set(:@sender_email, "test@example.com")
+    service.instance_variable_set(:@list_id, 1)
+    service.instance_variable_set(:@campaigns_api, fake_campaigns_api)
+
+    raised = assert_raises(BrevoService::ApiError) { service.campaign_content(42) }
+    assert_equal "Not Found", raised.message
+  end
+
+  test "update_campaign wraps Brevo::ApiError as BrevoService::ApiError when campaign not found" do
+    error = Brevo::ApiError.new(code: 404, response_body: '{"message":"Not Found"}')
+    fake_campaigns_api = Object.new
+    fake_campaigns_api.define_singleton_method(:update_email_campaign) { |*_| raise error }
+
+    newsletter = newsletters(:monthly_update)
+    service = BrevoService.new
+    service.instance_variable_set(:@api_key, "test-key")
+    service.instance_variable_set(:@sender_email, "test@example.com")
+    service.instance_variable_set(:@sender_name, "NCF")
+    service.instance_variable_set(:@list_id, 1)
+    service.instance_variable_set(:@campaigns_api, fake_campaigns_api)
+
+    raised = assert_raises(BrevoService::ApiError) { service.update_campaign(999, newsletter) }
+    assert_equal "Not Found", raised.message
+  end
+
   test "list_contacts returns contacts from configured list" do
     fake_contacts = [
       OpenStruct.new(email: "alice@example.com", attributes: { "FIRSTNAME" => "Alice" }),
