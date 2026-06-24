@@ -162,6 +162,8 @@ class ZohoMailService
     end
 
     handle_response(response)
+  rescue Faraday::Error => e
+    raise ApiError, "Network error: #{e.message}"
   end
 
   def connection
