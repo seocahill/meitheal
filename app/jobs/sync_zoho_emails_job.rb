@@ -15,8 +15,8 @@ class SyncZohoEmailsJob < ApplicationJob
 
     emails = @zoho.emails(folder_id: inbox_id, limit: SYNC_LIMIT)
     emails.each { |email_data| sync_email(inbox_id, email_data) }
-  rescue ZohoMailService::ApiError => e
-    Rails.logger.error("SyncZohoEmailsJob Zoho error: #{e.message}")
+  rescue ZohoMailService::ApiError, Faraday::Error => e
+    Rails.logger.error("SyncZohoEmailsJob network/API error: #{e.message}")
   end
 
   private
