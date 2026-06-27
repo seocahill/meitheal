@@ -21,6 +21,10 @@ production:
     class: CleanupPendingPaymentsJob
     queue: default
     schedule: every day at 3am
+  cleanup_orphaned_blobs:
+    class: CleanupOrphanedBlobsJob
+    queue: default
+    schedule: every day at 4am
   sync_zoho_emails:
     class: SyncZohoEmailsJob
     queue: default
