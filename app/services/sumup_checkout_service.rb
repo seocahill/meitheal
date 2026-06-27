@@ -1,13 +1,16 @@
 class SumupCheckoutService
   CHECKOUT_URL = "https://api.sumup.com/v0.1/checkouts".freeze
-  TRANSACTIONS_URL = "https://api.sumup.com/v2.1/merchants/MQ2STZEV/transactions/history".freeze
-  PAYOUTS_URL = "https://api.sumup.com/v1.0/merchants/MQ2STZEV/payouts".freeze
 
   class CheckoutError < StandardError; end
 
   def initialize
-    @api_key = Rails.application.credentials.dig(:sumup_api_key) || ENV["SUMUP_API_KEY"]
-    @merchant_code = Rails.application.credentials.dig(:sumup_merchant_code) || ENV["SUMUP_MERCHANT_CODE"]
+    if Rails.env.production?
+      @api_key = Rails.application.credentials.dig(:sumup_api_key) || ENV["SUMUP_API_KEY"]
+      @merchant_code = Rails.application.credentials.dig(:sumup_merchant_code) || ENV["SUMUP_MERCHANT_CODE"]
+    else
+      @api_key = ENV["SUMUP_SANDBOX_API_KEY"] || Rails.application.credentials.dig(:sumup_api_key) || ENV["SUMUP_API_KEY"]
+      @merchant_code = ENV["SUMUP_SANDBOX_MERCHANT_CODE"] || Rails.application.credentials.dig(:sumup_merchant_code) || ENV["SUMUP_MERCHANT_CODE"]
+    end
   end
 
   def create_checkout(amount_cents:, description:, checkout_reference:, return_url: nil)
@@ -44,7 +47,7 @@ class SumupCheckoutService
   # Returns { "items" => [...], "links" => [...] }
   # Supported filters: oldest_time, newest_time, statuses, payment_types, limit, order
   def list_transactions(filters = {})
-    uri = URI(TRANSACTIONS_URL)
+    uri = URI("https://api.sumup.com/v2.1/merchants/#{@merchant_code}/transactions/history")
     uri.query = URI.encode_www_form(filters.compact) if filters.any?
 
     request = Net::HTTP::Get.new(uri, headers)
@@ -57,7 +60,7 @@ class SumupCheckoutService
   end
 
   def list_payouts(filters = {})
-    uri = URI(PAYOUTS_URL)
+    uri = URI("https://api.sumup.com/v1.0/merchants/#{@merchant_code}/payouts")
     uri.query = URI.encode_www_form(filters.compact) if filters.any?
 
     request = Net::HTTP::Get.new(uri, headers)

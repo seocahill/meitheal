@@ -3,17 +3,27 @@
 about_page:
   title: About NCF
   slug: about
+  locale: en
+  visibility: 1  # published
+  nav_location: 2  # footer
+
+about_page_ga:
+  title: Maidir le THENCF
+  slug: about
+  locale: ga
   visibility: 1  # published
   nav_location: 2  # footer
 
 draft_page:
   title: Draft Page
   slug: draft
+  locale: en
   visibility: 0  # draft
   nav_location: 0  # none
 
 members_page:
   title: Members Only Page
   slug: members-only
+  locale: en
   visibility: 2  # members_only
   nav_location: 0  # none

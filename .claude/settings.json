@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(kamal app exec --reuse \"cat /tmp/may_newsletter.html\" 2>&1 | grep -v '^\\\\s*INFO\\\\|^Get current\\\\|^Launching\\\\|^App Host\\\\|^  INFO\\\\|^  ERROR' > /tmp/may_newsletter.html *)",
+      "Read(//tmp/**)",
+      "Bash(scp /tmp/ncf_avatars/mj_sm.jpg /tmp/ncf_avatars/kings_sm.jpg /tmp/ncf_avatars/pangur_sm.jpg root@46.225.112.39:/tmp/)",
+      "Bash(ls /Users/seosamh/Projects/personal/ncf/)",
+      "Read(//Users/seosamh/Projects/personal/ncf/**)",
+      "Bash(git commit -m ' *)",
+      "WebFetch(domain:www.tg4.ie)",
+      "WebFetch(domain:www.rte.ie)",
+      "WebFetch(domain:www.focloir.ie)",
+      "WebFetch(domain:www.gaeilge.ie)"
+    ],
+    "additionalDirectories": [
+      "/tmp",
+      "/private/tmp"
+    ]
+  }
+}

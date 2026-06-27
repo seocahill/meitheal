@@ -7,8 +7,11 @@ class Page < ApplicationRecord
   # Visibility determines who can see the page
   enum :visibility, { draft: 0, published: 1, members_only: 2 }, default: :draft
 
+  LOCALES = %w[en ga].freeze
+
   validates :title, presence: true
-  validates :slug, presence: true, uniqueness: true
+  validates :locale, inclusion: { in: LOCALES }
+  validates :slug, presence: true, uniqueness: { scope: :locale }
   validates :slug, format: { with: /\A[a-z0-9-]+\z/, message: "only allows lowercase letters, numbers, and hyphens" }
   validate :slug_does_not_clash_with_routes, if: -> { slug.present? && slug_changed? }
 
