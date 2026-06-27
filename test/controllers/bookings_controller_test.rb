@@ -11,7 +11,7 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
 
   # Public calendar
   test "calendar shows confirmed bookings to public" do
-    get calendar_path
+    get calendar_path(month: @booking.starts_at.strftime("%Y-%m"))
     assert_response :success
     assert_includes response.body, @booking.title
   end
@@ -181,7 +181,7 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
 
   test "calendar shows edit and cancel buttons to admin users" do
     sign_in_as(@editor)
-    get calendar_path
+    get calendar_path(month: @booking.starts_at.strftime("%Y-%m"))
     assert_response :success
     assert_includes response.body, edit_booking_path(@booking)
     assert_includes response.body, cancel_booking_path(@booking)
