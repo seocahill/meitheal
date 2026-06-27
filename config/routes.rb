@@ -26,6 +26,11 @@ Rails.application.routes.draw do
       patch :publish
       patch :unpublish
     end
+    resource :tickets, controller: "event_tickets", only: [ :new ] do
+      post :create_checkout
+      get :complete
+      get :receipt
+    end
   end
 
   get "faq", to: "faqs#index", as: :faq
@@ -33,6 +38,7 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
+    resources :ticket_sales, only: [ :index, :show ]
     resources :payments, only: [ :index ]
     resources :bookings, only: [ :index ] do
       member do
@@ -176,6 +182,13 @@ Rails.application.routes.draw do
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
   get "newsletter/qr.svg", to: "newsletter_subscriptions#qr_code", as: :newsletter_qr_code
+
+  # Locale switcher — sets session locale and redirects back
+  get "locale/:locale", to: "locales#update", as: :switch_locale,
+      constraints: { locale: /en|ga/ }
+
+  # Irish locale pages — kept for direct linking / admin preview
+  get "ga/:slug", to: "pages#show", defaults: { locale: "ga" }, as: :ga_page
 
   # Static pages (catch-all, must be last before root)
   get ":slug", to: "pages#show", as: :page

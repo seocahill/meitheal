@@ -30,11 +30,11 @@ class EventsController < ApplicationController
   end
 
   def new
-    @event = Event.new
+    @event = Event.new(starts_at: Time.current.noon)
   end
 
   def create
-    @event = Current.user.events.build(event_params)
+    @event = Current.user.events.build(event_params_with_cents)
     if @event.save
       redirect_to @event, notice: "Event created. It will be visible after an admin publishes it."
     else
@@ -51,6 +51,8 @@ class EventsController < ApplicationController
     unless Current.user.can_edit?
       filtered_params = filtered_params.except(:published, :user_id)
     end
+
+    filtered_params = convert_price_to_cents(filtered_params)
 
     if @event.update(filtered_params)
       redirect_to @event, notice: "Event updated."
@@ -84,8 +86,20 @@ class EventsController < ApplicationController
     params.require(:event).permit(
       :title, :starts_at, :ends_at, :doors_at, :description, :rich_description, :bio,
       :links, :ticket_price_cents, :ticket_url, :capacity,
+      :ticketing_enabled, :tickets_available_from,
       :venue_name, :venue_address, :published, :image, :user_id
     )
+  end
+
+  def event_params_with_cents
+    convert_price_to_cents(event_params)
+  end
+
+  def convert_price_to_cents(attrs)
+    euros_str = params.dig(:event, :ticket_price_cents_euros)
+    return attrs unless params.dig(:event)&.key?("ticket_price_cents_euros")
+    cents = euros_str.present? ? (euros_str.to_d * 100).to_i : nil
+    attrs.merge(ticket_price_cents: cents)
   end
 
   def can_view_draft?(event)
