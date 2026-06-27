@@ -41,42 +41,42 @@
         <%# Navigation %>
         <nav class="flex-1 p-2 space-y-0.5">
 
-          <%= link_to "Dashboard", dashboard_path, class: sidebar_nav_class("dashboard") %>
-          <%= link_to "Forum", thredded_path,
+          <%= link_to t("dashboard"), dashboard_path, class: sidebar_nav_class("dashboard") %>
+          <%= link_to t("forum"), thredded_path,
               class: "sidebar-nav-link #{request.path.start_with?("/forum") ? "sidebar-nav-active" : ""}" %>
 
-          <div class="sidebar-nav-section">Explore</div>
-          <%= link_to "News", posts_path, class: sidebar_nav_class("posts") %>
-          <%= link_to "Events", events_path, class: sidebar_nav_class("events") %>
-          <%= link_to "Gallery", artists_path, class: sidebar_nav_class("artists") %>
-          <%= link_to "Projects", projects_path, class: sidebar_nav_class("projects") %>
-          <%= link_to "Members", profiles_path, class: sidebar_nav_class("profiles") %>
+          <div class="sidebar-nav-section"><%= t("explore") %></div>
+          <%= link_to t("news"), posts_path, class: sidebar_nav_class("posts") %>
+          <%= link_to t("events"), events_path, class: sidebar_nav_class("events") %>
+          <%= link_to t("gallery"), artists_path, class: sidebar_nav_class("artists") %>
+          <%= link_to t("projects"), projects_path, class: sidebar_nav_class("projects") %>
+          <%= link_to t("members"), profiles_path, class: sidebar_nav_class("profiles") %>
 
-          <div class="sidebar-nav-section">Participate</div>
-          <%= link_to "Funding", funding_opportunities_path, class: sidebar_nav_class("funding_opportunities") %>
-          <%= link_to "Book Space", calendar_path, class: sidebar_nav_class("bookings") %>
-          <%= link_to "Make a Payment", new_payment_path, class: sidebar_nav_class("payments") %>
+          <div class="sidebar-nav-section"><%= t("participate") %></div>
+          <%= link_to t("funding"), funding_opportunities_path, class: sidebar_nav_class("funding_opportunities") %>
+          <%= link_to t("book_space"), calendar_path, class: sidebar_nav_class("bookings") %>
+          <%= link_to t("make_payment"), new_payment_path, class: sidebar_nav_class("payments") %>
 
           <% if current_user_can_edit? %>
-            <div class="sidebar-nav-section">Manage</div>
-            <%= link_to "Newsletters", newsletters_path, class: sidebar_nav_class("newsletters") %>
-            <%= link_to "Pages", admin_pages_path, class: sidebar_nav_class("admin/pages") %>
-            <%= link_to "FAQs", admin_faqs_path, class: sidebar_nav_class("admin/faqs") %>
+            <div class="sidebar-nav-section"><%= t("manage") %></div>
+            <%= link_to t("newsletters"), newsletters_path, class: sidebar_nav_class("newsletters") %>
+            <%= link_to t("pages"), admin_pages_path, class: sidebar_nav_class("admin/pages") %>
+            <%= link_to t("faqs"), admin_faqs_path, class: sidebar_nav_class("admin/faqs") %>
           <% end %>
 
           <% if current_user_can_manage? %>
-            <div class="sidebar-nav-section">Admin</div>
-            <%= link_to "Inbox", admin_inbox_index_path, class: sidebar_nav_class("admin/inbox") %>
-            <%= link_to "Email Groups", admin_email_groups_path, class: sidebar_nav_class("admin/email_groups") %>
-            <%= link_to "Users", admin_users_path, class: sidebar_nav_class("admin/users") %>
-            <%= link_to "Memberships", admin_memberships_path, class: sidebar_nav_class("admin/memberships") %>
-            <%= link_to "Payments", admin_payments_path, class: sidebar_nav_class("admin/payments") %>
-            <%= link_to "Transactions", admin_transactions_path, class: sidebar_nav_class("admin/transactions") %>
-            <%= link_to "Bookings", admin_bookings_path, class: sidebar_nav_class("admin/bookings") %>
-            <%= link_to "Ticket Sales", admin_ticket_sales_path, class: sidebar_nav_class("admin/ticket_sales") %>
-            <%= link_to "Proposals", admin_proposals_path, class: sidebar_nav_class("admin/proposals") %>
-            <%= link_to "Funding Opps", admin_funding_opportunities_path, class: sidebar_nav_class("admin/funding_opportunities") %>
-            <%= link_to "Todos", admin_todos_path, class: sidebar_nav_class("admin/todos") %>
+            <div class="sidebar-nav-section"><%= t("admin") %></div>
+            <%= link_to t("inbox"), admin_inbox_index_path, class: sidebar_nav_class("admin/inbox") %>
+            <%= link_to t("email_groups"), admin_email_groups_path, class: sidebar_nav_class("admin/email_groups") %>
+            <%= link_to t("users"), admin_users_path, class: sidebar_nav_class("admin/users") %>
+            <%= link_to t("memberships"), admin_memberships_path, class: sidebar_nav_class("admin/memberships") %>
+            <%= link_to t("payments"), admin_payments_path, class: sidebar_nav_class("admin/payments") %>
+            <%= link_to t("transactions"), admin_transactions_path, class: sidebar_nav_class("admin/transactions") %>
+            <%= link_to t("bookings"), admin_bookings_path, class: sidebar_nav_class("admin/bookings") %>
+            <%= link_to t("ticket_sales"), admin_ticket_sales_path, class: sidebar_nav_class("admin/ticket_sales") %>
+            <%= link_to t("proposals"), admin_proposals_path, class: sidebar_nav_class("admin/proposals") %>
+            <%= link_to t("funding_opps"), admin_funding_opportunities_path, class: sidebar_nav_class("admin/funding_opportunities") %>
+            <%= link_to t("todos"), admin_todos_path, class: sidebar_nav_class("admin/todos") %>
           <% end %>
 
         </nav>
@@ -87,7 +87,7 @@
             <%= Current.user.profile&.name || Current.user.email_address.split("@").first %>
           </div>
           <div class="text-gray-600 text-xs truncate mb-2"><%= Current.user.email_address %></div>
-          <%= button_to "Sign Out", session_path, method: :delete,
+          <%= button_to t("sign_out"), session_path, method: :delete,
               class: "text-xs text-gray-500 hover:text-white transition-colors" %>
         </div>
 
@@ -149,16 +149,17 @@
                 THENCF
               <% end %>
               <div class="hidden md:flex items-center gap-4">
-                <%= link_to "News", posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-                <%= link_to "Events", events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-                <%= link_to "Gallery", artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-                <%= link_to "Bookings", calendar_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-                <%= link_to "Projects", projects_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
-                <%= link_to "Newsletter", newsletter_page_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("news"), posts_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("events"), events_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("gallery"), artists_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("bookings"), calendar_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("projects"), projects_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
+                <%= link_to t("newsletter"), newsletter_page_path, class: "text-white/90 hover:text-white text-sm font-medium" %>
               </div>
             </div>
-            <div class="flex items-center">
-              <%= link_to "Sign In", new_session_path, class: "text-white font-medium text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30" %>
+            <div class="flex items-center gap-3">
+              <%= link_to t("switch_language"), switch_locale_path_for_other_language, class: "text-white/80 hover:text-white text-sm font-medium" %>
+              <%= link_to t("sign_in"), new_session_path, class: "text-white font-medium text-sm px-3 py-1.5 bg-white/20 rounded-lg hover:bg-white/30" %>
             </div>
           </div>
         </div>
@@ -188,13 +189,13 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6">
           <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <p class="text-gray-500 text-sm">
-              THENCF &middot; North Connacht Cultural Co-op &middot; Ballina, Co. Mayo
+              <%= t("org_tagline") %>
             </p>
             <div class="flex gap-4 text-sm">
-              <%= link_to "About", page_path("about"), class: "text-gray-500 hover:text-purple-600" %>
-              <%= link_to "Contact", contact_path, class: "text-gray-500 hover:text-purple-600" %>
-              <%= link_to "Newsletter", newsletter_page_path, class: "text-gray-500 hover:text-purple-600" %>
-              <%= link_to "Privacy", page_path("privacy"), class: "text-gray-500 hover:text-purple-600" %>
+              <%= link_to t("about"), page_path("about"), class: "text-gray-500 hover:text-purple-600" %>
+              <%= link_to t("contact"), contact_path, class: "text-gray-500 hover:text-purple-600" %>
+              <%= link_to t("newsletter"), newsletter_page_path, class: "text-gray-500 hover:text-purple-600" %>
+              <%= link_to t("privacy"), page_path("privacy"), class: "text-gray-500 hover:text-purple-600" %>
             </div>
           </div>
         </div>

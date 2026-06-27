@@ -16,7 +16,7 @@ production:
   daily_pending_summary:
     class: DailyPendingSummaryJob
     queue: default
-    schedule: every day at 9am
+    schedule: "0 9 * * 1,5"
   cleanup_pending_payments:
     class: CleanupPendingPaymentsJob
     queue: default
