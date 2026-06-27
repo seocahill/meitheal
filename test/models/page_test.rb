@@ -22,11 +22,28 @@ class PageTest < ActiveSupport::TestCase
     assert_includes page.errors[:slug], "can't be blank"
   end
 
-  test "slug must be unique" do
-    Page.create!(title: "First", slug: "unique-test-slug", content: "First content")
-    duplicate = Page.new(title: "Second", slug: "unique-test-slug", content: "Second content")
+  test "slug must be unique within the same locale" do
+    Page.create!(title: "First", slug: "unique-test-slug", locale: "en", content: "First content")
+    duplicate = Page.new(title: "Second", slug: "unique-test-slug", locale: "en", content: "Second content")
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:slug], "has already been taken"
+  end
+
+  test "same slug is allowed in different locales" do
+    Page.create!(title: "About", slug: "about-locale-test", locale: "en", content: "English")
+    irish = Page.new(title: "Maidir", slug: "about-locale-test", locale: "ga", content: "Gaeilge")
+    assert irish.valid?, irish.errors.full_messages.join(", ")
+  end
+
+  test "locale defaults to en" do
+    page = Page.new(title: "Test", slug: "locale-default-test")
+    assert_equal "en", page.locale
+  end
+
+  test "locale must be en or ga" do
+    page = Page.new(title: "Test", slug: "locale-invalid-test", locale: "fr")
+    assert_not page.valid?
+    assert_includes page.errors[:locale], "is not included in the list"
   end
 
   test "slug format validation" do
@@ -51,7 +68,7 @@ class PageTest < ActiveSupport::TestCase
     assert_not_includes Page.published, draft
   end
 
-  test "find_by_slug finds page by slug" do
+  test "find_by_slug finds English page by slug" do
     page = pages(:about_page)
     found = Page.find_by_slug("about")
     assert_equal page, found

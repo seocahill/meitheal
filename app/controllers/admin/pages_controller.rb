@@ -17,7 +17,7 @@ class Admin::PagesController < Admin::BaseController
   def create
     @page = Page.new(page_params)
     if @page.save
-      redirect_to page_path(@page.slug), notice: "Page created."
+      redirect_to locale_page_path(@page), notice: "Page created."
     else
       render :new, status: :unprocessable_entity
     end
@@ -28,7 +28,7 @@ class Admin::PagesController < Admin::BaseController
 
   def update
     if @page.update(page_params)
-      redirect_to page_path(@page.slug), notice: "Page updated."
+      redirect_to locale_page_path(@page), notice: "Page updated."
     else
       render :edit, status: :unprocessable_entity
     end
@@ -41,7 +41,7 @@ class Admin::PagesController < Admin::BaseController
 
   def publish
     @page.update!(visibility: :published)
-    redirect_to page_path(@page.slug), notice: "Page published."
+    redirect_to locale_page_path(@page), notice: "Page published."
   end
 
   def unpublish
@@ -55,7 +55,11 @@ class Admin::PagesController < Admin::BaseController
     @page = Page.find(params[:id])
   end
 
+  def locale_page_path(page)
+    page.locale == "ga" ? ga_page_path(page.slug) : page_path(page.slug)
+  end
+
   def page_params
-    params.require(:page).permit(:title, :slug, :content, :visibility, :nav_location)
+    params.require(:page).permit(:title, :slug, :locale, :content, :visibility, :nav_location)
   end
 end
