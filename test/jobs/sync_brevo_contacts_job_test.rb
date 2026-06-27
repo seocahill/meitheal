@@ -54,6 +54,7 @@ class SyncBrevoContactsJobTest < ActiveJob::TestCase
     bob = User.find_by(email_address: "bob@example.com")
     assert bob
     assert bob.approved?
+    assert_equal 1, bob.memberships.where(membership_type: :associate).count
     # Alice should not be duplicated (already exists locally)
     assert_equal 1, User.where(email_address: "alice@example.com").count
   end

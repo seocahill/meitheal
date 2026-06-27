@@ -9,9 +9,18 @@ class Profile < ApplicationRecord
 
   scope :visible, -> { where(visible: true) }
   scope :in_public_gallery, -> { where(public_gallery: true) }
+  scope :with_content, -> {
+    left_joins(:avatar_attachment).where(
+      "active_storage_attachments.id IS NOT NULL " \
+      "OR (bio IS NOT NULL AND bio != '') " \
+      "OR (skills IS NOT NULL AND skills != '') " \
+      "OR (website IS NOT NULL AND website != '') " \
+      "OR (location IS NOT NULL AND location != '')"
+    ).distinct
+  }
   scope :with_skill, ->(skill) { where("skills LIKE ?", "%#{skill}%") }
   scope :search, ->(query) {
-    where("name LIKE ? OR bio LIKE ?", "%#{query}%", "%#{query}%")
+    where("profiles.name LIKE ? OR profiles.bio LIKE ?", "%#{query}%", "%#{query}%")
   }
 
   def skills_list

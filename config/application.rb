@@ -26,5 +26,8 @@ module Meitheal
     # Allow iframes and video in the sanitize view helper
     config.action_view.sanitized_allowed_tags = Rails::HTML5::SafeListSanitizer.allowed_tags + [ "iframe", "video" ]
     config.action_view.sanitized_allowed_attributes = Rails::HTML5::SafeListSanitizer.allowed_attributes + [ "allow", "allowfullscreen", "frameborder", "loading", "referrerpolicy" ]
+
+    config.i18n.available_locales = [ :en, :ga ]
+    config.i18n.default_locale = :en
   end
 end
