@@ -1,10 +1,13 @@
 Daily Summary
 =============
-<% if @email_digest.present? %>
+<% if @new_todos.any? %>
 
-Email digest
-------------
-<%= @email_digest %>
+New todos from inbox (<%= @new_todos.count %>)
+<% @new_todos.each do |todo| %>
+  - <%= todo.title %><% if todo.source.is_a?(CachedEmail) %> — <%= admin_inbox_url(todo.source) %><% end %>
+<% end %>
+
+Review todos: <%= admin_todos_url %>
 <% end %>
 
 The following items are awaiting your action:

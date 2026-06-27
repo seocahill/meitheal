@@ -58,6 +58,19 @@ class ProfileTest < ActiveSupport::TestCase
     assert_not_includes results, sculptor
   end
 
+  test "scope with_content returns profiles with any content field filled" do
+    blank_user = User.create!(email_address: "blank@test.com", password: "password")
+    blank = Profile.create!(user: blank_user, name: "Blank Profile", visible: true)
+
+    with_bio_user = User.create!(email_address: "bio@test.com", password: "password")
+    with_bio = Profile.create!(user: with_bio_user, name: "Bio Profile", bio: "I make art", visible: true)
+
+    results = Profile.with_content
+    assert_includes results, profiles(:owner_profile)
+    assert_includes results, with_bio
+    assert_not_includes results, blank
+  end
+
   test "scope search finds profiles by name or bio" do
     profile1 = Profile.create!(user: @user, name: "Alice Smith", bio: "Visual artist")
     profile2_user = User.create!(email_address: "bob@test.com", password: "password")

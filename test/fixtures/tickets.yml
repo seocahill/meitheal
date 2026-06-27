@@ -1,0 +1,18 @@
+pending_ticket:
+  event: ticketed_event
+  buyer_name: Pádraig Ó Murchú
+  buyer_email: padraig@example.com
+  quantity: 2
+  amount_cents: 2000
+  status: 0
+  sumup_checkout_id: test-checkout-ticket-1
+
+paid_ticket:
+  event: ticketed_event
+  buyer_name: Siobhán Ní Fhaoláin
+  buyer_email: siobhan@example.com
+  quantity: 1
+  amount_cents: 1000
+  status: 1
+  sumup_checkout_id: test-checkout-ticket-2
+  sumup_transaction_id: txn-ticket-paid
