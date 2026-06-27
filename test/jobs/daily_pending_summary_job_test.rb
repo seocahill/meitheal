@@ -3,6 +3,12 @@ require "test_helper"
 class DailyPendingSummaryJobTest < ActiveJob::TestCase
   include ActionMailer::TestHelper
 
+  test "dispatches mail via MailerDeliveryJob so transient SMTP failures can be retried" do
+    assert_enqueued_with(job: MailerDeliveryJob) do
+      DailyPendingSummaryJob.perform_now
+    end
+  end
+
   test "creates todos for visible emails that don't yet have one" do
     email_without_todo = create_cached_email(subject: "New enquiry")
     email_with_todo = create_cached_email(zoho_message_id: "with_todo", subject: "Already handled")

@@ -4,7 +4,7 @@ class NewsletterContentService
   end
 
   def generate_news
-    return nil unless llm_configured?
+    return nil unless @chat || llm_configured?
 
     emails = recent_emails
     return nil if emails.empty?
@@ -19,7 +19,8 @@ class NewsletterContentService
   private
 
   def llm_configured?
-    RubyLLM.config.mistral_api_key.present? ||
+    @chat.present? ||
+      RubyLLM.config.mistral_api_key.present? ||
       RubyLLM.config.openai_api_key.present? ||
       RubyLLM.config.anthropic_api_key.present?
   end
