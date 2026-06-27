@@ -5,15 +5,15 @@
 
 # --- Users ---
 admin = User.find_or_initialize_by(email_address: "admin@meitheal.example")
-admin.assign_attributes(password: "password", role: :owner)
+admin.assign_attributes(password: "password", role: :owner, approved: true)
 admin.save!
 
 editor = User.find_or_initialize_by(email_address: "editor@meitheal.example")
-editor.assign_attributes(password: "password", role: :editor)
+editor.assign_attributes(password: "password", role: :editor, approved: true)
 editor.save!
 
 member = User.find_or_initialize_by(email_address: "member@meitheal.example")
-member.assign_attributes(password: "password", role: :viewer)
+member.assign_attributes(password: "password", role: :viewer, approved: true)
 member.save!
 
 # --- Profiles (one per user) ---
@@ -141,18 +141,27 @@ end
 Payment.find_or_create_by!(membership: mem_admin, paid_on: 1.year.ago.to_date) do |p|
   p.amount_cents = 300_00
   p.payment_method = :bank_transfer
+  p.user_email = admin.email_address
+  p.user_name = admin.name
+  p.description = "Annual associate membership"
   p.notes = "Annual membership"
 end
 
 Payment.find_or_create_by!(membership: mem_editor, paid_on: 6.months.ago.to_date) do |p|
   p.amount_cents = 150_00
   p.payment_method = :bank_transfer
+  p.user_email = editor.email_address
+  p.user_name = editor.name
+  p.description = "Half-year associate membership"
   p.notes = "Half-year"
 end
 
 Payment.find_or_create_by!(membership: mem_member, paid_on: 2.months.ago.to_date) do |p|
   p.amount_cents = 75_00
   p.payment_method = :cash
+  p.user_email = member.email_address
+  p.user_name = member.name
+  p.description = "Youth membership (concession rate)"
   p.notes = "Concession"
 end
 
