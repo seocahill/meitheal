@@ -7,7 +7,11 @@ class BookingsController < ApplicationController
   before_action :require_active_membership, only: [ :new, :create ]
 
   def calendar
-    @month = params[:month] ? Date.parse(params[:month] + "-01") : Date.current.beginning_of_month
+    @month = begin
+      params[:month].present? ? Date.strptime(params[:month], "%Y-%m") : Date.current.beginning_of_month
+    rescue ArgumentError, Date::Error
+      Date.current.beginning_of_month
+    end
     # Show both pending and confirmed bookings
     @bookings = Booking.where(status: [ :pending, :confirmed ])
       .where("starts_at < ? AND ends_at > ?", @month.end_of_month.end_of_day, @month.beginning_of_month.beginning_of_day)
@@ -22,7 +26,7 @@ class BookingsController < ApplicationController
   end
 
   def new
-    @booking = Booking.new
+    @booking = Booking.new(starts_at: Time.current.noon, ends_at: Time.current.noon + 2.hours)
     @spaces = Space.active.order(:name)
   end
 
@@ -55,7 +59,7 @@ class BookingsController < ApplicationController
   end
 
   def confirm
-    @booking.confirmed!
+    @booking.update!(status: :confirmed, approved_by: Current.user, approved_at: Time.current)
     redirect_to calendar_path, notice: "Booking confirmed."
   end
 
