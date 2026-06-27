@@ -5,6 +5,13 @@ class PaymentsControllerTest < ActionDispatch::IntegrationTest
     @owner = users(:owner)
     @membership = memberships(:active_membership)
     sign_in_as(@owner)
+    ENV["SUMUP_API_KEY"] = "test-key"
+    ENV["SUMUP_MERCHANT_CODE"] = "test-merchant"
+  end
+
+  teardown do
+    ENV.delete("SUMUP_API_KEY")
+    ENV.delete("SUMUP_MERCHANT_CODE")
   end
 
   test "should get new payment page" do

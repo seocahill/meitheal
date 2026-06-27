@@ -1,17 +1,19 @@
 class Admin::InboxController < Admin::BaseController
+  include Pagy::Method
+
   before_action :require_owner
   before_action :set_email, only: [ :show, :archive, :unarchive, :create_todo, :create_newsletter, :create_funding ]
 
-  PER_PAGE = 5
+  ALLOWED_LIMITS = [ 5, 10, 25, 50 ].freeze
+  DEFAULT_LIMIT = 10
 
   def index
     @show_archived = params[:show_archived] == "true"
-    @page = [ (params[:page] || 1).to_i, 1 ].max
+    limit = params[:limit].to_i
+    limit = DEFAULT_LIMIT unless ALLOWED_LIMITS.include?(limit)
 
     scope = @show_archived ? CachedEmail.archived : CachedEmail.visible
-    all_emails = scope.order(received_at: :desc).offset((@page - 1) * PER_PAGE).limit(PER_PAGE + 1).to_a
-    @has_more = all_emails.size > PER_PAGE
-    @emails = all_emails.first(PER_PAGE)
+    @pagy, @emails = pagy(scope.order(received_at: :desc), limit: limit)
   end
 
   def show
@@ -35,11 +37,7 @@ class Admin::InboxController < Admin::BaseController
   end
 
   def create_todo
-    todo = AdminTodo.create!(
-      title: "Follow up: #{@email.subject}",
-      description: "From: #{@email.from_address}\nReceived: #{@email.received_at.strftime('%B %d, %Y at %I:%M %p')}",
-      priority: :normal
-    )
+    AdminTodo.create!(@email.to_admin_todo_attrs)
     redirect_to admin_inbox_path(@email), notice: "Todo created."
   rescue => e
     redirect_to admin_inbox_path(@email), alert: "Could not create todo: #{e.message}"

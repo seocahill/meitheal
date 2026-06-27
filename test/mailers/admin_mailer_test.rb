@@ -65,33 +65,42 @@ class AdminMailerTest < ActionMailer::TestCase
     assert_includes body, "Proposals pending review"
   end
 
-  test "daily_pending_summary includes email digest section when provided" do
-    email = AdminMailer.daily_pending_summary(email_digest: "ACTION: Reply to grant inquiry from Arts Council")
+  test "daily_pending_summary lists new todos with an inbox link" do
+    cached_email = CachedEmail.create!(
+      zoho_message_id: "msg_1", zoho_folder_id: "inbox",
+      from_address: "sender@example.com", subject: "Follow up needed",
+      summary: "Please respond", received_at: 1.hour.ago
+    )
+    todo = AdminTodo.create!(cached_email.to_admin_todo_attrs)
+
+    email = AdminMailer.daily_pending_summary(new_todos: [ todo ])
 
     body = email.body.encoded
-    assert_includes body, "Email digest"
-    assert_includes body, "Reply to grant inquiry from Arts Council"
+    assert_includes body, "New todos from inbox"
+    assert_includes body, "Follow up: Follow up needed"
+    assert_includes body, Rails.application.routes.url_helpers.admin_inbox_url(cached_email, host: "example.com")
   end
 
-  test "daily_pending_summary sends when only email digest exists" do
+  test "daily_pending_summary sends when only new todos exist" do
     clear_all_pending_items
+    todo = AdminTodo.create!(title: "Standalone todo")
 
-    email = AdminMailer.daily_pending_summary(email_digest: "You have new emails to review")
+    email = AdminMailer.daily_pending_summary(new_todos: [ todo ])
 
     assert_equal [ users(:owner).email_address ], email.to
-    assert_includes email.body.encoded, "Email digest"
+    assert_includes email.body.encoded, "New todos from inbox"
   end
 
-  test "daily_pending_summary omits email digest section when nil" do
-    email = AdminMailer.daily_pending_summary(email_digest: nil)
+  test "daily_pending_summary omits new todos section when none created" do
+    email = AdminMailer.daily_pending_summary(new_todos: [])
 
-    assert_not_includes email.body.encoded, "Email digest"
+    assert_not_includes email.body.encoded, "New todos from inbox"
   end
 
-  test "daily_pending_summary is not sent when nothing needs action and no digest" do
+  test "daily_pending_summary is not sent when nothing needs action and no new todos" do
     clear_all_pending_items
 
-    email = AdminMailer.daily_pending_summary(email_digest: nil)
+    email = AdminMailer.daily_pending_summary(new_todos: [])
     assert_nil email.to
   end
 
