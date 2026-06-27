@@ -1,5 +1,6 @@
 class CachedEmail < ApplicationRecord
   has_many_attached :attachments
+  has_many :admin_todos, as: :source, dependent: :nullify
 
   enum :status, { unread: 0, read: 1, archived: 2 }, default: :unread
 
@@ -10,6 +11,18 @@ class CachedEmail < ApplicationRecord
 
   scope :recent, -> { where("received_at >= ?", 30.days.ago).order(received_at: :desc) }
   scope :visible, -> { where.not(status: :archived) }
+  scope :without_admin_todo, -> {
+    where.not(id: AdminTodo.where(source_type: name).select(:source_id))
+  }
+
+  def to_admin_todo_attrs
+    {
+      title: "Follow up: #{subject}",
+      description: "From: #{from_address}\nReceived: #{received_at.strftime('%B %d, %Y at %I:%M %p')}",
+      priority: :normal,
+      source: self
+    }
+  end
 
   # Returns the email body ready for display. Newly synced emails have their inline
   # images replaced with blob paths by SyncZohoEmailsJob. For emails synced before

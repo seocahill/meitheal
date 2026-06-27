@@ -21,7 +21,16 @@
     <p class="form-hint">URL path for the page (lowercase letters, numbers, and hyphens only)</p>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <%= form.label :locale, "Language", class: "form-label" %>
+      <%= form.select :locale, [
+        ["English (en)", "en"],
+        ["Gaeilge (ga)", "ga"]
+      ], {}, class: "form-input" %>
+      <p class="form-hint">Language of this page version</p>
+    </div>
+
     <div>
       <%= form.label :visibility, class: "form-label" %>
       <%= form.select :visibility, [
