@@ -1,4 +1,9 @@
 module ApplicationHelper
+  # Returns the path to switch to the other language.
+  def switch_locale_path_for_other_language
+    switch_locale_path(I18n.locale == :ga ? :en : :ga)
+  end
+
   # Returns CSS classes for a sidebar nav link, adding active state when
   # the current request matches any of the given controller path prefixes.
   def sidebar_nav_class(*controller_paths)

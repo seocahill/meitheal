@@ -1,6 +1,6 @@
 <div class="max-w-2xl mx-auto px-4 py-8">
   <header class="mb-8">
-    <h1 class="text-2xl font-bold tracking-wide uppercase">Projects</h1>
+    <h1 class="text-2xl font-bold tracking-wide uppercase"><%= t("projects") %></h1>
     <% if authenticated? && current_user_can_edit? %>
       <p class="mt-2">
         <%= link_to "New Project", new_project_path, class: "text-sm text-gray-600 hover:text-gray-900 underline" %>
@@ -9,7 +9,7 @@
   </header>
 
   <% if @posts.empty? %>
-    <p class="text-gray-500">No projects yet.</p>
+    <p class="text-gray-500"><%= t("no_projects") %></p>
   <% else %>
     <div class="space-y-12">
       <% @posts.each do |post| %>
@@ -23,7 +23,7 @@
           <h2 class="text-xl font-semibold mb-1">
             <%= link_to post.title, project_path(post.slug), class: "underline hover:text-gray-600" %>
             <% unless post.published? %>
-              <span class="ml-2 text-xs font-normal text-amber-700 bg-amber-100 border border-amber-300 rounded px-2 py-0.5 align-middle">draft: for discussion</span>
+              <span class="ml-2 text-xs font-normal text-amber-700 bg-amber-100 border border-amber-300 rounded px-2 py-0.5 align-middle"><%= t("draft_for_discussion") %></span>
             <% end %>
           </h2>
 
@@ -31,7 +31,7 @@
             <%= post.published_at&.strftime('%B %d, %Y') %>
           </p>
 
-          <%= link_to "Read more", project_path(post.slug), class: "text-sm underline hover:text-gray-600" %>
+          <%= link_to t("read_more"), project_path(post.slug), class: "text-sm underline hover:text-gray-600" %>
         </article>
       <% end %>
     </div>
