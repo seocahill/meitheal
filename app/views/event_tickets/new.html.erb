@@ -1,0 +1,81 @@
+<div class="max-w-lg mx-auto px-4 sm:px-6"
+     data-controller="event-ticket-payment"
+     data-event-ticket-payment-price-value="<%= @event.ticket_price_cents %>"
+     data-event-ticket-payment-event-id-value="<%= @event.id %>"
+     data-event-ticket-payment-capacity-value="<%= @event.tickets_remaining.to_i %>">
+
+  <h1 class="text-3xl font-bold text-gray-900 mb-2">Buy Tickets</h1>
+  <p class="text-gray-500 mb-8"><%= @event.title %> &mdash; <%= @event.starts_at.strftime("%A %d %B %Y") %></p>
+
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Your details</h2>
+    <div class="space-y-4">
+      <div>
+        <label for="buyer_name" class="form-label">Name</label>
+        <input type="text" id="buyer_name" name="buyer_name"
+               data-event-ticket-payment-target="buyerName"
+               class="form-input w-full" required>
+      </div>
+      <div>
+        <label for="buyer_email" class="form-label">Email address</label>
+        <input type="email" id="buyer_email" name="buyer_email"
+               data-event-ticket-payment-target="buyerEmail"
+               class="form-input w-full" required>
+        <p class="text-sm text-gray-500 mt-1">Your ticket confirmation will be sent here.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-6 mb-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tickets</h2>
+
+    <div class="flex items-center gap-4 mb-4">
+      <label for="quantity" class="form-label mb-0">Quantity</label>
+      <input type="number" id="quantity" name="quantity" value="1" min="1"
+             <% if @event.tickets_remaining.present? %>max="<%= @event.tickets_remaining %>"<% end %>
+             data-action="input->event-ticket-payment#updateTotal"
+             data-event-ticket-payment-target="quantity"
+             class="form-input w-24">
+    </div>
+
+    <div class="flex justify-between items-center text-base font-semibold border-t border-gray-200 pt-4">
+      <span>Total</span>
+      <span data-event-ticket-payment-target="totalDisplay">
+        &euro;<%= number_with_precision(@event.ticket_price_cents / 100.0, precision: 2) %>
+      </span>
+    </div>
+  </div>
+
+  <div class="card p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment</h2>
+
+    <div id="event-sumup-card"
+         data-event-ticket-payment-target="cardWidget">
+    </div>
+
+    <div data-event-ticket-payment-target="loading"
+         class="hidden text-center py-8 text-gray-500">
+      Loading payment form...
+    </div>
+
+    <div data-event-ticket-payment-target="error"
+         class="hidden mt-4 p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-700">
+    </div>
+
+    <button
+      type="button"
+      data-action="click->event-ticket-payment#initiatePayment"
+      data-event-ticket-payment-target="payButton"
+      class="mt-6 w-full btn-primary text-white px-6 py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+      Pay &euro;<span data-event-ticket-payment-target="buttonTotal"><%= number_with_precision(@event.ticket_price_cents / 100.0, precision: 2) %></span>
+    </button>
+
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      Payments are securely processed by SumUp.
+    </p>
+  </div>
+
+  <%= link_to "Cancel", event_path(@event), class: "block mt-6 text-center text-gray-600 hover:text-purple-600 transition-colors" %>
+</div>
+
+<script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script>

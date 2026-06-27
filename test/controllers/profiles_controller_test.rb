@@ -15,6 +15,22 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, @owner_profile.name
   end
 
+  test "index shows total member count in heading and visible count in subheading" do
+    get profiles_path
+    assert_response :success
+    assert_match(/#{Profile.count} Members/, response.body)
+    assert_match(/#{Profile.visible.count} members with visible profiles/, response.body)
+  end
+
+  test "index hides profiles without any content by default" do
+    blank_user = User.create!(email_address: "blank@test.com", password: "password")
+    blank = Profile.create!(user: blank_user, name: "Blank Member", visible: true)
+
+    get profiles_path
+    assert_not_includes response.body, blank.name
+    assert_includes response.body, @owner_profile.name
+  end
+
   test "index can filter by skill" do
     get profiles_path(skill: "administration")
     assert_response :success
