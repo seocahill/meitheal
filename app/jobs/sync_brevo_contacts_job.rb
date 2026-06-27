@@ -71,6 +71,8 @@ class SyncBrevoContactsJob < ApplicationJob
       approved: true
     )
 
+    user.memberships.create!(membership_type: :associate, starts_on: Date.current)
+
     # Create profile with name if provided
     if first_name.present?
       user.create_profile!(name: first_name)

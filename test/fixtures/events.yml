@@ -13,3 +13,12 @@ published_event:
   description: A published event visible to all
   published: true
   user: editor
+
+ticketed_event:
+  title: Ticketed Gig
+  starts_at: <%= 2.weeks.from_now %>
+  published: true
+  ticketing_enabled: true
+  ticket_price_cents: 1000
+  capacity: 50
+  user: editor

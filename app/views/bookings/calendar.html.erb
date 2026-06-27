@@ -1,4 +1,28 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
+  <% if !authenticated? %>
+    <div class="mb-6 bg-amber-50 border border-amber-300 rounded-lg p-4 flex flex-col sm:flex-row sm:items-start gap-3">
+      <svg class="w-6 h-6 text-amber-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <div>
+        <p class="font-semibold text-amber-800">You must be logged in to book.</p>
+        <p class="text-sm text-amber-700 mt-1">
+          Please read the <a href="https://thencf.art/booking-rules" target="_blank" class="underline hover:text-amber-900">booking rules</a> before booking.
+          If you have any questions please <a class="underline hover:text-amber-900" href="https://thencf.art/contact">contact us</a>.
+        </p>
+      </div>
+    </div>
+  <% elsif !Current.user.has_active_membership? %>
+    <div class="mb-6 bg-red-50 border border-red-300 rounded-lg p-4 flex flex-col sm:flex-row sm:items-start gap-3">
+      <svg class="w-6 h-6 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <div>
+        <p class="font-semibold text-red-800">You must pay your annual subscription to book.</p>
+        <p class="text-sm text-red-700 mt-1">
+          Please read the <a href="https://thencf.art/booking-rules" target="_blank" class="underline hover:text-red-900">booking rules</a> before booking.
+          If you have any questions please <a class="underline hover:text-red-900" href="https://thencf.art/contact">contact us</a>.
+        </p>
+      </div>
+    </div>
+  <% end %>
+
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">Space Calendar</h1>
     <% if authenticated? %>
