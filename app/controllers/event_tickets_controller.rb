@@ -1,5 +1,5 @@
 class EventTicketsController < ApplicationController
-  allow_unauthenticated_access only: [ :new, :create_checkout, :complete ]
+  allow_unauthenticated_access only: [ :new, :create_checkout, :complete, :receipt ]
   before_action :set_event
 
   def new
@@ -83,7 +83,7 @@ class EventTicketsController < ApplicationController
           sumup_transaction_id: checkout["transaction_id"]
         )
         TicketMailer.confirmation(ticket).deliver_later
-        redirect_to event_path(@event), notice: "Payment successful! Your ticket confirmation has been sent to #{ticket.buyer_email}."
+        redirect_to receipt_event_tickets_path(@event, checkout_id: ticket.sumup_checkout_id)
       else
         ticket.update!(status: :failed)
         redirect_to event_path(@event), alert: "Payment was not completed. Please try again."
@@ -92,6 +92,11 @@ class EventTicketsController < ApplicationController
       Rails.logger.error("Ticket checkout verification failed: #{e.message}")
       redirect_to event_path(@event), alert: "Unable to verify payment. Please contact us if you were charged."
     end
+  end
+
+  def receipt
+    @ticket = @event.tickets.find_by(sumup_checkout_id: params[:checkout_id])
+    redirect_to event_path(@event) unless @ticket
   end
 
   private

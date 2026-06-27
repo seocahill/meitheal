@@ -53,6 +53,15 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new event form defaults starts_at to noon today" do
+    sign_in_as(@viewer)
+    travel_to Time.zone.parse("2026-05-19 09:30") do
+      get new_event_path
+      assert_response :success
+      assert_includes response.body, "2026-05-19T12:00"
+    end
+  end
+
   test "signed in user can create event as draft" do
     sign_in_as(@viewer)
     assert_difference "Event.count" do

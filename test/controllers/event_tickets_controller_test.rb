@@ -94,7 +94,7 @@ class EventTicketsControllerTest < ActionDispatch::IntegrationTest
 
   # complete
 
-  test "complete with PAID status marks ticket as paid and sends email" do
+  test "complete with PAID status marks ticket as paid, sends email, and redirects to receipt" do
     ticket = tickets(:pending_ticket)
 
     stub_request(:get, "#{SumupCheckoutService::CHECKOUT_URL}/#{ticket.sumup_checkout_id}")
@@ -108,10 +108,24 @@ class EventTicketsControllerTest < ActionDispatch::IntegrationTest
       get complete_event_tickets_path(@event, checkout_id: ticket.sumup_checkout_id)
     end
 
-    assert_redirected_to event_path(@event)
-    assert_match /confirmation.*sent/i, flash[:notice]
+    assert_redirected_to receipt_event_tickets_path(@event, checkout_id: ticket.sumup_checkout_id)
     assert ticket.reload.paid?
     assert_equal "txn-new", ticket.reload.sumup_transaction_id
+  end
+
+  # receipt
+
+  test "receipt shows confirmation for a paid ticket" do
+    ticket = tickets(:paid_ticket)
+    get receipt_event_tickets_path(@event, checkout_id: ticket.sumup_checkout_id)
+    assert_response :success
+    assert_match ticket.buyer_name, response.body
+    assert_match @event.title, response.body
+  end
+
+  test "receipt redirects to event for unknown checkout_id" do
+    get receipt_event_tickets_path(@event, checkout_id: "unknown")
+    assert_redirected_to event_path(@event)
   end
 
   test "complete with failed payment marks ticket as failed" do

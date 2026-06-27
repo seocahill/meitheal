@@ -36,11 +36,6 @@
              data-action="input->event-ticket-payment#updateTotal"
              data-event-ticket-payment-target="quantity"
              class="form-input w-24">
-      <% if @event.tickets_remaining.present? %>
-        <span class="text-sm text-gray-500">
-          (<%= @event.tickets_remaining %> remaining)
-        </span>
-      <% end %>
     </div>
 
     <div class="flex justify-between items-center text-base font-semibold border-t border-gray-200 pt-4">

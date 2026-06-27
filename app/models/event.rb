@@ -72,8 +72,7 @@ class Event < ApplicationRecord
       markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
       markdown.render(description).html_safe
     elsif rich_description.present?
-      # Add target="_blank" and rel="noopener" to all links in ActionText content
-      html = rich_description.to_s
+      html = YoutubeEmbedTransformer.call(rich_description.to_s)
       html.gsub(/<a\s+href/, '<a target="_blank" rel="noopener" href').html_safe
     end
   end

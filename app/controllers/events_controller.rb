@@ -30,7 +30,7 @@ class EventsController < ApplicationController
   end
 
   def new
-    @event = Event.new
+    @event = Event.new(starts_at: Time.current.noon)
   end
 
   def create
