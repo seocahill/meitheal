@@ -202,6 +202,7 @@
 /* Primary button */
 .btn-primary {
   background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
+  color: white;
   transition: all 0.2s ease;
 }
 

@@ -21,7 +21,7 @@ class AdminMailer < ApplicationMailer
     )
   end
 
-  def daily_pending_summary(email_digest: nil)
+  def daily_pending_summary(new_todos: [])
     admin_emails = User.where(role: :owner).pluck(:email_address)
     return if admin_emails.empty?
 
@@ -31,11 +31,11 @@ class AdminMailer < ApplicationMailer
     @pending_bookings = Booking.pending
     @draft_events = Event.draft
     @unpaid_bookings = Booking.confirmed.unpaid.includes(:user, :space)
-    @email_digest = email_digest
+    @new_todos = new_todos
 
     pending_items = [ @pending_users, @pending_funding_opportunities, @pending_proposals,
                       @pending_bookings, @draft_events, @unpaid_bookings ]
-    return if pending_items.all?(&:none?) && @email_digest.blank?
+    return if pending_items.all?(&:none?) && @new_todos.empty?
 
     mail(
       to: admin_emails,
