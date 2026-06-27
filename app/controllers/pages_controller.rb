@@ -8,18 +8,16 @@ class PagesController < ApplicationController
   private
 
   def find_page
-    page = Page.find_by!(slug: params[:slug])
+    page = Page.find_by(slug: params[:slug], locale: I18n.locale.to_s) ||
+           Page.find_by!(slug: params[:slug], locale: "en")
 
     # Visibility checks
     case page.visibility
     when "draft"
-      # Only editors can view drafts
       raise ActiveRecord::RecordNotFound unless current_user_can_edit?
     when "members_only"
-      # Only authenticated users can view members-only pages
       raise ActiveRecord::RecordNotFound unless Current.user.present?
     end
-    # "published" pages are visible to everyone
 
     page
   end

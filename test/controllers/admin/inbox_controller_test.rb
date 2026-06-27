@@ -53,7 +53,7 @@ class Admin::InboxControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "index paginates results" do
-    6.times do |i|
+    11.times do |i|
       CachedEmail.create!(
         zoho_message_id: "msg_page_#{i}",
         zoho_folder_id: "folder_inbox",
@@ -64,7 +64,28 @@ class Admin::InboxControllerTest < ActionDispatch::IntegrationTest
     end
     get admin_inbox_index_path
     assert_response :success
-    assert_select "a", text: "Next"
+    assert_select "nav.pagy"
+  end
+
+  test "index respects per-page limit param" do
+    12.times do |i|
+      CachedEmail.create!(
+        zoho_message_id: "msg_limit_#{i}",
+        zoho_folder_id: "folder_inbox",
+        from_address: "sender#{i}@example.com",
+        subject: "Limit Test Email #{i}",
+        received_at: i.hours.ago
+      )
+    end
+    get admin_inbox_index_path(limit: 5)
+    assert_response :success
+    assert_select "nav.pagy"
+    assert_select ".pagy-info"
+  end
+
+  test "index ignores invalid per-page limit" do
+    get admin_inbox_index_path(limit: 999)
+    assert_response :success
   end
 
   # Show

@@ -1,6 +1,7 @@
 class Booking < ApplicationRecord
   belongs_to :space
   belongs_to :user
+  belongs_to :approved_by, class_name: "User", optional: true
 
   # Virtual attributes for agreement checkboxes
   attr_accessor :agree_booking_rules, :agree_ethics

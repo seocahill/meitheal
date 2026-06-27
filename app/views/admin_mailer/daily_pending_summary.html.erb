@@ -1,8 +1,18 @@
 <h1>Daily Summary</h1>
 
-<% if @email_digest.present? %>
-  <h2>Email digest</h2>
-  <%= simple_format(@email_digest) %>
+<% if @new_todos.any? %>
+  <h2>New todos from inbox (<%= @new_todos.count %>)</h2>
+  <ul>
+    <% @new_todos.each do |todo| %>
+      <li>
+        <strong><%= todo.title %></strong>
+        <% if todo.source.is_a?(CachedEmail) %>
+          — <%= link_to "open in inbox", admin_inbox_url(todo.source) %>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+  <p><%= link_to "Review todos", admin_todos_url %></p>
 <% end %>
 
 <p>The following items are awaiting your action:</p>
