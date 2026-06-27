@@ -10,6 +10,10 @@ WebMock.disable_net_connect!(
   allow: "models.dev" # RubyLLM model registry refresh on boot
 )
 
+# Fake SumUp credentials so service doesn't raise before hitting stubbed HTTP
+ENV["SUMUP_API_KEY"] ||= "test-api-key"
+ENV["SUMUP_MERCHANT_CODE"] ||= "TEST_MERCHANT"
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers
