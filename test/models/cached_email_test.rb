@@ -178,6 +178,66 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert_nil email.displayable_body
   end
 
+  test "noise? flags security alert subjects" do
+    [
+      "Security Alert: Verify a new IP",
+      "Security alert: New device login",
+      "New sign-in from Chrome on macOS",
+      "Verify a new device on your account",
+      "Your verification code is 123456",
+      "One-time passcode for sign-in",
+      "Password reset request",
+      "Reset your password"
+    ].each do |subject|
+      email = CachedEmail.new(from_address: "alice@example.com", subject: subject)
+      assert email.noise?, "Expected #{subject.inspect} to be flagged as noise"
+    end
+  end
+
+  test "noise? flags package and card delivery notifications" do
+    [
+      "Your Mastercard is en route",
+      "Your package is out for delivery",
+      "Your order has shipped",
+      "Your parcel is on the way"
+    ].each do |subject|
+      email = CachedEmail.new(from_address: "shipping@example.com", subject: subject)
+      assert email.noise?, "Expected #{subject.inspect} to be flagged as noise"
+    end
+  end
+
+  test "noise? flags automated sender addresses regardless of subject" do
+    [
+      "noreply@bank.com",
+      "no-reply@service.io",
+      "do-not-reply@platform.net",
+      "donotreply@example.com",
+      "notifications@github.com",
+      "notification@linkedin.com",
+      "account-security-noreply@accountprotection.microsoft.com"
+    ].each do |from_address|
+      email = CachedEmail.new(from_address: from_address, subject: "Anything")
+      assert email.noise?, "Expected #{from_address.inspect} to be flagged as noise"
+    end
+  end
+
+  test "noise? does not flag genuine community or funding email" do
+    [
+      [ "events@mayococo.ie", "Mayo Culture Night Event Fund now Open For Applications" ],
+      [ "info@artscouncil.ie", "Bursary deadline reminder" ],
+      [ "member@example.com", "Question about Saturday's exhibition" ],
+      [ "studio@example.com", "Workshop proposal for spring programme" ]
+    ].each do |from_address, subject|
+      email = CachedEmail.new(from_address: from_address, subject: subject)
+      assert_not email.noise?, "Expected #{subject.inspect} from #{from_address} to be signal, not noise"
+    end
+  end
+
+  test "noise? handles nil subject and from_address safely" do
+    assert_not CachedEmail.new.noise?
+    assert_not CachedEmail.new(subject: nil, from_address: nil).noise?
+  end
+
   test "visible scope excludes archived emails" do
     visible = CachedEmail.create!(
       zoho_message_id: "msg_visible",

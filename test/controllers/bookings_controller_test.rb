@@ -45,19 +45,21 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
 
   test "new booking form defaults starts_at to noon today" do
     sign_in_as(@viewer)
-    travel_to Time.zone.parse("2026-05-19 09:30") do
+    today = Date.current
+    travel_to today.in_time_zone.change(hour: 9, min: 30) do
       get new_booking_path
       assert_response :success
-      assert_includes response.body, "2026-05-19T12:00"
+      assert_includes response.body, "#{today.iso8601}T12:00"
     end
   end
 
   test "new booking form defaults ends_at to 2 hours after noon today" do
     sign_in_as(@viewer)
-    travel_to Time.zone.parse("2026-05-19 09:30") do
+    today = Date.current
+    travel_to today.in_time_zone.change(hour: 9, min: 30) do
       get new_booking_path
       assert_response :success
-      assert_includes response.body, "2026-05-19T14:00"
+      assert_includes response.body, "#{today.iso8601}T14:00"
     end
   end
 
