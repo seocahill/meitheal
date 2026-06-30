@@ -16,7 +16,7 @@ class DailyPendingSummaryJob < ApplicationJob
   end
 
   def create_todos_for_unprocessed_emails
-    CachedEmail.visible.without_admin_todo.order(received_at: :desc).map do |email|
+    CachedEmail.visible.without_admin_todo.order(received_at: :desc).reject(&:noise?).map do |email|
       AdminTodo.create!(email.to_admin_todo_attrs)
     end
   end

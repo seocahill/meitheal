@@ -33,6 +33,19 @@ class DailyPendingSummaryJobTest < ActiveJob::TestCase
     assert_predicate stale.reload, :archived?
   end
 
+  test "skips noisy emails like security alerts and noreply notifications" do
+    signal = create_cached_email(zoho_message_id: "signal", subject: "Mayo Culture Night Event Fund now Open For Applications")
+    create_cached_email(zoho_message_id: "alert", subject: "Security Alert: Verify a new IP")
+    create_cached_email(zoho_message_id: "noreply", from_address: "noreply@bank.com", subject: "Statement available")
+
+    assert_difference -> { AdminTodo.count }, 1 do
+      DailyPendingSummaryJob.perform_now
+    end
+
+    todo = AdminTodo.order(:created_at).last
+    assert_equal signal, todo.source
+  end
+
   test "archived emails do not get todos created" do
     create_cached_email(received_at: 2.months.ago, subject: "Old news")
 
