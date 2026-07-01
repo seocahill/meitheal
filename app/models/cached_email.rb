@@ -14,6 +14,13 @@ class CachedEmail < ApplicationRecord
   scope :without_admin_todo, -> {
     where.not(id: AdminTodo.where(source_type: name).select(:source_id))
   }
+  scope :search, ->(term) {
+    next all if term.blank?
+
+    pattern = "%#{sanitize_sql_like(term)}%"
+    where("LOWER(subject) LIKE LOWER(?) OR LOWER(from_address) LIKE LOWER(?) OR LOWER(summary) LIKE LOWER(?)",
+          pattern, pattern, pattern)
+  }
 
   # Automated sender prefixes that almost never warrant a follow-up todo
   # (security mailers, transactional notifiers, shipping bots, etc.).
