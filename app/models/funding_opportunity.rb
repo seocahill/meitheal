@@ -18,6 +18,13 @@ class FundingOpportunity < ApplicationRecord
   scope :upcoming, -> { approved.open.order(:deadline) }
   scope :approved_or_owned_by, ->(user) { where(approved: true).or(where(created_by: user)) }
   scope :by_category, ->(category) { where("categories LIKE ?", "%#{category}%") }
+  scope :search, ->(term) {
+    next all if term.blank?
+
+    pattern = "%#{sanitize_sql_like(term)}%"
+    where("LOWER(title) LIKE LOWER(?) OR LOWER(organization) LIKE LOWER(?) OR LOWER(description) LIKE LOWER(?)",
+          pattern, pattern, pattern)
+  }
 
   def closed?
     deadline < Date.current

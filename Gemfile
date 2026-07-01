@@ -69,6 +69,9 @@ gem "brevo"
 # Forum engine [https://github.com/thredded/thredded]
 gem "thredded"
 
+# Model Context Protocol server, exposes admin tools to AI clients [https://github.com/yjacquin/fast-mcp]
+gem "fast-mcp", require: "fast_mcp"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
