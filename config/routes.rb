@@ -2,6 +2,28 @@ Rails.application.routes.draw do
   mount MissionControl::Jobs::Engine, at: "/jobs"
   mount Litestream::Engine, at: "/litestream"
 
+  namespace :api do
+    namespace :v1 do
+      resources_only = { only: [ :index, :show, :create, :update ] }
+      resources :faqs, **resources_only
+      resources :pages, **resources_only
+      resources :posts, **resources_only
+      resources :events, **resources_only
+      resources :newsletters, **resources_only
+      resources :funding_opportunities, **resources_only
+      resources :spaces, **resources_only
+      resources :bookings, **resources_only
+      resources :memberships, **resources_only
+      resources :proposals, **resources_only
+      resources :payments, **resources_only
+      resources :tickets, **resources_only
+      resources :email_groups, **resources_only
+      resources :admin_todos, **resources_only
+      resources :profiles, **resources_only
+      resources :users, **resources_only
+    end
+  end
+
   resources :posts, param: :slug do
     member do
       patch :publish
