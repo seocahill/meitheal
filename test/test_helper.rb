@@ -15,6 +15,9 @@ WebMock.disable_net_connect!(
 ENV["SUMUP_API_KEY"] ||= "test-api-key"
 ENV["SUMUP_MERCHANT_CODE"] ||= "TEST_MERCHANT"
 
+# Bearer token used by the JSON API in tests
+ENV["API_TOKEN"] ||= "test-api-token"
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers

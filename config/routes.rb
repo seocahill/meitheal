@@ -1,6 +1,39 @@
 Rails.application.routes.draw do
+  use_doorkeeper
+
+  # claude.ai MCP connector: OAuth 2.1 discovery, dynamic client registration,
+  # and the MCP endpoint itself. Kept above the catch-all `get ":slug"` route.
+  get ".well-known/oauth-authorization-server", to: "oauth/metadata#authorization_server"
+  get ".well-known/oauth-authorization-server/mcp", to: "oauth/metadata#authorization_server"
+  get ".well-known/oauth-protected-resource", to: "oauth/metadata#protected_resource", as: :oauth_protected_resource
+  get ".well-known/oauth-protected-resource/mcp", to: "oauth/metadata#protected_resource"
+  post "oauth/register", to: "oauth/registrations#create", as: :oauth_register
+  match "mcp", to: "mcp#invoke", via: %i[get post], as: :mcp
+
   mount MissionControl::Jobs::Engine, at: "/jobs"
   mount Litestream::Engine, at: "/litestream"
+
+  namespace :api do
+    namespace :v1 do
+      resources_only = { only: [ :index, :show, :create, :update ] }
+      resources :faqs, **resources_only
+      resources :pages, **resources_only
+      resources :posts, **resources_only
+      resources :events, **resources_only
+      resources :newsletters, **resources_only
+      resources :funding_opportunities, **resources_only
+      resources :spaces, **resources_only
+      resources :bookings, **resources_only
+      resources :memberships, **resources_only
+      resources :proposals, **resources_only
+      resources :payments, **resources_only
+      resources :tickets, **resources_only
+      resources :email_groups, **resources_only
+      resources :admin_todos, **resources_only
+      resources :profiles, **resources_only
+      resources :users, **resources_only
+    end
+  end
 
   resources :posts, param: :slug do
     member do
