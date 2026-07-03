@@ -1,4 +1,15 @@
 Rails.application.routes.draw do
+  use_doorkeeper
+
+  # claude.ai MCP connector: OAuth 2.1 discovery, dynamic client registration,
+  # and the MCP endpoint itself. Kept above the catch-all `get ":slug"` route.
+  get ".well-known/oauth-authorization-server", to: "oauth/metadata#authorization_server"
+  get ".well-known/oauth-authorization-server/mcp", to: "oauth/metadata#authorization_server"
+  get ".well-known/oauth-protected-resource", to: "oauth/metadata#protected_resource", as: :oauth_protected_resource
+  get ".well-known/oauth-protected-resource/mcp", to: "oauth/metadata#protected_resource"
+  post "oauth/register", to: "oauth/registrations#create", as: :oauth_register
+  match "mcp", to: "mcp#invoke", via: %i[get post], as: :mcp
+
   mount MissionControl::Jobs::Engine, at: "/jobs"
   mount Litestream::Engine, at: "/litestream"
 

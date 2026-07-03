@@ -69,21 +69,8 @@ module Api
         render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
       end
 
-      # Serialize DB columns plus any ActionText rich-text fields (as HTML).
       def serialize(record)
-        record.attributes.merge(rich_text_fields(record))
-      end
-
-      def rich_text_fields(record)
-        rich_text_names(record.class).index_with do |name|
-          record.public_send(name)&.body&.to_html
-        end
-      end
-
-      def rich_text_names(klass)
-        klass.reflect_on_all_associations(:has_one)
-             .select { |assoc| assoc.options[:class_name].to_s == "ActionText::RichText" }
-             .map { |assoc| assoc.name.to_s.delete_prefix("rich_text_") }
+        Api::RecordSerializer.call(record)
       end
     end
   end

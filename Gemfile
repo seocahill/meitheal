@@ -69,6 +69,10 @@ gem "brevo"
 # Forum engine [https://github.com/thredded/thredded]
 gem "thredded"
 
+# MCP server + OAuth 2.1 provider for the claude.ai web connector
+gem "mcp"
+gem "doorkeeper"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
