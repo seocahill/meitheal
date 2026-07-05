@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_03_165532) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_05_071230) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -370,7 +370,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_165532) do
     t.string "slug"
     t.string "title"
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.index ["slug"], name: "index_posts_on_slug", unique: true
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
@@ -402,7 +402,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_03_165532) do
     t.datetime "submitted_at"
     t.string "title", null: false
     t.datetime "updated_at", null: false
-    t.integer "user_id", null: false
+    t.integer "user_id"
     t.index ["funding_opportunity_id"], name: "index_proposals_on_funding_opportunity_id"
     t.index ["user_id", "funding_opportunity_id"], name: "index_proposals_on_user_id_and_funding_opportunity_id", unique: true
     t.index ["user_id"], name: "index_proposals_on_user_id"

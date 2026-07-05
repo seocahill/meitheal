@@ -59,4 +59,32 @@ class UserTest < ActiveSupport::TestCase
     assert_not editor.can_manage?
     assert_not viewer.can_manage?
   end
+
+  test "destroying a user nullifies their posts" do
+    user = User.create!(email_address: "nullify-posts@example.com", password: "password123")
+    post = Post.create!(user: user, title: "Orphan Post", slug: "orphan-post", post_type: 0)
+
+    assert_difference "Post.count", 0 do
+      user.destroy!
+    end
+
+    assert_nil post.reload.user_id
+  end
+
+  test "destroying a user nullifies their proposals" do
+    user = User.create!(email_address: "nullify-proposals@example.com", password: "password123")
+    opportunity = funding_opportunities(:arts_council_grant)
+    proposal = Proposal.create!(
+      user: user,
+      funding_opportunity: opportunity,
+      title: "Orphan Proposal",
+      status: :draft
+    )
+
+    assert_difference "Proposal.count", 0 do
+      user.destroy!
+    end
+
+    assert_nil proposal.reload.user_id
+  end
 end
