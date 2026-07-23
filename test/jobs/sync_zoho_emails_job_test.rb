@@ -195,6 +195,48 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     assert_match "ImageDisplay", email.body
   end
 
+  test "uses (no subject) default when email has no subject" do
+    @zoho_emails = [
+      {
+        "messageId" => "msg_nosubject",
+        "fromAddress" => "sender@example.com",
+        "subject" => nil,
+        "summary" => "A summary",
+        "receivedTime" => (1.hour.ago.to_f * 1000).to_i.to_s
+      }
+    ]
+    zoho_emails = @zoho_emails
+    @stub_zoho.define_singleton_method(:emails) { |folder_id:, limit:| zoho_emails }
+
+    assert_difference "CachedEmail.count", 1 do
+      SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+    end
+
+    email = CachedEmail.find_by(zoho_message_id: "msg_nosubject")
+    assert_equal "(no subject)", email.subject
+  end
+
+  test "uses (no subject) default when email has blank subject" do
+    @zoho_emails = [
+      {
+        "messageId" => "msg_blanksubject",
+        "fromAddress" => "sender@example.com",
+        "subject" => "",
+        "summary" => "A summary",
+        "receivedTime" => (1.hour.ago.to_f * 1000).to_i.to_s
+      }
+    ]
+    zoho_emails = @zoho_emails
+    @stub_zoho.define_singleton_method(:emails) { |folder_id:, limit:| zoho_emails }
+
+    assert_difference "CachedEmail.count", 1 do
+      SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+    end
+
+    email = CachedEmail.find_by(zoho_message_id: "msg_blanksubject")
+    assert_equal "(no subject)", email.subject
+  end
+
   test "continues syncing when individual email content fetch fails" do
     call_count = 0
     @stub_zoho.define_singleton_method(:email) do |folder_id:, message_id:|
