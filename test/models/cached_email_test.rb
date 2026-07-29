@@ -53,15 +53,15 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert_includes email.errors[:from_address], "can't be blank"
   end
 
-  test "requires subject" do
+  test "allows blank subject" do
     email = CachedEmail.new(
       zoho_message_id: "msg_123",
       zoho_folder_id: "folder_456",
       from_address: "sender@example.com",
       received_at: 1.hour.ago
     )
-    assert_not email.valid?
-    assert_includes email.errors[:subject], "can't be blank"
+    assert email.valid?
+    assert_empty email.errors[:subject]
   end
 
   test "requires received_at" do
