@@ -71,7 +71,9 @@ Rails.application.routes.draw do
   resource :contact, only: [ :show, :create ]
 
   namespace :admin do
-    resources :ticket_sales, only: [ :index, :show ]
+    resources :ticket_sales, only: [ :index, :show ] do
+      post :add_booking, on: :member
+    end
     resources :payments, only: [ :index ]
     resources :bookings, only: [ :index ] do
       member do
