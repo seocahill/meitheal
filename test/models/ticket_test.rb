@@ -28,6 +28,19 @@ class TicketTest < ActiveSupport::TestCase
     assert_includes ticket.errors[:buyer_email], "can't be blank"
   end
 
+  test "reserved booking is valid without an email" do
+    ticket = Ticket.new(event: @event, buyer_name: "Door Guest", quantity: 1,
+                        amount_cents: 500, status: :reserved)
+    assert ticket.valid?
+  end
+
+  test "reserved booking still rejects a malformed email" do
+    ticket = Ticket.new(event: @event, buyer_name: "Door Guest", buyer_email: "notanemail",
+                        quantity: 1, amount_cents: 500, status: :reserved)
+    assert_not ticket.valid?
+    assert ticket.errors[:buyer_email].present?
+  end
+
   test "validates buyer_email format" do
     ticket = Ticket.new(event: @event, buyer_name: "Test", buyer_email: "notanemail", quantity: 1, amount_cents: 500)
     assert_not ticket.valid?

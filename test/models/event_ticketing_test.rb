@@ -10,8 +10,28 @@ class EventTicketingTest < ActiveSupport::TestCase
     assert_equal 1, @event.tickets_sold
   end
 
+  # tickets_reserved
+  test "tickets_reserved counts only reserved ticket quantities" do
+    assert_equal 0, @event.tickets_reserved
+    Ticket.create!(event: @event, buyer_name: "Door Guest", quantity: 3,
+                   amount_cents: 3000, status: :reserved)
+    assert_equal 3, @event.tickets_reserved
+  end
+
   # tickets_remaining
   test "tickets_remaining subtracts sold from capacity" do
+    assert_equal 49, @event.tickets_remaining
+  end
+
+  test "tickets_remaining subtracts reserved bookings" do
+    Ticket.create!(event: @event, buyer_name: "Door Guest", quantity: 5,
+                   amount_cents: 5000, status: :reserved)
+    # capacity 50, 1 paid, 5 reserved => 44 remaining
+    assert_equal 44, @event.tickets_remaining
+  end
+
+  test "pending tickets do not reduce availability" do
+    # fixtures already include a pending ticket of quantity 2; only the paid one counts
     assert_equal 49, @event.tickets_remaining
   end
 
@@ -38,6 +58,14 @@ class EventTicketingTest < ActiveSupport::TestCase
   test "sold_out? is false when capacity is nil" do
     @event.update!(capacity: nil)
     assert_not @event.sold_out?
+  end
+
+  test "reserved bookings count toward sold_out" do
+    @event.update!(capacity: 3)
+    # 1 paid already; reserve the remaining 2 seats
+    Ticket.create!(event: @event, buyer_name: "Door Guest", quantity: 2,
+                   amount_cents: 2000, status: :reserved)
+    assert @event.sold_out?
   end
 
   # ticketing_available?

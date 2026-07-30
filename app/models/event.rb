@@ -37,9 +37,15 @@ class Event < ApplicationRecord
     tickets.paid.sum(:quantity)
   end
 
+  # Seats held by editor-added door bookings, which reduce availability
+  # without counting as online revenue.
+  def tickets_reserved
+    tickets.reserved.sum(:quantity)
+  end
+
   def tickets_remaining
     return nil unless capacity.present?
-    [ capacity - tickets_sold, 0 ].max
+    [ capacity - tickets_sold - tickets_reserved, 0 ].max
   end
 
   def sold_out?

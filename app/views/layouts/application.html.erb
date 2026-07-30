@@ -62,6 +62,7 @@
             <%= link_to t("newsletters"), newsletters_path, class: sidebar_nav_class("newsletters") %>
             <%= link_to t("pages"), admin_pages_path, class: sidebar_nav_class("admin/pages") %>
             <%= link_to t("faqs"), admin_faqs_path, class: sidebar_nav_class("admin/faqs") %>
+            <%= link_to t("ticket_sales"), admin_ticket_sales_path, class: sidebar_nav_class("admin/ticket_sales") %>
           <% end %>
 
           <% if current_user_can_manage? %>
@@ -73,7 +74,6 @@
             <%= link_to t("payments"), admin_payments_path, class: sidebar_nav_class("admin/payments") %>
             <%= link_to t("transactions"), admin_transactions_path, class: sidebar_nav_class("admin/transactions") %>
             <%= link_to t("bookings"), admin_bookings_path, class: sidebar_nav_class("admin/bookings") %>
-            <%= link_to t("ticket_sales"), admin_ticket_sales_path, class: sidebar_nav_class("admin/ticket_sales") %>
             <%= link_to t("proposals"), admin_proposals_path, class: sidebar_nav_class("admin/proposals") %>
             <%= link_to t("funding_opps"), admin_funding_opportunities_path, class: sidebar_nav_class("admin/funding_opportunities") %>
             <%= link_to t("todos"), admin_todos_path, class: sidebar_nav_class("admin/todos") %>
