@@ -14,6 +14,7 @@ class DashboardController < ApplicationController
     @my_bookings = @user.bookings.upcoming.includes(:space).limit(3)
     @my_proposals = @user.proposals.includes(:funding_opportunity).order(updated_at: :desc).limit(3)
     @my_draft_events = @user.events.draft.order(updated_at: :desc).limit(3)
+    @my_tickets = Ticket.paid.for_email(@user.email_address).eager_load(:event).merge(Event.upcoming)
     @unpaid_bookings = @user.bookings.confirmed.unpaid.includes(:space)
 
     # Recent forum activity - approved topics only
