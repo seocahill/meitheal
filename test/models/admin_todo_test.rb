@@ -69,6 +69,29 @@ class AdminTodoTest < ActiveSupport::TestCase
     assert_not_includes AdminTodo.due_soon, overdue
   end
 
+  test "search scope matches title case-insensitively" do
+    match = AdminTodo.create!(title: "Follow up: Grant application")
+    other = AdminTodo.create!(title: "Book the community hall")
+
+    assert_includes AdminTodo.search("grant"), match
+    assert_not_includes AdminTodo.search("grant"), other
+  end
+
+  test "search scope matches description" do
+    match = AdminTodo.create!(title: "Task", description: "Contact the funding office")
+    other = AdminTodo.create!(title: "Other", description: "Nothing relevant here")
+
+    assert_includes AdminTodo.search("funding"), match
+    assert_not_includes AdminTodo.search("funding"), other
+  end
+
+  test "search scope returns all todos for a blank query" do
+    todo = AdminTodo.create!(title: "Anything")
+
+    assert_includes AdminTodo.search(""), todo
+    assert_includes AdminTodo.search(nil), todo
+  end
+
   # Instance methods
   test "overdue? returns true for past due incomplete todos" do
     todo = AdminTodo.new(title: "Test", due_date: 1.day.ago, completed: false)

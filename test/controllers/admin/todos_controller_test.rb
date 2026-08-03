@@ -53,6 +53,26 @@ class Admin::TodosControllerTest < ActionDispatch::IntegrationTest
     assert_match "Done task", response.body
   end
 
+  test "index filters todos by search query" do
+    sign_in_as(@owner)
+    AdminTodo.create!(title: "Follow up: Grant application")
+    AdminTodo.create!(title: "Book the community hall")
+
+    get admin_todos_path(q: "grant")
+    assert_response :success
+    assert_match "Grant application", response.body
+    assert_no_match(/community hall/, response.body)
+  end
+
+  test "index search includes completed todos when requested" do
+    sign_in_as(@owner)
+    AdminTodo.create!(title: "Grant reconciliation", completed: true)
+
+    get admin_todos_path(q: "grant", show_completed: true)
+    assert_response :success
+    assert_match "Grant reconciliation", response.body
+  end
+
   # CRUD tests
   test "owner can view new todo form" do
     sign_in_as(@owner)
@@ -127,6 +147,14 @@ class Admin::TodosControllerTest < ActionDispatch::IntegrationTest
 
     assert todo1.reload.completed
     assert todo2.reload.completed
+  end
+
+  test "batch complete preserves the search filter in the redirect" do
+    sign_in_as(@owner)
+    todo = AdminTodo.create!(title: "Follow up: Grant")
+
+    post batch_complete_admin_todos_path(q: "grant"), params: { todo_ids: [ todo.id ] }
+    assert_redirected_to admin_todos_path(q: "grant")
   end
 
   test "owner can batch delete todos" do

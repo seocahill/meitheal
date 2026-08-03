@@ -4,12 +4,10 @@ class Admin::TodosController < Admin::BaseController
 
   def index
     @show_completed = params[:show_completed] == "true"
+    @query = params[:q].to_s.strip
 
-    @todos = if @show_completed
-      AdminTodo.default_order
-    else
-      AdminTodo.pending.default_order
-    end
+    scope = @show_completed ? AdminTodo.all : AdminTodo.pending
+    @todos = scope.search(@query).default_order
 
     @overdue_count = AdminTodo.overdue.count
     @due_soon_count = AdminTodo.due_soon.count
@@ -59,16 +57,21 @@ class Admin::TodosController < Admin::BaseController
   def batch_complete
     ids = params[:todo_ids] || []
     AdminTodo.where(id: ids).update_all(completed: true)
-    redirect_to admin_todos_path, notice: "#{ids.size} todos marked complete."
+    redirect_to admin_todos_path(list_filters), notice: "#{ids.size} todos marked complete."
   end
 
   def batch_delete
     ids = params[:todo_ids] || []
     AdminTodo.where(id: ids).destroy_all
-    redirect_to admin_todos_path, notice: "#{ids.size} todos deleted."
+    redirect_to admin_todos_path(list_filters), notice: "#{ids.size} todos deleted."
   end
 
   private
+
+  # Keep the current search/completed view when returning from a batch action.
+  def list_filters
+    params.permit(:q, :show_completed).to_h.compact_blank
+  end
 
   def set_todo
     @todo = AdminTodo.find(params[:id])
