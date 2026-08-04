@@ -221,6 +221,56 @@ class CachedEmailTest < ActiveSupport::TestCase
     end
   end
 
+  test "noise? flags newsletter, auto-reply and bounce subjects" do
+    [
+      "The March Newsletter is here",
+      "Weekly digest: this week in the arts",
+      "Community bulletin - spring edition",
+      "Out of Office: Re: your enquiry",
+      "Automatic reply: Away until Monday",
+      "Undeliverable: Meeting notes",
+      "Delivery Status Notification (Failure)"
+    ].each do |subject|
+      email = CachedEmail.new(from_address: "sender@example.com", subject: subject)
+      assert email.noise?, "Expected #{subject.inspect} to be flagged as noise"
+    end
+  end
+
+  test "noise? flags bulk sender addresses" do
+    [
+      "newsletter@artscouncil.ie",
+      "marketing@venue.com",
+      "mailer-daemon@example.com",
+      "bounce@sendgrid.net",
+      "postmaster@example.com"
+    ].each do |from_address|
+      email = CachedEmail.new(from_address: from_address, subject: "Anything")
+      assert email.noise?, "Expected #{from_address.inspect} to be flagged as noise"
+    end
+  end
+
+  test "noise? flags bulk mail identified by an unsubscribe link or marketing footer" do
+    [
+      %(<p>Big news!</p><a href="https://mailchimp.us1.list-manage.com/unsubscribe?u=123">Unsubscribe</a>),
+      %(<a href="https://track.example.com/x">Unsubscribe</a> from these emails),
+      "You are receiving this email because you signed up on our website.",
+      "Can't see this? View this email in your browser.",
+      "Manage your email preferences at any time."
+    ].each do |body|
+      email = CachedEmail.new(from_address: "hello@venue.com", subject: "Spring programme", body: body)
+      assert email.noise?, "Expected body #{body.inspect} to be flagged as bulk mail noise"
+    end
+  end
+
+  test "noise? does not flag a personal email that merely mentions unsubscribing" do
+    email = CachedEmail.new(
+      from_address: "member@example.com",
+      subject: "Mailing list",
+      body: "Hi, could you please unsubscribe me from the members mailing list? Thanks."
+    )
+    assert_not email.noise?
+  end
+
   test "noise? does not flag genuine community or funding email" do
     [
       [ "events@mayococo.ie", "Mayo Culture Night Event Fund now Open For Applications" ],
