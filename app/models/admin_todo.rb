@@ -14,6 +14,12 @@ class AdminTodo < ApplicationRecord
   scope :by_position, -> { order(Arel.sql("position IS NULL, position ASC")) }
   scope :by_due_date, -> { order(Arel.sql("due_date IS NULL, due_date ASC")) }
   scope :by_priority, -> { order(priority: :desc) }
+  scope :search, ->(query) {
+    next all if query.blank?
+
+    term = "%#{query.strip.downcase}%"
+    where("LOWER(title) LIKE :term OR LOWER(description) LIKE :term", term: term)
+  }
 
   # Default ordering for todo list
   scope :default_order, -> { by_priority.by_due_date.by_position }

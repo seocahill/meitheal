@@ -1,6 +1,7 @@
 <div id="<%= dom_id(todo) %>" class="flex items-start gap-4 px-4 py-3 hover:bg-gray-50 transition-colors <%= 'opacity-60' if todo.completed? %>">
   <div class="flex items-center pt-0.5">
     <input type="checkbox"
+           form="todo-batch"
            name="todo_ids[]"
            value="<%= todo.id %>"
            data-batch-select-target="checkbox"

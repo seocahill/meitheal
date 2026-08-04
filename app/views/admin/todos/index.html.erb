@@ -1,4 +1,4 @@
-<div class="max-w-4xl mx-auto px-4 sm:px-6">
+<div class="max-w-4xl mx-auto px-4 sm:px-6" data-controller="batch-select">
   <div class="flex justify-between items-center mb-8">
     <div>
       <h1 class="text-3xl font-bold text-gray-900">Todo List</h1>
@@ -14,46 +14,60 @@
     </div>
     <div class="flex items-center gap-3">
       <% if @show_completed %>
-        <%= link_to "Hide completed", admin_todos_path, class: "text-sm text-gray-600 hover:text-purple-600" %>
+        <%= link_to "Hide completed", admin_todos_path(q: @query.presence), class: "text-sm text-gray-600 hover:text-purple-600" %>
       <% else %>
-        <%= link_to "Show completed", admin_todos_path(show_completed: true), class: "text-sm text-gray-600 hover:text-purple-600" %>
+        <%= link_to "Show completed", admin_todos_path(show_completed: true, q: @query.presence), class: "text-sm text-gray-600 hover:text-purple-600" %>
       <% end %>
       <%= link_to "New Todo", new_admin_todo_path, class: "btn-primary text-white px-4 py-2 rounded-xl font-medium text-sm" %>
     </div>
   </div>
 
-  <%= form_with url: batch_complete_admin_todos_path, method: :post, data: { controller: "batch-select" } do %>
-    <div class="card">
-      <% if @todos.any? %>
-        <div class="divide-y divide-gray-100">
-          <% @todos.each do |todo| %>
-            <%= render "todo", todo: todo %>
-          <% end %>
-        </div>
+  <%= form_with url: admin_todos_path, method: :get, class: "mb-4 flex items-center gap-2" do |form| %>
+    <%= form.hidden_field :show_completed, value: @show_completed %>
+    <%= form.search_field :q, value: @query, placeholder: "Search todos…", autocomplete: "off",
+          class: "form-input flex-1" %>
+    <%= form.submit "Search", class: "btn-primary text-white px-4 py-2 rounded-xl font-medium text-sm cursor-pointer" %>
+    <% if @query.present? %>
+      <%= link_to "Clear", admin_todos_path(show_completed: @show_completed ? true : nil), class: "text-sm text-gray-600 hover:text-purple-600" %>
+    <% end %>
+  <% end %>
 
+  <div class="card">
+    <% if @todos.any? %>
+      <div class="divide-y divide-gray-100">
+        <% @todos.each do |todo| %>
+          <%= render "todo", todo: todo %>
+        <% end %>
+      </div>
+
+      <%= form_with url: batch_complete_admin_todos_path, method: :post, id: "todo-batch" do %>
         <div class="px-4 py-3 bg-gray-50 rounded-b-xl border-t border-gray-100 flex items-center gap-4" data-batch-select-target="actions" style="display: none;">
           <span class="text-sm text-gray-600" data-batch-select-target="count">0 selected</span>
           <button type="submit" class="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
             Mark Complete
           </button>
           <button type="submit" formaction="<%= batch_delete_admin_todos_path %>" formmethod="post"
-                  data-confirm="Delete selected todos?"
+                  data-turbo-confirm="Delete selected todos?"
                   class="text-sm text-rose-600 hover:text-rose-700 font-medium">
             Delete
           </button>
         </div>
-      <% else %>
-        <div class="px-6 py-12 text-center">
-          <p class="text-gray-500">
-            <% if @show_completed %>
-              No todos yet.
-            <% else %>
-              All caught up! No pending todos.
-            <% end %>
-          </p>
-          <%= link_to "Add a todo", new_admin_todo_path, class: "text-purple-600 hover:text-purple-700 font-medium mt-2 inline-block" %>
-        </div>
       <% end %>
-    </div>
-  <% end %>
+    <% else %>
+      <div class="px-6 py-12 text-center">
+        <p class="text-gray-500">
+          <% if @query.present? %>
+            No todos match &ldquo;<%= @query %>&rdquo;.
+          <% elsif @show_completed %>
+            No todos yet.
+          <% else %>
+            All caught up! No pending todos.
+          <% end %>
+        </p>
+        <% if @query.blank? %>
+          <%= link_to "Add a todo", new_admin_todo_path, class: "text-purple-600 hover:text-purple-700 font-medium mt-2 inline-block" %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 </div>
