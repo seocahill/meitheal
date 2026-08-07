@@ -36,7 +36,7 @@ class SyncZohoEmailsJob < ApplicationJob
       zoho_message_id: message_id,
       zoho_folder_id: folder_id,
       from_address: email_data["fromAddress"],
-      subject: email_data["subject"],
+      subject: email_data["subject"].presence || "(No subject)",
       summary: email_data["summary"],
       body: body,
       received_at: Time.at(email_data["receivedTime"].to_i / 1000)
