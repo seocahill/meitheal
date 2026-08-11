@@ -215,4 +215,24 @@ class SyncZohoEmailsJobTest < ActiveJob::TestCase
     email2 = CachedEmail.find_by(zoho_message_id: "msg_002")
     assert_equal "<p>Email body for msg_002</p>", email2.body
   end
+
+  test "syncs emails with blank subject" do
+    @stub_zoho.define_singleton_method(:emails) do |folder_id:, limit:|
+      [ {
+        "messageId" => "msg_no_subject",
+        "fromAddress" => "sender@example.com",
+        "subject" => "",
+        "summary" => "Some summary",
+        "receivedTime" => (1.hour.ago.to_f * 1000).to_i.to_s
+      } ]
+    end
+
+    assert_difference "CachedEmail.count", 1 do
+      SyncZohoEmailsJob.perform_now(zoho_service: @stub_zoho)
+    end
+
+    email = CachedEmail.find_by(zoho_message_id: "msg_no_subject")
+    assert_not_nil email
+    assert_equal "", email.subject
+  end
 end
