@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_30_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_14_085352) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -125,7 +125,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_30_000000) do
     t.string "from_address", null: false
     t.datetime "received_at", null: false
     t.integer "status", default: 0, null: false
-    t.string "subject", null: false
+    t.string "subject"
     t.text "summary"
     t.datetime "updated_at", null: false
     t.string "zoho_folder_id", null: false
