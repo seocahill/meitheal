@@ -12,6 +12,14 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert email.valid?
   end
 
+  test "to_admin_todo_attrs uses (no subject) fallback when subject is blank" do
+    email = CachedEmail.new(
+      from_address: "sender@example.com",
+      received_at: 1.hour.ago
+    )
+    assert_equal "Follow up: (no subject)", email.to_admin_todo_attrs[:title]
+  end
+
   test "requires zoho_message_id" do
     email = CachedEmail.new(
       zoho_folder_id: "folder_456",
@@ -53,15 +61,14 @@ class CachedEmailTest < ActiveSupport::TestCase
     assert_includes email.errors[:from_address], "can't be blank"
   end
 
-  test "requires subject" do
+  test "allows blank subject" do
     email = CachedEmail.new(
       zoho_message_id: "msg_123",
       zoho_folder_id: "folder_456",
       from_address: "sender@example.com",
       received_at: 1.hour.ago
     )
-    assert_not email.valid?
-    assert_includes email.errors[:subject], "can't be blank"
+    assert email.valid?
   end
 
   test "requires received_at" do
