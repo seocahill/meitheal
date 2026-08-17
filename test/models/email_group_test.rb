@@ -65,4 +65,24 @@ class EmailGroupTest < ActiveSupport::TestCase
     assert_includes group.members, user
     assert_includes user.email_groups, group
   end
+
+  test "add_member creates membership for new user" do
+    group = email_groups(:all_members)
+    user = users(:viewer)
+    group.email_group_memberships.delete_all
+
+    group.add_member(user)
+
+    assert_includes group.reload.members, user
+  end
+
+  test "add_member is idempotent when member already exists" do
+    group = email_groups(:all_members)
+    user = users(:viewer)
+    group.email_group_memberships.delete_all
+    group.email_group_memberships.create!(user: user)
+
+    assert_nothing_raised { group.add_member(user) }
+    assert_equal 1, group.email_group_memberships.where(user: user).count
+  end
 end

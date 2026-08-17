@@ -15,4 +15,8 @@ class EmailGroup < ApplicationRecord
   def email_address
     "#{local_part}@#{DOMAIN}"
   end
+
+  def add_member(user)
+    email_group_memberships.find_or_create_by!(user: user)
+  end
 end

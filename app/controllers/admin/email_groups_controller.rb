@@ -43,7 +43,7 @@ class Admin::EmailGroupsController < Admin::BaseController
 
   def add_member
     user = User.find(params[:user_id])
-    @email_group.members << user unless @email_group.members.include?(user)
+    @email_group.add_member(user)
     redirect_to edit_admin_email_group_path(@email_group), notice: "#{user.email_address} added to group."
   end
 
