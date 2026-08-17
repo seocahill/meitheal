@@ -187,3 +187,14 @@ FundingOpportunity.find_or_create_by!(title: "Tech for Good", organization: "Loc
   f.categories = "tech, social impact, innovation"
   f.url = "https://example.com/tech-for-good"
 end
+
+FundingOpportunity.find_or_create_by!(title: "Regular Grant Scheme", organization: "Culture Ireland") do |f|
+  f.description = "Supports the international presentation of contemporary Irish artistic work. " \
+                  "Requires a confirmed international presenting partner (venue, festival, curator or promoter). " \
+                  "Funds costs directly related to presenting the work abroad, such as travel, freight, " \
+                  "accommodation and subsistence; artists' fees are not covered."
+  f.deadline = Date.new(2026, 8, 5)
+  f.approved = true
+  f.categories = "arts, international, touring, performance"
+  f.url = "https://www.cultureireland.ie/funding/regular-grant/"
+end
