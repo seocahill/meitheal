@@ -46,6 +46,22 @@ class DailyPendingSummaryJobTest < ActiveJob::TestCase
     assert_equal signal, todo.source
   end
 
+  test "skips bulk marketing mail identified by an unsubscribe link" do
+    signal = create_cached_email(zoho_message_id: "signal2", subject: "Partnership proposal")
+    create_cached_email(
+      zoho_message_id: "bulk",
+      subject: "Our spring programme is out",
+      body: %(<p>News!</p><a href="https://list-manage.com/unsubscribe?u=1">Unsubscribe</a>)
+    )
+
+    assert_difference -> { AdminTodo.count }, 1 do
+      DailyPendingSummaryJob.perform_now
+    end
+
+    todo = AdminTodo.order(:created_at).last
+    assert_equal signal, todo.source
+  end
+
   test "archived emails do not get todos created" do
     create_cached_email(received_at: 2.months.ago, subject: "Old news")
 

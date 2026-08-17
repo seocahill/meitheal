@@ -14,12 +14,14 @@ class CachedEmail < ApplicationRecord
     where.not(id: AdminTodo.where(source_type: name).select(:source_id))
   }
 
-  # Automated sender prefixes that almost never warrant a follow-up todo
-  # (security mailers, transactional notifiers, shipping bots, etc.).
-  NOISY_SENDER_PATTERN = /\A(no[-_.]?reply|do[-_.]?not[-_.]?reply|donotreply|notifications?|account[-_.]?security)/i
+  # Automated / bulk sender prefixes that almost never warrant a follow-up todo
+  # (security mailers, transactional notifiers, shipping bots, newsletters,
+  # marketing blasts, and bounce daemons).
+  NOISY_SENDER_PATTERN = /\A(no[-_.]?reply|do[-_.]?not[-_.]?reply|donotreply|notifications?|account[-_.]?security|newsletters?|marketing|mailer(?:[-_.]?daemon)?|bounces?|postmaster)/i
 
   # Subject patterns for transactional / automated noise: account security
-  # notifications, OTP/verification codes, and delivery status updates.
+  # notifications, OTP/verification codes, delivery status updates, bulk
+  # newsletters, auto-replies, and bounce notifications.
   NOISY_SUBJECT_PATTERNS = [
     /security alert/i,
     /new (sign[- ]?in|device|login)/i,
@@ -28,12 +30,25 @@ class CachedEmail < ApplicationRecord
     /verification code/i,
     /one[- ]?time (passcode|password|code|pin)/i,
     /(reset your password|password (was )?reset|password reset)/i,
-    /(out for delivery|on the way|en route|has shipped|your (package|parcel|order|card) (is|has))/i
+    /(out for delivery|on the way|en route|has shipped|your (package|parcel|order|card) (is|has))/i,
+    /\b(e-?newsletter|newsletter|digest|bulletin)\b/i,
+    /(out of office|automatic reply|auto[- ]?reply)/i,
+    /(undeliverable|delivery status notification|mail delivery (failed|subsystem)|returned mail)/i
+  ].freeze
+
+  # Body markers of bulk mail (newsletters, marketing): a real unsubscribe link
+  # or the standard bulk-mail footer. Kept specific enough that a personal email
+  # merely mentioning "unsubscribe" in prose is not caught.
+  BULK_BODY_PATTERNS = [
+    /href=["'][^"']*unsubscribe/i,
+    /<a[^>]*>\s*unsubscribe/i,
+    /you (are )?receiv(ed|ing) this (e-?mail|message) because/i,
+    /view (this )?(e-?mail |message )?in (your )?browser/i,
+    /(manage|update) your (e-?mail )?preferences/i
   ].freeze
 
   def noise?
-    NOISY_SENDER_PATTERN.match?(from_address.to_s) ||
-      NOISY_SUBJECT_PATTERNS.any? { |pattern| pattern.match?(subject.to_s) }
+    automated_sender? || noisy_subject? || bulk_mail?
   end
 
   def to_admin_todo_attrs
@@ -55,5 +70,21 @@ class CachedEmail < ApplicationRecord
     doc = Nokogiri::HTML::DocumentFragment.parse(body)
     doc.css("img[src*='ImageDisplay']").each(&:remove)
     doc.to_html
+  end
+
+  private
+
+  def automated_sender?
+    NOISY_SENDER_PATTERN.match?(from_address.to_s)
+  end
+
+  def noisy_subject?
+    NOISY_SUBJECT_PATTERNS.any? { |pattern| pattern.match?(subject.to_s) }
+  end
+
+  def bulk_mail?
+    return false if body.blank?
+
+    BULK_BODY_PATTERNS.any? { |pattern| pattern.match?(body) }
   end
 end
