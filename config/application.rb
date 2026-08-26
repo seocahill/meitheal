@@ -29,5 +29,10 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    # App always runs behind kamal-proxy which controls all incoming headers,
+    # so the CLIENT_IP vs X-Forwarded-For spoofing check has no security value
+    # and causes false positives from bots that set CLIENT_IP: 127.0.0.1.
+    config.action_dispatch.ip_spoofing_check = false
   end
 end
