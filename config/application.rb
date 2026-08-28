@@ -29,5 +29,10 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    # Disable IP spoofing check: the app runs behind kamal-proxy which sets X-Forwarded-For
+    # correctly, but external bots (e.g. WordPress) sometimes also send Client-IP headers
+    # with loopback values that disagree with X-Forwarded-For, triggering false positives.
+    config.action_dispatch.ip_spoofing_check = false
   end
 end
