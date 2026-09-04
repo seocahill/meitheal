@@ -29,5 +29,11 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    # The Kamal proxy forwards client-set headers (e.g. Client-IP) without stripping
+    # them. External bots like WordPress scanners set Client-IP to values that differ
+    # from X-Forwarded-For, triggering Rails' spoof check. Disabling it here is the
+    # standard recommendation for apps behind proxies that pass through arbitrary headers.
+    config.action_dispatch.ip_spoofing_check = false
   end
 end
