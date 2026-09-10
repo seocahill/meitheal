@@ -1,0 +1,31 @@
+<h1>Booking Request From Member With Overdue Payments</h1>
+
+<p>
+  <%= @member.profile&.name || @member.email_address %> has requested a booking
+  while <%= pluralize(@overdue_bookings.size, "earlier booking") %> remains unpaid.
+  The request is awaiting your confirmation.
+</p>
+
+<h2>Requested booking</h2>
+
+<ul>
+  <li><strong>Title:</strong> <%= @booking.title %></li>
+  <li><strong>Space:</strong> <%= @booking.space.name %></li>
+  <li><strong>When:</strong> <%= @booking.starts_at.strftime("%d %B %Y at %H:%M") %> - <%= @booking.ends_at.strftime("%d %B %Y at %H:%M") %></li>
+  <li><strong>Member:</strong> <%= @member.email_address %></li>
+</ul>
+
+<h2>Outstanding payments</h2>
+
+<ul>
+  <% @overdue_bookings.each do |overdue| %>
+    <li>
+      <%= overdue.title %> - <%= overdue.space.name %>,
+      <%= overdue.ends_at.strftime("%d %B %Y") %>
+    </li>
+  <% end %>
+</ul>
+
+<p>
+  <%= link_to "Review pending bookings", admin_bookings_url(status: "pending") %>
+</p>

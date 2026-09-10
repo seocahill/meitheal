@@ -21,6 +21,67 @@ class AdminMailerTest < ActionMailer::TestCase
     assert_nil email.to
   end
 
+  # booking_request_with_overdue_payments tests
+
+  test "booking_request_with_overdue_payments sends to owners and lists the overdue bookings" do
+    member = users(:viewer)
+    overdue = Booking.create!(
+      space: spaces(:front_room), user: member, title: "Overdue Booking",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    request = Booking.create!(
+      space: spaces(:back_room), user: member, title: "Requested Booking",
+      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    email = AdminMailer.booking_request_with_overdue_payments(request)
+
+    assert_equal [ users(:owner).email_address ], email.to
+    assert_includes email.subject, member.email_address
+    assert_includes email.body.encoded, request.title
+    assert_includes email.body.encoded, overdue.title
+  end
+
+  test "booking_request_with_overdue_payments returns nil when the member has no overdue payments" do
+    member = users(:viewer)
+    Booking.create!(
+      space: spaces(:front_room), user: member, title: "Unpaid Future Booking",
+      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    request = Booking.create!(
+      space: spaces(:back_room), user: member, title: "Requested Booking",
+      starts_at: 4.weeks.from_now, ends_at: 4.weeks.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    email = AdminMailer.booking_request_with_overdue_payments(request)
+    assert_nil email.to
+  end
+
+  test "booking_request_with_overdue_payments returns nil with no owners" do
+    member = users(:viewer)
+    Booking.create!(
+      space: spaces(:front_room), user: member, title: "Overdue Booking",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    request = Booking.create!(
+      space: spaces(:back_room), user: member, title: "Requested Booking",
+      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 1.hour,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    User.where(role: :owner).update_all(role: :viewer)
+
+    email = AdminMailer.booking_request_with_overdue_payments(request)
+    assert_nil email.to
+  end
+
   # daily_pending_summary tests
 
   test "daily_pending_summary includes all pending item types" do

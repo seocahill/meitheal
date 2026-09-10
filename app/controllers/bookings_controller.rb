@@ -33,6 +33,9 @@ class BookingsController < ApplicationController
   def create
     @booking = Current.user.bookings.build(booking_params)
     if @booking.save
+      if Current.user.overdue_unpaid_bookings.any?
+        AdminMailer.booking_request_with_overdue_payments(@booking).deliver_later
+      end
       redirect_to calendar_path, notice: "Booking request submitted. An admin will confirm it."
     else
       @spaces = Space.active.order(:name)
