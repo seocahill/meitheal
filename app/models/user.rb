@@ -28,6 +28,10 @@ class User < ApplicationRecord
     owner?
   end
 
+  def overdue_unpaid_bookings
+    bookings.confirmed.unpaid.overdue
+  end
+
   def has_active_membership?
     memberships.active.exists? && !memberships.active.first.associate?
   end

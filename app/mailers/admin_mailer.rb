@@ -21,6 +21,21 @@ class AdminMailer < ApplicationMailer
     )
   end
 
+  def booking_request_with_overdue_payments(booking)
+    @booking = booking
+    @member = booking.user
+    @overdue_bookings = @member.overdue_unpaid_bookings.includes(:space)
+    return if @overdue_bookings.none?
+
+    admin_emails = User.where(role: :owner).pluck(:email_address)
+    return if admin_emails.empty?
+
+    mail(
+      to: admin_emails,
+      subject: "Booking request from member with overdue payments: #{@member.email_address}"
+    )
+  end
+
   def daily_pending_summary(new_todos: [])
     admin_emails = User.where(role: :owner).pluck(:email_address)
     return if admin_emails.empty?

@@ -288,7 +288,7 @@
   <% if @unpaid_bookings.any? %>
     <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
       <h2 class="text-lg font-semibold text-amber-900 mb-2">⚠️ Unpaid Bookings</h2>
-      <p class="text-sm text-amber-800 mb-3">You have <%= pluralize(@unpaid_bookings.count, "unpaid booking") %>. Please settle outstanding payments before making new bookings.</p>
+      <p class="text-sm text-amber-800 mb-3">You have <%= pluralize(@unpaid_bookings.count, "unpaid booking") %>. Please settle outstanding payments as soon as you can.</p>
       <ul class="space-y-2">
         <% @unpaid_bookings.each do |booking| %>
           <li class="text-sm text-amber-900">
