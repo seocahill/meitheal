@@ -75,6 +75,17 @@ class Event < ApplicationRecord
     true
   end
 
+  # A booking for someone paying at the door, priced at the event's ticket price.
+  def build_door_booking(buyer_name:, buyer_email: nil, quantity:)
+    tickets.new(
+      buyer_name: buyer_name.to_s.strip,
+      buyer_email: buyer_email.to_s.strip,
+      quantity: quantity,
+      amount_cents: ticket_price_cents.to_i * quantity,
+      status: :reserved
+    )
+  end
+
   # People currently in the room: everyone checked in, less those who left.
   def audience_count
     [ tickets.admitted.sum(:checked_in_count) - audience_left_count, 0 ].max

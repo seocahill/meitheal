@@ -76,6 +76,7 @@ ga:
   # Events
   no_events: "Níl aon imeachtaí fós."
   sold_out: "Díolta amach"
+  online_sales_closed: "Díolachán ar líne dúnta"
   on_sale_from: "Ar díol ó"
   get_tickets: "Faigh Ticéid →"
   share_this_event: "Roinn an imeacht seo"

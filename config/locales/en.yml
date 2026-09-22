@@ -76,6 +76,7 @@ en:
   # Events
   no_events: "No events yet."
   sold_out: "Sold Out"
+  online_sales_closed: "Online sales closed"
   on_sale_from: "On sale from"
   get_tickets: "Get Tickets →"
   share_this_event: "Share this event"
