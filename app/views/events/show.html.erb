@@ -46,6 +46,8 @@
           <% scarcity_label = @event.capacity.present? ? @event.ticket_availability_label : nil %>
           <% if @event.sold_out? %>
             <span class="block w-full text-center px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium text-sm cursor-not-allowed"><%= t("sold_out") %></span>
+          <% elsif !@event.box_office_open? %>
+            <span class="block w-full text-center px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-medium text-sm cursor-not-allowed"><%= t("online_sales_closed") %></span>
           <% elsif @event.tickets_available_from.present? && @event.tickets_available_from > Time.current %>
             <p class="text-sm text-gray-500"><%= t("on_sale_from") %> <strong class="text-gray-700"><%= @event.tickets_available_from.strftime("%A %d %B at %-l:%M%P") %></strong></p>
           <% else %>

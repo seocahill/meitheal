@@ -81,4 +81,58 @@ class TicketTest < ActiveSupport::TestCase
     ticket.failed!
     assert ticket.failed?
   end
+
+  # check-in
+  test "remaining_to_check_in is quantity minus checked in" do
+    ticket = tickets(:paid_ticket)
+    ticket.update!(quantity: 3, checked_in_count: 1)
+    assert_equal 2, ticket.remaining_to_check_in
+  end
+
+  test "check_in! admits the requested number of people" do
+    ticket = tickets(:paid_ticket)
+    ticket.update!(quantity: 3)
+    assert ticket.check_in!(2)
+    assert_equal 2, ticket.reload.checked_in_count
+  end
+
+  test "check_in! refuses more people than the ticket covers" do
+    ticket = tickets(:paid_ticket)
+    ticket.update!(quantity: 2, checked_in_count: 1)
+    assert_not ticket.check_in!(2)
+    assert_equal 1, ticket.reload.checked_in_count
+  end
+
+  test "check_in! refuses when the room has no space" do
+    ticket = tickets(:paid_ticket)
+    ticket.update!(quantity: 3)
+    @event.update!(capacity: 2)
+    assert_not ticket.check_in!(3)
+    assert_equal 0, ticket.reload.checked_in_count
+  end
+
+  test "check_in! refuses tickets that are not paid or reserved" do
+    ticket = tickets(:pending_ticket)
+    assert_not ticket.check_in!(1)
+    assert_equal 0, ticket.reload.checked_in_count
+  end
+
+  test "undo_check_in! removes one checked-in person" do
+    ticket = tickets(:paid_ticket)
+    ticket.update!(quantity: 2, checked_in_count: 2)
+    ticket.undo_check_in!
+    assert_equal 1, ticket.reload.checked_in_count
+  end
+
+  test "undo_check_in! does nothing when nobody is checked in" do
+    ticket = tickets(:paid_ticket)
+    ticket.undo_check_in!
+    assert_equal 0, ticket.reload.checked_in_count
+  end
+
+  test "checked_in_count cannot exceed quantity" do
+    ticket = tickets(:paid_ticket)
+    ticket.checked_in_count = 2
+    assert_not ticket.valid?
+  end
 end

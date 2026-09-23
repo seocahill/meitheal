@@ -74,6 +74,18 @@ Rails.application.routes.draw do
     resources :ticket_sales, only: [ :index, :show ] do
       post :add_booking, on: :member
     end
+    # Door check-in for an event, keyed by event id
+    resources :box_offices, only: [ :show ] do
+      member do
+        post :check_in
+        post :undo_check_in
+        post :walk_up
+        patch :close
+        patch :reopen
+        patch :person_left
+        patch :person_returned
+      end
+    end
     resources :payments, only: [ :index ]
     resources :bookings, only: [ :index ] do
       member do

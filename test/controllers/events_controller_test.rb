@@ -190,4 +190,17 @@ class EventsControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to root_path
   end
+
+  test "ticketed event shows get tickets while the box office is open" do
+    get event_path(events(:ticketed_event))
+    assert_match "Get Tickets", response.body
+  end
+
+  test "ticketed event shows sales closed once the box office closes" do
+    event = events(:ticketed_event)
+    event.update!(box_office_closed_manually: true)
+    get event_path(event)
+    assert_no_match "Get Tickets", response.body
+    assert_match "Online sales closed", response.body
+  end
 end

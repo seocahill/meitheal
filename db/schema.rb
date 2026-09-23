@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_15_071202) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_22_120000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -162,7 +162,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_071202) do
   end
 
   create_table "events", force: :cascade do |t|
+    t.integer "audience_left_count", default: 0, null: false
     t.text "bio"
+    t.boolean "box_office_closed_manually", default: false, null: false
     t.integer "capacity", default: 50
     t.datetime "created_at", null: false
     t.text "description"
@@ -661,6 +663,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_071202) do
     t.integer "amount_cents", null: false
     t.string "buyer_email"
     t.string "buyer_name", null: false
+    t.integer "checked_in_count", default: 0, null: false
     t.datetime "created_at", null: false
     t.integer "event_id", null: false
     t.integer "quantity", default: 1, null: false

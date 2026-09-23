@@ -38,6 +38,12 @@ class Admin::TicketSalesControllerTest < ActionDispatch::IntegrationTest
     assert_match tickets(:paid_ticket).buyer_name, response.body
   end
 
+  test "ticket sales links to the box office" do
+    sign_in_as(@editor)
+    get admin_ticket_sale_path(@event)
+    assert_select "a[href=?]", admin_box_office_path(@event)
+  end
+
   test "viewer cannot view ticket sales for an event" do
     sign_in_as(@viewer)
     get admin_ticket_sale_path(@event)

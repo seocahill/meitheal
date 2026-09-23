@@ -23,13 +23,7 @@ class Admin::TicketSalesController < Admin::BaseController
         alert: "Only #{remaining} #{remaining == 1 ? "ticket" : "tickets"} remaining." and return
     end
 
-    ticket = @event.tickets.new(
-      buyer_name: params[:buyer_name].to_s.strip,
-      buyer_email: params[:buyer_email].to_s.strip,
-      quantity: quantity,
-      amount_cents: @event.ticket_price_cents.to_i * quantity,
-      status: :reserved
-    )
+    ticket = @event.build_door_booking(buyer_name: params[:buyer_name], buyer_email: params[:buyer_email], quantity: quantity)
 
     if ticket.save
       redirect_to admin_ticket_sale_path(@event), notice: "Booking added for #{ticket.buyer_name}."
