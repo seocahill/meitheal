@@ -3,3 +3,6 @@
 
 ignore:
   - CVE-THAT-DOES-NOT-APPLY
+  # ruby_llm ReDoS (GHSA-42r3-x6vx-x49x): the only fix is 2.0.0.rc1, a prerelease.
+  # Remove once ruby_llm 2.0 is released as stable and we have upgraded.
+  - CVE-2026-67991
