@@ -59,4 +59,29 @@ class UserTest < ActiveSupport::TestCase
     assert_not editor.can_manage?
     assert_not viewer.can_manage?
   end
+
+  test "overdue_unpaid_bookings returns confirmed unpaid bookings that ended more than 2 weeks ago" do
+    user = users(:viewer)
+    space = spaces(:front_room)
+    overdue = Booking.create!(
+      space: space, user: user, title: "Overdue Booking",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    Booking.create!(
+      space: space, user: user, title: "Future Booking",
+      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    Booking.create!(
+      space: space, user: user, title: "Settled Booking",
+      starts_at: 4.weeks.ago, ends_at: 4.weeks.ago + 1.hour,
+      status: :confirmed, paid: true,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    assert_equal [ overdue ], user.overdue_unpaid_bookings.to_a
+  end
 end

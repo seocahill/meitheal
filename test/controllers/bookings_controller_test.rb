@@ -95,6 +95,69 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert Booking.last.pending?
   end
 
+  test "member with overdue unpaid bookings can still request a booking" do
+    sign_in_as(@viewer)
+    Booking.create!(
+      space: @space, user: @viewer, title: "Overdue Booking",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    assert_difference "Booking.count" do
+      post bookings_path, params: {
+        booking: {
+          space_id: @space.id,
+          title: "New Booking",
+          starts_at: 3.weeks.from_now,
+          ends_at: 3.weeks.from_now + 2.hours,
+          agree_booking_rules: "1",
+          agree_ethics: "1"
+        }
+      }
+    end
+    assert_redirected_to calendar_path
+  end
+
+  test "booking request from member with overdue unpaid bookings alerts admins" do
+    sign_in_as(@viewer)
+    Booking.create!(
+      space: @space, user: @viewer, title: "Overdue Booking",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+
+    assert_enqueued_email_with AdminMailer, :booking_request_with_overdue_payments, args: ->(args) { args.first.title == "New Booking" } do
+      post bookings_path, params: {
+        booking: {
+          space_id: @space.id,
+          title: "New Booking",
+          starts_at: 3.weeks.from_now,
+          ends_at: 3.weeks.from_now + 2.hours,
+          agree_booking_rules: "1",
+          agree_ethics: "1"
+        }
+      }
+    end
+  end
+
+  test "booking request from member without overdue payments does not alert admins" do
+    sign_in_as(@viewer)
+    assert_no_enqueued_emails do
+      post bookings_path, params: {
+        booking: {
+          space_id: @space.id,
+          title: "New Booking",
+          starts_at: 3.weeks.from_now,
+          ends_at: 3.weeks.from_now + 2.hours,
+          agree_booking_rules: "1",
+          agree_ethics: "1"
+        }
+      }
+    end
+  end
+
   test "booking without agreements is rejected" do
     sign_in_as(@viewer)
     assert_no_difference "Booking.count" do
