@@ -30,6 +30,11 @@ Rails.application.configure do
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 
+  # Kamal-proxy sets HTTP_CLIENT_IP to 127.0.0.1 (its internal loopback address) while
+  # X-Forwarded-For carries the real client IP. Rails' RemoteIp middleware treats this
+  # mismatch as an IP spoofing attack. Disable the check since kamal-proxy is trusted.
+  config.action_dispatch.ip_spoofing_check = false
+
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
 

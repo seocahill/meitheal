@@ -25,6 +25,11 @@ Rails.application.configure do
   # Render exception templates for rescuable exceptions and raise for other exceptions.
   config.action_dispatch.show_exceptions = :rescuable
 
+  # Mirror production: kamal-proxy sets HTTP_CLIENT_IP to 127.0.0.1 which triggers
+  # false IP spoofing errors. Disabled in production; match that here so tests can
+  # exercise the login flow with proxy-style headers.
+  config.action_dispatch.ip_spoofing_check = false
+
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
 
