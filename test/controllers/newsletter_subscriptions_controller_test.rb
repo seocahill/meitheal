@@ -5,6 +5,7 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     @original_brevo_new = BrevoService.method(:new)
     stub_brevo = Object.new
     stub_brevo.define_singleton_method(:configured?) { false }
+    stub_brevo.define_singleton_method(:sent_campaigns) { raise BrevoService::ConfigurationError, "Missing configuration" }
     BrevoService.define_singleton_method(:new) { stub_brevo }
   end
 
@@ -26,6 +27,41 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
   test "qr_code is publicly accessible" do
     get newsletter_qr_code_path
     assert_response :success
+  end
+
+  # Past issues come from Brevo
+  def with_brevo_campaigns(campaigns: [], error: nil)
+    fake = Object.new
+    fake.define_singleton_method(:sent_campaigns) { raise error if error; campaigns }
+    original = BrevoService.method(:new)
+    BrevoService.define_singleton_method(:new) { |*| fake }
+    yield
+  ensure
+    BrevoService.define_singleton_method(:new, original)
+  end
+
+  test "new lists newsletters sent from Brevo with a link to each" do
+    campaigns = [ { subject: "October Newsletter", sentDate: "2026-10-02T12:07:22.000+02:00", shareLink: "http://sh1.sendinblue.com/nmo49686gc.html" } ]
+    with_brevo_campaigns(campaigns: campaigns) { get newsletter_page_path }
+
+    assert_select "h2", text: "Past Issues"
+    assert_select "a[href='http://sh1.sendinblue.com/nmo49686gc.html'][target=_blank][rel~=noopener]", text: "October Newsletter"
+    assert_includes response.body, "2 October 2026"
+  end
+
+  test "new hides past issues when Brevo has none" do
+    with_brevo_campaigns(campaigns: []) { get newsletter_page_path }
+
+    assert_response :success
+    assert_select "h2", text: "Past Issues", count: 0
+  end
+
+  test "new still shows the signup form when Brevo is unavailable" do
+    with_brevo_campaigns(error: BrevoService::ApiError.new("down")) { get newsletter_page_path }
+
+    assert_response :success
+    assert_includes response.body, "Subscribe"
+    assert_select "h2", text: "Past Issues", count: 0
   end
 
   test "new shows signup form" do
@@ -111,6 +147,7 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     original = BrevoService.method(:new)
     error_service = Object.new
     error_service.define_singleton_method(:configured?) { true }
+    error_service.define_singleton_method(:sent_campaigns) { [] }
     error_service.define_singleton_method(:add_contact) { |*| raise BrevoService::ApiError, "fail" }
     BrevoService.define_singleton_method(:new) { error_service }
 

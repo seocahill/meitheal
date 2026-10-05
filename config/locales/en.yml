@@ -32,7 +32,6 @@ en:
   sign_in: "Sign In"
   sign_out: "Sign Out"
   my_account: "My Account"
-  forum: "Forum"
 
   # Authenticated sidebar — section headers
   explore: "Explore"

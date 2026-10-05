@@ -32,7 +32,6 @@ ga:
   sign_in: "Logáil isteach"
   sign_out: "Logáil amach"
   my_account: "Mo Chuntas"
-  forum: "Fóram"
 
   # Authenticated sidebar — section headers
   explore: "Taiscéal"

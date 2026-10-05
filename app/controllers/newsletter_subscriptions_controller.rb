@@ -4,6 +4,8 @@ class NewsletterSubscriptionsController < ApplicationController
     redirect_to newsletter_page_path, alert: "Too many attempts. Please try again later."
   }
 
+  helper_method :sent_newsletters
+
   def new
   end
 
@@ -32,6 +34,12 @@ class NewsletterSubscriptionsController < ApplicationController
   end
 
   private
+
+  # Read lazily so a failed signup re-render and a normal visit both get the
+  # list, and a successful signup never calls Brevo for it.
+  def sent_newsletters
+    @sent_newsletters ||= SentNewsletter.all
+  end
 
   def subscribe_user(email)
     user = User.find_by(email_address: email)
