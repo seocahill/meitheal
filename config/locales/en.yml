@@ -50,7 +50,6 @@ en:
   users: "Users"
   memberships: "Memberships"
   payments: "Payments"
-  transactions: "Transactions"
   ticket_sales: "Ticket Sales"
   proposals: "Proposals"
   funding_opps: "Funding Opps"

@@ -156,8 +156,6 @@ Rails.application.routes.draw do
         post :batch_delete
       end
     end
-    resources :calendar_imports, only: [ :new, :create ]
-    resources :transactions, only: [ :index ]
   end
 
   # Redirect old /pages/:slug URLs

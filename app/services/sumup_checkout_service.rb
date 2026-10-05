@@ -44,21 +44,6 @@ class SumupCheckoutService
     JSON.parse(response.body)
   end
 
-  # Returns { "items" => [...], "links" => [...] }
-  # Supported filters: oldest_time, newest_time, statuses, payment_types, limit, order
-  def list_transactions(filters = {})
-    uri = URI("https://api.sumup.com/v2.1/merchants/#{@merchant_code}/transactions/history")
-    uri.query = URI.encode_www_form(filters.compact) if filters.any?
-
-    request = Net::HTTP::Get.new(uri, headers)
-
-    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(request)
-    end
-
-    JSON.parse(response.body)
-  end
-
   def list_payouts(filters = {})
     uri = URI("https://api.sumup.com/v1.0/merchants/#{@merchant_code}/payouts")
     uri.query = URI.encode_www_form(filters.compact) if filters.any?

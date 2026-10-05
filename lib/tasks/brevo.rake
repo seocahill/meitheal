@@ -47,33 +47,4 @@ namespace :brevo do
 
     puts "\nDone: #{imported} imported, #{skipped} skipped"
   end
-
-  desc "Sync all associate members to Brevo contact list"
-  task sync_contacts: :environment do
-    brevo = BrevoService.new
-    unless brevo.configured?
-      puts "Brevo is not configured. Set BREVO_API_KEY, BREVO_SENDER_EMAIL, and BREVO_LIST_ID."
-      next
-    end
-
-    users = User.joins(:memberships)
-                .where(memberships: { membership_type: :associate })
-                .distinct
-
-    puts "Syncing #{users.count} associate members to Brevo..."
-
-    synced = 0
-    failed = 0
-
-    users.find_each do |user|
-      brevo.add_contact(user.email_address, name: user.profile&.name)
-      synced += 1
-      print "."
-    rescue BrevoService::ApiError => e
-      failed += 1
-      puts "\n  FAIL: #{user.email_address} - #{e.message}"
-    end
-
-    puts "\nDone: #{synced} synced, #{failed} failed"
-  end
 end
