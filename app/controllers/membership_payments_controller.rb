@@ -106,13 +106,7 @@ class MembershipPaymentsController < ApplicationController
   end
 
   def apply_membership_upgrade!(payment)
-    new_expiry = if @membership.expires_on.present? && @membership.expires_on > Date.current
-                   @membership.expires_on + 1.year
-    else
-                   1.year.from_now.to_date
-    end
-
-    updates = { expires_on: new_expiry }
+    updates = { expires_on: @membership.renewal_expiry }
     updates[:membership_type] = payment.pending_membership_type if payment.pending_membership_type.present?
 
     @membership.update!(updates)

@@ -131,15 +131,41 @@ class MembershipTest < ActiveSupport::TestCase
     assert_not_includes Membership.renewing_soon, lapsed
   end
 
+  # Renewal runs to the end of a calendar year
+  test "renewal_expiry for an unpaid or lapsed membership is the end of this calendar year" do
+    travel_to Date.new(2026, 10, 5) do
+      assert_equal Date.new(2026, 12, 31), membership_with(type: :full, expires_on: nil).renewal_expiry
+      assert_equal Date.new(2026, 12, 31), membership_with(type: :full, expires_on: Date.new(2026, 3, 1)).renewal_expiry
+    end
+  end
+
+  test "renewal_expiry for a membership already paid to the end of the year is the end of next year" do
+    travel_to Date.new(2026, 10, 5) do
+      assert_equal Date.new(2027, 12, 31), membership_with(type: :full, expires_on: Date.new(2026, 12, 31)).renewal_expiry
+    end
+  end
+
+  test "renewal_expiry for a membership paid into next year is the end of that year" do
+    travel_to Date.new(2026, 10, 5) do
+      assert_equal Date.new(2027, 12, 31), membership_with(type: :full, expires_on: Date.new(2027, 4, 7)).renewal_expiry
+    end
+  end
+
+  test "renewal_expiry on the last day of the year covers next year" do
+    travel_to Date.new(2026, 12, 31) do
+      assert_equal Date.new(2027, 12, 31), membership_with(type: :full, expires_on: nil).renewal_expiry
+    end
+  end
+
   # Recording payment
-  test "record_payment! extends a lapsed membership a year from today and logs the payment" do
+  test "record_payment! renews a lapsed membership to the end of this year and logs the payment" do
     membership = membership_with(type: :full, expires_on: 1.month.ago.to_date)
 
     assert_difference "membership.payments.count", 1 do
       membership.record_payment!(payment_method: :cash)
     end
 
-    assert_equal 1.year.from_now.to_date, membership.reload.expires_on
+    assert_equal Date.current.end_of_year, membership.reload.expires_on
     assert_equal :paid, membership.payment_status
     payment = membership.payments.last
     assert payment.cash?
@@ -149,10 +175,10 @@ class MembershipTest < ActiveSupport::TestCase
     assert_equal membership.user.email_address, payment.user_email
   end
 
-  test "record_payment! on an unpaid membership starts the year from today" do
+  test "record_payment! on an unpaid membership renews to the end of this year" do
     membership = membership_with(type: :concession, expires_on: nil)
     membership.record_payment!(payment_method: :bank_transfer)
-    assert_equal 1.year.from_now.to_date, membership.reload.expires_on
+    assert_equal Date.current.end_of_year, membership.reload.expires_on
     assert_equal Membership::FEE_CENTS[:concession], membership.payments.last.amount_cents
   end
 
