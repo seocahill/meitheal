@@ -52,6 +52,7 @@
         <div class="admin-nav-section">Content</div>
         <%= link_to "Pages", admin_pages_path, class: "admin-nav-link #{active.("admin/pages") ? "admin-nav-active" : ""}" %>
         <%= link_to "FAQs", admin_faqs_path, class: "admin-nav-link #{active.("admin/faqs") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Files", admin_stored_files_path, class: "admin-nav-link #{active.("admin/stored_files") ? "admin-nav-active" : ""}" %>
       </nav>
 
       <%# User / sign out %>

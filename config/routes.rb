@@ -84,6 +84,7 @@ Rails.application.routes.draw do
       end
     end
     resources :payments, only: [ :index ]
+    resources :stored_files, only: [ :index, :create, :destroy ]
     resources :bookings, only: [ :index ] do
       member do
         patch :toggle_paid
