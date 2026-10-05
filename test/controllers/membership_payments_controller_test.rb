@@ -118,6 +118,7 @@ class MembershipPaymentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to my_profile_path
     assert_equal "full", @membership.reload.membership_type
     assert @membership.expires_on > original_expiry
+    assert_equal @membership.expires_on.end_of_year, @membership.expires_on, "renews to the end of a calendar year"
     assert_equal "completed", payment.reload.status
   end
 

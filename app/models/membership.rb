@@ -15,8 +15,8 @@ class Membership < ApplicationRecord
     where("starts_on <= ? AND (expires_on IS NULL OR expires_on >= ?)", Date.current, Date.current)
   }
 
-  # Payment status of fee-paying memberships. A payment sets expires_on a year
-  # ahead, so no expiry means no payment has been recorded.
+  # Payment status of fee-paying memberships. A payment sets expires_on to the
+  # end of a calendar year, so no expiry means no payment has been recorded.
   scope :fee_paying, -> { where.not(membership_type: :associate) }
   scope :no_fee, -> { where(membership_type: :associate) }
   scope :paid, -> { fee_paying.where("expires_on >= ?", Date.current) }
@@ -35,8 +35,16 @@ class Membership < ApplicationRecord
     expired? ? :lapsed : :paid
   end
 
+  # Where the membership is paid up to after the next payment. Membership runs by
+  # calendar year: a payment covers the rest of this year, or, if the member is
+  # already paid up to a later date, the calendar year after that.
+  def renewal_expiry
+    paid_until = expires_on if expires_on&.>=(Date.current)
+    ((paid_until || Date.current) + 1.day).end_of_year
+  end
+
   # Records an offline payment (cash, bank transfer, ...) and renews the
-  # membership for a year from today.
+  # membership to the end of the calendar year.
   def record_payment!(payment_method:)
     raise ArgumentError, "associate memberships have no fee" if associate?
 
@@ -51,7 +59,7 @@ class Membership < ApplicationRecord
         user_name: user.profile&.name.presence || user.email_address,
         description: "NCF #{membership_type.humanize} Membership"
       )
-      update!(expires_on: Date.current + 1.year)
+      update!(expires_on: renewal_expiry)
     end
   end
 
