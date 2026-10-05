@@ -149,7 +149,7 @@ class PageTest < ActiveSupport::TestCase
 
   test "slug cannot clash with existing routes" do
     # These slugs match real routes defined in config/routes.rb
-    %w[dashboard calendar events faq artists forum up].each do |reserved|
+    %w[dashboard calendar events faq artists up].each do |reserved|
       page = Page.new(title: "Test", slug: reserved, content: "Content")
       assert_not page.valid?, "Expected slug '#{reserved}' to be invalid (clashes with route)"
       assert_includes page.errors[:slug], "is reserved (clashes with an existing route)"

@@ -51,9 +51,6 @@ gem "aws-sdk-s3", require: false
 # Rich text editor with markdown support [https://github.com/basecamp/lexxy]
 gem "lexxy"
 
-# Unified LLM API for OpenAI, Anthropic, etc [https://github.com/crmne/ruby_llm]
-gem "ruby_llm"
-
 # Pagination [https://github.com/ddnexus/pagy]
 gem "pagy"
 
@@ -65,9 +62,6 @@ gem "faraday"
 
 # Brevo email marketing API [https://github.com/getbrevo/brevo-ruby]
 gem "brevo"
-
-# Forum engine [https://github.com/thredded/thredded]
-gem "thredded"
 
 # MCP server + OAuth 2.1 provider for the claude.ai web connector
 gem "mcp"
@@ -107,7 +101,6 @@ gem "dockerfile-rails", ">= 1.7", group: :development
 gem "litestream", "~> 0.14.0"
 
 gem "mission_control-jobs", "~> 1.1"
-
 
 gem "webmock", "~> 3.26", group: :test
 

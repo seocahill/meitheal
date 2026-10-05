@@ -24,24 +24,18 @@ A curated directory of grants and funding calls, with deadline tracking and cate
 Members can submit funding proposals against opportunities. Proposals move through a draft → submitted → approved/rejected workflow, with document upload support.
 
 ### Newsletters
-Rich-text newsletters with Brevo (Sendinblue) integration for sending campaigns. An AI-assisted content generation step drafts the news section from recent emails.
+Newsletters are written and sent in Brevo. The site has a public signup page (with QR code) that adds subscribers to the Brevo list, and lists the newsletters Brevo has sent.
 
 ### Member directory & profiles
 An opt-in public directory of member artists with skill-based search and portfolio images.
 
-### Forum
-Integrated community discussion forum (Thredded), with AI-powered moderation against the collective's ethics code.
-
-### Email groups
-Mailing lists (e.g. info@thencf.art) with Zoho Mail integration and per-group email archiving.
-
 ### Admin tooling
-- Full user/membership/payment/booking management
-- Internal todo list with priority and due dates
-- Funding opportunity curation and AI-refresh
-- Inbox view for inbound emails
-- Calendar import (iCalendar format)
+- User, membership, payment and booking management, with paid/unpaid status, filters and toggles for memberships and bookings
+- Ticket sales and door check-in (box office)
+- File storage: upload large files and copy a link to share
 - Job queue and Litestream monitoring
+
+Features that have been retired, and the database tables they left behind, are listed in [docs/DEPRECATED_TABLES.md](docs/DEPRECATED_TABLES.md).
 
 ---
 
@@ -59,8 +53,6 @@ Mailing lists (e.g. info@thencf.art) with Zoho Mail integration and per-group em
 | Auth | Custom cookie sessions, bcrypt |
 | Payments | SumUp |
 | Email marketing | Brevo |
-| Email sync | Zoho Mail |
-| LLM | ruby_llm (Mistral primary) |
 | Deployment | Kamal + Docker |
 | Error tracking | Sentry |
 
@@ -88,7 +80,6 @@ Copy `.env.example` (if present) and fill in:
 
 - `BREVO_API_KEY` — Brevo email marketing
 - `SUMUP_API_KEY` — SumUp payment processing
-- `MISTRAL_API_KEY` — LLM access
 - `AWS_*` — S3 for file storage (production)
 - `RECAPTCHA_*` — reCAPTCHA site/secret keys
 - `SENTRY_DSN` — Error reporting
@@ -106,7 +97,7 @@ kamal console   # Rails console on prod
 | Role | Can do |
 |---|---|
 | `viewer` | Browse content, book spaces, submit proposals |
-| `editor` | Everything above + publish events/posts, manage newsletters, confirm bookings |
+| `editor` | Everything above + publish events/posts, confirm bookings |
 | `owner` | Full admin access |
 
 New accounts require admin approval before activation.

@@ -31,7 +31,6 @@
     <div class="mt-auto">
       <% if authenticated? %>
         <div class="flex flex-col gap-2 text-lg font-medium text-white mb-6">
-          <%= link_to t("forum"), thredded_path, class: "menu-highlight inline-block" %>
           <% if current_user_can_edit? %>
             <%= link_to t("pages"), admin_pages_path, class: "menu-highlight inline-block text-sm" %>
           <% end %>

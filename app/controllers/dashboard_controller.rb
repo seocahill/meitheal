@@ -17,13 +17,6 @@ class DashboardController < ApplicationController
     @my_tickets = Ticket.paid.for_email(@user.email_address).eager_load(:event).merge(Event.upcoming)
     @unpaid_bookings = @user.bookings.confirmed.unpaid.includes(:space)
 
-    # Recent forum activity - approved topics only
-    @recent_topics = Thredded::Topic
-      .where(moderation_state: :approved)
-      .includes(:user, :messageboard)
-      .order(last_post_at: :desc)
-      .limit(5)
-
     # Editor items
     if @user.can_edit?
       @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)

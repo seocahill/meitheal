@@ -175,9 +175,6 @@ Rails.application.routes.draw do
   # Dashboard (authenticated users)
   get "dashboard", to: "dashboard#index", as: :dashboard
 
-  # Forum
-  mount Thredded::Engine => "/forum"
-
   # Newsletter signup
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe

@@ -1,4 +1,5 @@
 require "test_helper"
+require "ostruct"
 
 class BrevoServiceTest < ActiveSupport::TestCase
   test "add_contact raises ConfigurationError when not configured" do

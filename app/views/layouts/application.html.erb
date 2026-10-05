@@ -42,8 +42,6 @@
         <nav class="flex-1 p-2 space-y-0.5">
 
           <%= link_to t("dashboard"), dashboard_path, class: sidebar_nav_class("dashboard") %>
-          <%= link_to t("forum"), thredded_path,
-              class: "sidebar-nav-link #{request.path.start_with?("/forum") ? "sidebar-nav-active" : ""}" %>
 
           <div class="sidebar-nav-section"><%= t("explore") %></div>
           <%= link_to t("news"), posts_path, class: sidebar_nav_class("posts") %>

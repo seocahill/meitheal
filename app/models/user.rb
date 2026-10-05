@@ -31,25 +31,9 @@ class User < ApplicationRecord
     memberships.active.exists? && !memberships.active.first.associate?
   end
 
-  # Thredded compatibility methods
   def name
     return unless approved?
 
     profile&.name || email_address.split("@").first
-  end
-
-  # Alias for Gravatar compatibility
-  def email
-    email_address
-  end
-
-  # Thredded admin/moderator check
-  def admin
-    owner?
-  end
-  alias_method :admin?, :admin
-
-  def thredded_can_moderate_messageboard?(_messageboard)
-    can_edit?
   end
 end
