@@ -121,7 +121,7 @@ module Api
 
       RESOURCE_INDEX_PATHS = %w[
         faqs pages posts events newsletters funding_opportunities spaces bookings
-        memberships proposals payments tickets email_groups admin_todos profiles users
+        memberships proposals payments tickets profiles users
       ].freeze
 
       test "every resource index responds successfully" do

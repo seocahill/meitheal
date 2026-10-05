@@ -45,15 +45,12 @@ ga:
   pages: "Leathanaigh"
   book_space: "Áirithint Spáis"
   make_payment: "Íocaíocht a Dhéanamh"
-  inbox: "Bosca Isteach"
-  email_groups: "Grúpaí Ríomhphoist"
   users: "Úsáideoirí"
   memberships: "Ballraíochtaí"
   payments: "Íocaíochtaí"
   ticket_sales: "Díolacháin Ticéad"
   proposals: "Tograí"
   funding_opps: "Deiseanna Maoinithe"
-  todos: "Liosta Oibre"
 
   # Home page
   upcoming: "Ag teacht aníos"

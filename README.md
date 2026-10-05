@@ -88,7 +88,6 @@ Copy `.env.example` (if present) and fill in:
 
 - `BREVO_API_KEY` — Brevo email marketing
 - `SUMUP_API_KEY` — SumUp payment processing
-- `ZOHO_*` — Zoho Mail OAuth credentials
 - `MISTRAL_API_KEY` — LLM access
 - `AWS_*` — S3 for file storage (production)
 - `RECAPTCHA_*` — reCAPTCHA site/secret keys

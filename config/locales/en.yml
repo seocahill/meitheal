@@ -45,15 +45,12 @@ en:
   pages: "Pages"
   book_space: "Book Space"
   make_payment: "Make a Payment"
-  inbox: "Inbox"
-  email_groups: "Email Groups"
   users: "Users"
   memberships: "Memberships"
   payments: "Payments"
   ticket_sales: "Ticket Sales"
   proposals: "Proposals"
   funding_opps: "Funding Opps"
-  todos: "Todos"
 
   # Home page
   upcoming: "Upcoming"

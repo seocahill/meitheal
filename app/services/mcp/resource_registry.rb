@@ -7,7 +7,7 @@ module Mcp
 
     RESOURCES = %w[
       faqs pages posts events newsletters funding_opportunities spaces bookings
-      memberships proposals payments tickets email_groups admin_todos profiles users
+      memberships proposals payments tickets profiles users
     ].freeze
 
     def resources

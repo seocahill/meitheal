@@ -98,10 +98,10 @@ class NewsletterTest < ActiveSupport::TestCase
     refute_includes newsletter.content.to_s, pending_grant.title
   end
 
-  test "build_template includes generating news placeholder" do
+  test "build_template includes news placeholder for the editor to fill in" do
     newsletter = Newsletter.build_template
     assert_includes newsletter.content.to_s, "<h2>News</h2>"
-    assert_includes newsletter.content.to_s, "[Generating news section...]"
+    assert_includes newsletter.content.to_s, "[News here]"
   end
 
   test "build_template omits events section when none upcoming" do

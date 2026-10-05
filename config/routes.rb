@@ -28,8 +28,6 @@ Rails.application.routes.draw do
       resources :proposals, **resources_only
       resources :payments, **resources_only
       resources :tickets, **resources_only
-      resources :email_groups, **resources_only
-      resources :admin_todos, **resources_only
       resources :profiles, **resources_only
       resources :users, **resources_only
     end
@@ -115,12 +113,6 @@ Rails.application.routes.draw do
         patch :unpublish
       end
     end
-    resources :email_groups do
-      member do
-        post :add_member
-        delete :remove_member
-      end
-    end
     resources :proposals, only: [ :index, :show ] do
       member do
         post :approve
@@ -133,27 +125,6 @@ Rails.application.routes.draw do
       end
       member do
         post :approve
-      end
-    end
-    resources :inbox, only: [ :index, :show ] do
-      member do
-        post :create_todo
-        post :create_newsletter
-        post :create_funding
-        post :archive
-        post :unarchive
-      end
-      collection do
-        post :batch_archive
-      end
-    end
-    resources :todos do
-      member do
-        patch :toggle
-      end
-      collection do
-        post :batch_complete
-        post :batch_delete
       end
     end
   end

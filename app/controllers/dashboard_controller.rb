@@ -35,7 +35,6 @@ class DashboardController < ApplicationController
     if @user.can_manage?
       @pending_users = User.where(approved: false).includes(:profile).order(created_at: :desc).limit(10)
       @pending_proposals = Proposal.submitted.includes(:user, :funding_opportunity).order(submitted_at: :desc).limit(10)
-      @admin_todos = AdminTodo.pending.default_order.limit(10)
     end
   end
 end
