@@ -1,15 +1,17 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
   <div class="mb-6">
     <h1 class="text-3xl font-bold">Files</h1>
-    <p class="text-sm text-gray-500 mt-1">Upload a file, then copy its link to share in Notion or on a public page. Anyone with the link can open the file, so don't upload anything private.</p>
+    <p class="text-sm text-gray-500 mt-1">For files too big to upload to Slack or Notion. Upload a file, then copy its link to share in Notion or on a public page. Anyone with the link can open the file, so don't upload anything private.</p>
   </div>
 
   <%= form_with scope: :stored_file, url: admin_stored_files_path, method: :post, multipart: true,
+        data: { controller: "upload-progress", action: "direct-upload:start->upload-progress#start direct-upload:progress->upload-progress#update direct-upload:end->upload-progress#finish direct-upload:error->upload-progress#fail" },
         class: "bg-white rounded-lg shadow p-5 mb-8 flex flex-wrap items-end gap-4" do |f| %>
     <div>
       <%= f.label :files, "Files", class: "block text-sm font-medium text-gray-700 mb-1" %>
-      <%= f.file_field :files, multiple: true, id: "stored_file_files", class: "block text-sm text-gray-600" %>
-      <p class="text-xs text-gray-500 mt-1">Up to <%= number_to_human_size(StoredFile.max_size) %> each. You can choose several.</p>
+      <%= f.file_field :files, multiple: true, direct_upload: true, id: "stored_file_files", class: "block text-sm text-gray-600" %>
+      <p class="text-xs text-gray-500 mt-1">Up to <%= number_to_human_size(StoredFile.max_size) %> each. You can choose several. Large files take a while, so keep this page open until it says it's done.</p>
+      <p class="text-sm text-blue-700 mt-2" role="status" aria-live="polite" data-upload-progress-target="status" hidden></p>
     </div>
     <div class="flex-1 min-w-48">
       <%= f.label :description, "Description (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>

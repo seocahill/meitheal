@@ -30,7 +30,7 @@ class StoredFileTest < ActiveSupport::TestCase
     stored_file.file.blob.byte_size = StoredFile.max_size + 1
     assert_not stored_file.valid?
     assert_match "too large", stored_file.errors[:file].join
-    assert_match "50 MB", stored_file.errors[:file].join
+    assert_match "2 GB", stored_file.errors[:file].join
   end
 
   test "filename comes from the attached file" do

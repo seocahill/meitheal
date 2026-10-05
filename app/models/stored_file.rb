@@ -1,5 +1,6 @@
 # A file an editor uploads to share by link, for example in Notion or on a
-# public page. Stored through Active Storage (S3 in production).
+# public page. Meant for files too large for Slack or Notion's free tier, so
+# the browser uploads straight to storage rather than through the app server.
 class StoredFile < ApplicationRecord
   belongs_to :user
   has_one_attached :file
@@ -17,7 +18,7 @@ class StoredFile < ApplicationRecord
   }
 
   def self.max_size
-    50.megabytes
+    2.gigabytes
   end
 
   def filename

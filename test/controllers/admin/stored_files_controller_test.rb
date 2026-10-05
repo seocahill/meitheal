@@ -111,6 +111,24 @@ class Admin::StoredFilesControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ "sample.pdf", "sample.png" ], StoredFile.order(:id).last(2).map(&:filename)
   end
 
+  test "files uploaded directly to storage are attached from their signed ids" do
+    sign_in_as(@editor)
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("a very large video"), filename: "recording.mp4", content_type: "video/mp4"
+    )
+    assert_difference "StoredFile.count", 1 do
+      post admin_stored_files_path, params: { stored_file: { files: [ blob.signed_id ] } }
+    end
+    assert_equal blob, StoredFile.last.file.blob
+    assert_equal "recording.mp4", StoredFile.last.filename
+  end
+
+  test "upload form sends files straight to storage" do
+    sign_in_as(@editor)
+    get admin_stored_files_path
+    assert_select "input[type=file][data-direct-upload-url]"
+  end
+
   test "uploading with no file chosen explains what to do" do
     sign_in_as(@editor)
     assert_no_difference "StoredFile.count" do
