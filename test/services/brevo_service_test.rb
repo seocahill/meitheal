@@ -45,16 +45,41 @@ class BrevoServiceTest < ActiveSupport::TestCase
   end
 
   test "sent_campaigns asks Brevo for sent campaigns newest first without HTML bodies" do
-    captured = nil
+    captured = []
     fake_response = OpenStruct.new(campaigns: [ { id: 42, subject: "Test" } ])
 
-    with_stubbed_campaigns_api(get_email_campaigns: ->(opts) { captured = opts; fake_response }) do |service|
+    with_stubbed_campaigns_api(get_email_campaigns: ->(opts) { captured << opts; fake_response }) do |service|
       assert_equal [ { id: 42, subject: "Test" } ], service.sent_campaigns
     end
 
-    assert_equal "sent", captured[:status]
-    assert_equal "desc", captured[:sort]
-    assert_equal true, captured[:exclude_html_content]
+    assert_equal 1, captured.size
+    assert_equal "sent", captured.first[:status]
+    assert_equal "desc", captured.first[:sort]
+    assert_equal true, captured.first[:exclude_html_content]
+    assert_equal 0, captured.first[:offset]
+  end
+
+  test "sent_campaigns reads every page, not just the first" do
+    offsets = []
+    pages = {
+      0 => Array.new(100) { |i| { id: i } },
+      100 => Array.new(100) { |i| { id: 100 + i } },
+      200 => [ { id: 200 }, { id: 201 } ]
+    }
+
+    with_stubbed_campaigns_api(get_email_campaigns: ->(opts) { offsets << opts[:offset]; OpenStruct.new(campaigns: pages.fetch(opts[:offset])) }) do |service|
+      assert_equal 202, service.sent_campaigns.size
+    end
+
+    assert_equal [ 0, 100, 200 ], offsets
+  end
+
+  test "sent_campaigns stops after a page that comes back empty" do
+    offsets = []
+    with_stubbed_campaigns_api(get_email_campaigns: ->(opts) { offsets << opts[:offset]; OpenStruct.new(campaigns: nil) }) do |service|
+      assert_equal [], service.sent_campaigns
+    end
+    assert_equal [ 0 ], offsets
   end
 
   test "sent_campaigns raises ConfigurationError when not configured" do

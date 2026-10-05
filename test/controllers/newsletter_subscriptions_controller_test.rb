@@ -1,16 +1,59 @@
 require "test_helper"
 
+# The public newsletter page for anyone, member or not. Signing up goes straight
+# to the Brevo mailing list and creates nothing on the platform.
 class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
+  class FakeBrevo
+    attr_reader :added
+
+    def initialize(campaigns: [], add_error: nil, list_error: nil)
+      @campaigns = campaigns
+      @add_error = add_error
+      @list_error = list_error
+      @added = []
+    end
+
+    def sent_campaigns
+      raise @list_error if @list_error
+
+      @campaigns
+    end
+
+    def add_contact(email, name: nil)
+      raise @add_error if @add_error
+
+      @added << [ email, name ]
+    end
+  end
+
   setup do
     @original_brevo_new = BrevoService.method(:new)
-    stub_brevo = Object.new
-    stub_brevo.define_singleton_method(:configured?) { false }
-    stub_brevo.define_singleton_method(:sent_campaigns) { raise BrevoService::ConfigurationError, "Missing configuration" }
-    BrevoService.define_singleton_method(:new) { stub_brevo }
+    Newsletter.delete_all
+    use_brevo(FakeBrevo.new)
   end
 
   teardown do
     BrevoService.define_singleton_method(:new, @original_brevo_new)
+  end
+
+  def use_brevo(fake)
+    @brevo = fake
+    BrevoService.define_singleton_method(:new) { |*| fake }
+  end
+
+  # The page itself
+  test "the page is public and shows the signup form" do
+    get newsletter_page_path
+
+    assert_response :success
+    assert_select "h2", text: "Subscribe"
+    assert_select "form[action='#{newsletter_subscribe_path}']"
+    assert_includes response.body, "Subscribe"
+  end
+
+  test "the page shows the QR code" do
+    get newsletter_page_path
+    assert_select "img[src='#{newsletter_qr_code_path}']"
   end
 
   test "qr_code serves SVG with correct content type" do
@@ -24,139 +67,106 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "<svg"
   end
 
-  test "qr_code is publicly accessible" do
-    get newsletter_qr_code_path
-    assert_response :success
-  end
-
-  # Past issues come from Brevo
-  def with_brevo_campaigns(campaigns: [], error: nil)
-    fake = Object.new
-    fake.define_singleton_method(:sent_campaigns) { raise error if error; campaigns }
-    original = BrevoService.method(:new)
-    BrevoService.define_singleton_method(:new) { |*| fake }
-    yield
-  ensure
-    BrevoService.define_singleton_method(:new, original)
-  end
-
-  test "new lists newsletters sent from Brevo with a link to each" do
-    campaigns = [ { subject: "October Newsletter", sentDate: "2026-10-02T12:07:22.000+02:00", shareLink: "http://sh1.sendinblue.com/nmo49686gc.html" } ]
-    with_brevo_campaigns(campaigns: campaigns) { get newsletter_page_path }
+  # Past issues
+  test "past issues list Brevo newsletters with a link to each" do
+    use_brevo(FakeBrevo.new(campaigns: [
+      { id: 51, subject: "October Newsletter", sentDate: "2026-10-02T12:07:22.000+02:00", shareLink: "http://sh1.sendinblue.com/nmo49686gc.html" }
+    ]))
+    get newsletter_page_path
 
     assert_select "h2", text: "Past Issues"
     assert_select "a[href='http://sh1.sendinblue.com/nmo49686gc.html'][target=_blank][rel~=noopener]", text: "October Newsletter"
     assert_includes response.body, "2 October 2026"
   end
 
-  test "new hides past issues when Brevo has none" do
-    with_brevo_campaigns(campaigns: []) { get newsletter_page_path }
-
-    assert_response :success
-    assert_select "h2", text: "Past Issues", count: 0
-  end
-
-  test "new still shows the signup form when Brevo is unavailable" do
-    with_brevo_campaigns(error: BrevoService::ApiError.new("down")) { get newsletter_page_path }
-
-    assert_response :success
-    assert_includes response.body, "Subscribe"
-    assert_select "h2", text: "Past Issues", count: 0
-  end
-
-  test "new shows signup form" do
+  test "past issues link to our own archived copy where there is one" do
+    copy = Newsletter.create!(subject: "December Newsletter", content: "<p>Hi</p>", status: :sent,
+                              sent_at: Time.zone.local(2025, 12, 26, 15, 0), brevo_campaign_id: 28)
+    use_brevo(FakeBrevo.new(campaigns: [
+      { id: 28, subject: "December Newsletter", sentDate: "2025-12-26T15:04:25.000+01:00", shareLink: "http://sh1.sendinblue.com/old.html" }
+    ]))
     get newsletter_page_path
-    assert_response :success
-    assert_includes response.body, "Subscribe"
+
+    assert_select "a[href='#{newsletter_path(copy)}']", text: "December Newsletter"
+    assert_select "a[href='http://sh1.sendinblue.com/old.html']", count: 0
   end
 
-  test "create with new email creates user and associate membership" do
-    assert_difference [ "User.count", "Membership.count" ], 1 do
+  test "past issues still list archived newsletters when Brevo is down" do
+    copy = Newsletter.create!(subject: "December Newsletter", content: "<p>Hi</p>", status: :sent,
+                              sent_at: Time.zone.local(2025, 12, 26, 15, 0), brevo_campaign_id: 28)
+    use_brevo(FakeBrevo.new(list_error: BrevoService::ApiError.new("down")))
+    get newsletter_page_path
+
+    assert_response :success
+    assert_select "a[href='#{newsletter_path(copy)}']", text: "December Newsletter"
+  end
+
+  test "past issues are hidden when there are none" do
+    get newsletter_page_path
+
+    assert_response :success
+    assert_select "h2", text: "Past Issues", count: 0
+  end
+
+  # Signing up
+  test "signing up adds the email straight to Brevo" do
+    post newsletter_subscribe_path, params: { email: "newsubscriber@example.com" }
+
+    assert_equal [ [ "newsubscriber@example.com", nil ] ], @brevo.added
+    assert_redirected_to newsletter_page_path
+    assert_equal "Thanks for subscribing! You'll receive our next newsletter.", flash[:notice]
+  end
+
+  test "signing up creates no user, profile or membership on the platform" do
+    assert_no_difference [ "User.count", "Profile.count", "Membership.count" ] do
       post newsletter_subscribe_path, params: { email: "newsubscriber@example.com" }
     end
-
-    user = User.find_by(email_address: "newsubscriber@example.com")
-    assert user.approved?
-    assert user.viewer?
-    assert user.memberships.last.associate?
-    assert_redirected_to newsletter_page_path
   end
 
-  test "create with new email creates profile" do
-    post newsletter_subscribe_path, params: { email: "newsubscriber@example.com" }
-    user = User.find_by(email_address: "newsubscriber@example.com")
-    assert user.profile.present?
-  end
+  test "signing up with a member's email changes nothing on the platform" do
+    member = users(:viewer)
 
-  test "create with existing user does not create duplicate user" do
-    existing = users(:viewer)
-
-    assert_no_difference "User.count" do
-      post newsletter_subscribe_path, params: { email: existing.email_address }
+    assert_no_difference [ "User.count", "Membership.count" ] do
+      post newsletter_subscribe_path, params: { email: member.email_address }
     end
-
-    assert_redirected_to newsletter_page_path
+    assert_equal [ [ member.email_address, nil ] ], @brevo.added
   end
 
-  test "create with existing user ensures associate membership" do
-    existing = users(:editor)
-    # Editor has an expired membership - should get a new associate one
-    assert_difference "Membership.count", 1 do
-      post newsletter_subscribe_path, params: { email: existing.email_address }
-    end
-
-    assert existing.memberships.active.exists?
+  test "the email is trimmed and lowercased before it goes to Brevo" do
+    post newsletter_subscribe_path, params: { email: "  UPPER@EXAMPLE.COM " }
+    assert_equal "upper@example.com", @brevo.added.first.first
   end
 
-  test "create with existing active member does not create duplicate membership" do
-    existing = users(:owner)
-    # Owner already has an active membership
-    assert_no_difference "Membership.count" do
-      post newsletter_subscribe_path, params: { email: existing.email_address }
-    end
-  end
+  test "a blank email re-renders the form with an error and does not call Brevo" do
+    post newsletter_subscribe_path, params: { email: "" }
 
-  test "create shows same success message for new and existing emails" do
-    # New email
-    post newsletter_subscribe_path, params: { email: "brand-new@example.com" }
-    assert_redirected_to newsletter_page_path
-    new_notice = flash[:notice]
-
-    # Existing email
-    post newsletter_subscribe_path, params: { email: users(:viewer).email_address }
-    assert_redirected_to newsletter_page_path
-    existing_notice = flash[:notice]
-
-    assert_equal new_notice, existing_notice
-  end
-
-  test "create with blank email re-renders form with error" do
-    assert_no_difference "User.count" do
-      post newsletter_subscribe_path, params: { email: "" }
-    end
     assert_response :unprocessable_entity
+    assert_includes response.body, "Please enter your email address."
+    assert_empty @brevo.added
   end
 
-  test "create normalizes email to lowercase" do
-    post newsletter_subscribe_path, params: { email: "UPPER@EXAMPLE.COM" }
-    assert User.find_by(email_address: "upper@example.com")
+  test "an invalid email re-renders the form with an error and does not call Brevo" do
+    post newsletter_subscribe_path, params: { email: "not-an-email" }
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, "That doesn&#39;t look like an email address."
+    assert_empty @brevo.added
   end
 
-  test "create syncs to brevo best-effort" do
-    # Brevo sync failures should not break signup
-    original = BrevoService.method(:new)
-    error_service = Object.new
-    error_service.define_singleton_method(:configured?) { true }
-    error_service.define_singleton_method(:sent_campaigns) { [] }
-    error_service.define_singleton_method(:add_contact) { |*| raise BrevoService::ApiError, "fail" }
-    BrevoService.define_singleton_method(:new) { error_service }
+  test "when Brevo refuses the signup the visitor is told and nothing is claimed" do
+    use_brevo(FakeBrevo.new(add_error: BrevoService::ApiError.new("Invalid email")))
+    post newsletter_subscribe_path, params: { email: "fail@example.com" }
 
-    assert_difference "User.count", 1 do
-      post newsletter_subscribe_path, params: { email: "brevo-fail@example.com" }
-    end
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Sorry, we couldn&#39;t sign you up just now. Please try again later."
+    assert_nil flash[:notice]
+  end
 
-    assert_redirected_to newsletter_page_path
-  ensure
-    BrevoService.define_singleton_method(:new, original)
+  test "when Brevo is not configured the visitor is told and nothing is claimed" do
+    use_brevo(FakeBrevo.new(add_error: BrevoService::ConfigurationError.new("Missing configuration")))
+    post newsletter_subscribe_path, params: { email: "fail@example.com" }
+
+    assert_response :unprocessable_entity
+    assert_includes response.body, "Sorry, we couldn&#39;t sign you up just now."
   end
 end
