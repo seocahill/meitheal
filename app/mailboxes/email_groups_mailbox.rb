@@ -6,7 +6,7 @@ class EmailGroupsMailbox < ApplicationMailbox
     archived = @group.archived_emails.create!(
       from_address: mail.from.first,
       subject: mail.subject,
-      body: mail.body.decoded,
+      body: mail.body.decoded.force_encoding(mail.charset || "UTF-8").encode("UTF-8", invalid: :replace, undef: :replace),
       received_at: Time.current
     )
 
