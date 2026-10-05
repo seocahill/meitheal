@@ -1,0 +1,89 @@
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold">Files</h1>
+    <p class="text-sm text-gray-500 mt-1">For files too big to upload to Slack or Notion. Upload a file, then copy its link to share in Notion or on a public page. Anyone with the link can open the file, so don't upload anything private.</p>
+  </div>
+
+  <%= form_with scope: :stored_file, url: admin_stored_files_path, method: :post, multipart: true,
+        data: { controller: "upload-progress", action: "direct-upload:start->upload-progress#start direct-upload:progress->upload-progress#update direct-upload:end->upload-progress#finish direct-upload:error->upload-progress#fail" },
+        class: "bg-white rounded-lg shadow p-5 mb-8 flex flex-wrap items-end gap-4" do |f| %>
+    <div>
+      <%= f.label :files, "Files", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.file_field :files, multiple: true, direct_upload: true, id: "stored_file_files", class: "block text-sm text-gray-600" %>
+      <p class="text-xs text-gray-500 mt-1">Up to <%= number_to_human_size(StoredFile.max_size) %> each. You can choose several. Large files take a while, so keep this page open until it says it's done.</p>
+      <p class="text-sm text-blue-700 mt-2" role="status" aria-live="polite" data-upload-progress-target="status" hidden></p>
+    </div>
+    <div class="flex-1 min-w-48">
+      <%= f.label :description, "Description (optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+      <%= f.text_field :description, id: "stored_file_description", placeholder: "e.g. AGM minutes 2026", class: "w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+    </div>
+    <%= f.submit "Upload", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 text-sm cursor-pointer" %>
+  <% end %>
+
+  <%= form_with url: admin_stored_files_path, method: :get, class: "flex items-end gap-3 mb-4" do %>
+    <div>
+      <label for="q" class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+      <%= text_field_tag :q, params[:q], placeholder: "File name or description", class: "w-64 border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+    </div>
+    <%= submit_tag "Search", name: nil, class: "bg-gray-800 text-white px-4 py-2 rounded-lg text-sm cursor-pointer" %>
+    <% if params[:q].present? %>
+      <%= link_to "Clear", admin_stored_files_path, class: "text-sm text-gray-500 hover:text-gray-700 py-2" %>
+    <% end %>
+  <% end %>
+
+  <% if @stored_files.any? %>
+    <div class="bg-white shadow rounded-lg overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link to share</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @stored_files.each do |stored_file| %>
+            <tr>
+              <td class="px-4 py-3">
+                <div class="font-medium text-gray-900 break-all"><%= stored_file.filename %></div>
+                <div class="text-xs text-gray-500"><%= number_to_human_size(stored_file.file.byte_size) %> · <%= stored_file.file.content_type %></div>
+                <% if stored_file.description.present? %>
+                  <div class="text-sm text-gray-600 mt-1"><%= stored_file.description %></div>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                <div><%= stored_file.created_at.strftime("%d %b %Y") %></div>
+                <div class="text-xs text-gray-500"><%= stored_file.user.email_address %></div>
+              </td>
+              <td class="px-4 py-3" data-controller="clipboard">
+                <div class="flex items-center gap-2">
+                  <input type="text" readonly value="<%= rails_blob_url(stored_file.file) %>"
+                         id="link_<%= stored_file.id %>" aria-label="Link to <%= stored_file.filename %>"
+                         data-clipboard-target="source" data-action="focus->clipboard#copy"
+                         class="w-56 border border-gray-300 rounded px-2 py-1 text-xs text-gray-600">
+                  <button type="button" data-clipboard-target="button" data-action="clipboard#copy"
+                          class="px-3 py-1 rounded text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 whitespace-nowrap">Copy link</button>
+                </div>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                <%= link_to "Open", rails_blob_path(stored_file.file), target: "_blank", rel: "noopener", class: "text-pink-600 hover:text-pink-900 mr-3" %>
+                <%= button_to "Delete", admin_stored_file_path(stored_file), method: :delete,
+                      form: { class: "inline", data: { turbo_confirm: "Delete #{stored_file.filename}? Links that point to it will stop working." } },
+                      class: "text-red-600 hover:text-red-800" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <nav class="mt-8 text-center text-sm">
+      <%== @pagy.series_nav %>
+    </nav>
+  <% else %>
+    <div class="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+      <%= params[:q].present? ? "No files match your search." : "No files yet. Upload one above to get a shareable link." %>
+    </div>
+  <% end %>
+</div>

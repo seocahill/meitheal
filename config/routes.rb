@@ -20,7 +20,6 @@ Rails.application.routes.draw do
       resources :pages, **resources_only
       resources :posts, **resources_only
       resources :events, **resources_only
-      resources :newsletters, **resources_only
       resources :funding_opportunities, **resources_only
       resources :spaces, **resources_only
       resources :bookings, **resources_only
@@ -28,8 +27,6 @@ Rails.application.routes.draw do
       resources :proposals, **resources_only
       resources :payments, **resources_only
       resources :tickets, **resources_only
-      resources :email_groups, **resources_only
-      resources :admin_todos, **resources_only
       resources :profiles, **resources_only
       resources :users, **resources_only
     end
@@ -87,6 +84,7 @@ Rails.application.routes.draw do
       end
     end
     resources :payments, only: [ :index ]
+    resources :stored_files, only: [ :index, :create, :destroy ]
     resources :bookings, only: [ :index ] do
       member do
         patch :toggle_paid
@@ -105,7 +103,7 @@ Rails.application.routes.draw do
     end
     resources :memberships do
       member do
-        post :mark_as_paid
+        patch :toggle_paid
       end
       resources :payments, only: [ :create, :destroy ]
     end
@@ -115,49 +113,12 @@ Rails.application.routes.draw do
         patch :unpublish
       end
     end
-    resources :email_groups do
-      member do
-        post :add_member
-        delete :remove_member
-      end
-    end
     resources :proposals, only: [ :index, :show ] do
       member do
         post :approve
         post :reject
       end
     end
-    resources :funding_opportunities, only: [ :index ] do
-      collection do
-        post :refresh
-      end
-      member do
-        post :approve
-      end
-    end
-    resources :inbox, only: [ :index, :show ] do
-      member do
-        post :create_todo
-        post :create_newsletter
-        post :create_funding
-        post :archive
-        post :unarchive
-      end
-      collection do
-        post :batch_archive
-      end
-    end
-    resources :todos do
-      member do
-        patch :toggle
-      end
-      collection do
-        post :batch_complete
-        post :batch_delete
-      end
-    end
-    resources :calendar_imports, only: [ :new, :create ]
-    resources :transactions, only: [ :index ]
   end
 
   # Redirect old /pages/:slug URLs
@@ -181,14 +142,6 @@ Rails.application.routes.draw do
   resource :payment, controller: "payments", only: [ :new ] do
     post :create_checkout
     get :complete
-  end
-
-  # Newsletters (editor-only)
-  resources :newsletters do
-    member do
-      post :compose_with_ai
-      post :export_to_brevo
-    end
   end
 
   # Funding opportunities
@@ -225,7 +178,7 @@ Rails.application.routes.draw do
   # Forum
   mount Thredded::Engine => "/forum"
 
-  # Newsletter (public archive + signup)
+  # Newsletter signup
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
   get "newsletter/qr.svg", to: "newsletter_subscriptions#qr_code", as: :newsletter_qr_code

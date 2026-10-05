@@ -12,6 +12,7 @@ ga:
   art: "Ealaín"
   news: "Núacht"
   faq: "Ceisteanna Coitianta"
+  files: "Comhaid"
   faqs: "Ceisteanna Coitianta"
   space: "An Spás"
   bookings: "Áirithintí"
@@ -41,20 +42,14 @@ ga:
 
   # Authenticated sidebar — links
   dashboard: "Deais"
-  newsletters: "Nuachtlitreacha"
   pages: "Leathanaigh"
   book_space: "Áirithint Spáis"
   make_payment: "Íocaíocht a Dhéanamh"
-  inbox: "Bosca Isteach"
-  email_groups: "Grúpaí Ríomhphoist"
   users: "Úsáideoirí"
   memberships: "Ballraíochtaí"
   payments: "Íocaíochtaí"
-  transactions: "Idirbhearta"
   ticket_sales: "Díolacháin Ticéad"
   proposals: "Tograí"
-  funding_opps: "Deiseanna Maoinithe"
-  todos: "Liosta Oibre"
 
   # Home page
   upcoming: "Ag teacht aníos"
@@ -125,7 +120,6 @@ ga:
   draft_for_discussion: "dréacht: le plé"
 
   # Funding
-  pending_approval: "Ag feitheamh le ceadú"
   expired: "Caite"
   days_left: "lá fágtha"
   due: "Sprioc"

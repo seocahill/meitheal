@@ -22,13 +22,7 @@ class CleanupOrphanedBlobsJobTest < ActiveJob::TestCase
   end
 
   test "does not purge attached blobs" do
-    cached_email = CachedEmail.create!(
-      zoho_message_id: "test-cleanup-msg-#{SecureRandom.hex(4)}",
-      zoho_folder_id: "folder_inbox",
-      from_address: "test@example.com",
-      subject: "Test Email",
-      received_at: 1.week.ago
-    )
+    proposal = proposals(:draft)
 
     attached_blob = ActiveStorage::Blob.create_and_upload!(
       io: StringIO.new("attached content"),
@@ -36,7 +30,7 @@ class CleanupOrphanedBlobsJobTest < ActiveJob::TestCase
       content_type: "text/plain"
     )
     attached_blob.update_column(:created_at, 3.days.ago)
-    cached_email.attachments.attach(attached_blob)
+    proposal.documents.attach(attached_blob)
 
     CleanupOrphanedBlobsJob.perform_now
 

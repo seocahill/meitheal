@@ -111,7 +111,7 @@ GEM
     bindex (0.8.1)
     bootsnap (1.24.0)
       msgpack (~> 1.2)
-    brakeman (8.0.6)
+    brakeman (8.1.0)
       racc
     brevo (4.0.0)
       addressable (~> 2.3, >= 2.3.0)
@@ -191,12 +191,6 @@ GEM
     htmlentities (4.4.2)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    icalendar (2.12.2)
-      base64
-      ice_cube (~> 0.16)
-      logger
-      ostruct
-    ice_cube (0.17.0)
     image_processing (1.14.0)
       mini_magick (>= 4.9.5, < 6)
       ruby-vips (>= 2.0.17, < 3)
@@ -631,7 +625,6 @@ DEPENDENCIES
   doorkeeper
   dotenv (~> 3.2)
   faraday
-  icalendar
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
@@ -696,7 +689,7 @@ CHECKSUMS
   bigdecimal (4.1.2) sha256=53d217666027eab4280346fba98e7d5b66baaae1b9c3c1c0ffe89d48188a3fbd
   bindex (0.8.1) sha256=7b1ecc9dc539ed8bccfc8cb4d2732046227b09d6f37582ff12e50a5047ceb17e
   bootsnap (1.24.0) sha256=34e6dea61ff4895101aa9c10894ce30186bec73fe2279e0eb52040d8d4cec297
-  brakeman (8.0.6) sha256=759cc69341115e6c2dcd47b6fd8649a0b9bd540e3585ac8a0a94e31c66fee386
+  brakeman (8.1.0) sha256=cfa9e5214e4925842f4bc849a64f8a7e6c5d0425fe98eac8d7b7bc60fdc17e07
   brevo (4.0.0) sha256=016aff0108a8c90b55bbc414a30900f796c654ebc5d79c857d9b5fb37606fd05
   builder (3.3.0) sha256=497918d2f9dca528fdca4b88d84e4ef4387256d984b8154e9d5d3fe5a9c8835f
   bundler-audit (0.9.3) sha256=81c8766c71e47d0d28a0f98c7eed028539f21a6ea3cd8f685eb6f42333c9b4e9
@@ -740,8 +733,6 @@ CHECKSUMS
   html-pipeline (2.14.3) sha256=8a1d4d7128b2141913387cac0f8ba898bb6812557001acc0c2b46910f59413a0
   htmlentities (4.4.2) sha256=bbafbdf69f2eca9262be4efef7e43e6a1de54c95eb600f26984f71d2fe96c5c3
   i18n (1.15.2) sha256=00f9eb62412fe593b2a65a97daa75300d37abb8f7202ec748e94b6d46a9dd1b5
-  icalendar (2.12.2) sha256=b63dfb784b4d1214bceaec40097e61eaf78c8691929d7f217779956d9019d9f5
-  ice_cube (0.17.0) sha256=32deb45dda4b4acc53505c2f581f6d32b5afc04d29b9004769944a0df5a5fcbe
   image_processing (1.14.0) sha256=754cc169c9c262980889bec6bfd325ed1dafad34f85242b5a07b60af004742fb
   importmap-rails (2.2.3) sha256=7101be2a4dc97cf1558fb8f573a718404c5f6bcfe94f304bf1f39e444feeb16a
   inline_svg (1.10.0) sha256=5b652934236fd9f8adc61f3fd6e208b7ca3282698b19f28659971da84bf9a10f

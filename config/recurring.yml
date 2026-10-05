@@ -13,10 +13,6 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
-  daily_pending_summary:
-    class: DailyPendingSummaryJob
-    queue: default
-    schedule: "0 9 * * 1,5"
   cleanup_pending_payments:
     class: CleanupPendingPaymentsJob
     queue: default
@@ -25,25 +21,3 @@ production:
     class: CleanupOrphanedBlobsJob
     queue: default
     schedule: every day at 4am
-  sync_zoho_emails:
-    class: SyncZohoEmailsJob
-    queue: default
-    schedule: every 30 minutes
-  # sync_brevo_contacts:
-  #   class: SyncBrevoContactsJob
-  #   queue: default
-  #   schedule: every 6 hours
-  sync_brevo_newsletters:
-    class: SyncBrevoNewslettersJob
-    queue: default
-    schedule: every monday at 8am
-  # refresh_funding_opportunities:
-  #   class: RefreshFundingOpportunitiesJob
-  #   queue: default
-  #   schedule: every monday at 9am
-
-development:
-  # refresh_funding_opportunities:
-  #   class: RefreshFundingOpportunitiesJob
-  #   queue: default
-  #   schedule: every day at 10am

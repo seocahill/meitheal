@@ -54,23 +54,19 @@
 
         <% if current_user&.can_edit? %>
           <div class="sidebar-nav-section">Manage</div>
-          <%= link_to "Newsletters", main_app.newsletters_path, class: "sidebar-nav-link" %>
           <%= link_to "Pages", main_app.admin_pages_path, class: "sidebar-nav-link" %>
           <%= link_to "FAQs", main_app.admin_faqs_path, class: "sidebar-nav-link" %>
+          <%= link_to "Files", main_app.admin_stored_files_path, class: "sidebar-nav-link" %>
         <% end %>
 
         <% if current_user&.can_manage? %>
           <div class="sidebar-nav-section">Admin</div>
-          <%= link_to "Inbox", main_app.admin_inbox_index_path, class: "sidebar-nav-link" %>
-          <%= link_to "Email Groups", main_app.admin_email_groups_path, class: "sidebar-nav-link" %>
           <%= link_to "Users", main_app.admin_users_path, class: "sidebar-nav-link" %>
           <%= link_to "Memberships", main_app.admin_memberships_path, class: "sidebar-nav-link" %>
           <%= link_to "Payments", main_app.admin_payments_path, class: "sidebar-nav-link" %>
           <%= link_to "Transactions", main_app.admin_transactions_path, class: "sidebar-nav-link" %>
           <%= link_to "Bookings", main_app.admin_bookings_path, class: "sidebar-nav-link" %>
           <%= link_to "Proposals", main_app.admin_proposals_path, class: "sidebar-nav-link" %>
-          <%= link_to "Funding Opps", main_app.admin_funding_opportunities_path, class: "sidebar-nav-link" %>
-          <%= link_to "Todos", main_app.admin_todos_path, class: "sidebar-nav-link" %>
         <% end %>
 
       </nav>

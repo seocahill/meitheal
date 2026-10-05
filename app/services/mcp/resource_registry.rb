@@ -6,8 +6,8 @@ module Mcp
     module_function
 
     RESOURCES = %w[
-      faqs pages posts events newsletters funding_opportunities spaces bookings
-      memberships proposals payments tickets email_groups admin_todos profiles users
+      faqs pages posts events funding_opportunities spaces bookings
+      memberships proposals payments tickets profiles users
     ].freeze
 
     def resources

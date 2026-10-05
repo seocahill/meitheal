@@ -37,8 +37,6 @@
         <% active = ->(path) { controller_path == path } %>
 
         <div class="admin-nav-section">Communications</div>
-        <%= link_to "Inbox", admin_inbox_index_path, class: "admin-nav-link #{active.("admin/inbox") ? "admin-nav-active" : ""}" %>
-        <%= link_to "Email Groups", admin_email_groups_path, class: "admin-nav-link #{active.("admin/email_groups") ? "admin-nav-active" : ""}" %>
 
         <div class="admin-nav-section">Members</div>
         <%= link_to "Users", admin_users_path, class: "admin-nav-link #{active.("admin/users") ? "admin-nav-active" : ""}" %>
@@ -46,17 +44,15 @@
 
         <div class="admin-nav-section">Financial</div>
         <%= link_to "Payments", admin_payments_path, class: "admin-nav-link #{active.("admin/payments") ? "admin-nav-active" : ""}" %>
-        <%= link_to "Transactions", admin_transactions_path, class: "admin-nav-link #{active.("admin/transactions") ? "admin-nav-active" : ""}" %>
 
         <div class="admin-nav-section">Operations</div>
         <%= link_to "Bookings", admin_bookings_path, class: "admin-nav-link #{active.("admin/bookings") ? "admin-nav-active" : ""}" %>
         <%= link_to "Proposals", admin_proposals_path, class: "admin-nav-link #{active.("admin/proposals") ? "admin-nav-active" : ""}" %>
-        <%= link_to "Funding", admin_funding_opportunities_path, class: "admin-nav-link #{active.("admin/funding_opportunities") ? "admin-nav-active" : ""}" %>
-        <%= link_to "Todos", admin_todos_path, class: "admin-nav-link #{active.("admin/todos") ? "admin-nav-active" : ""}" %>
 
         <div class="admin-nav-section">Content</div>
         <%= link_to "Pages", admin_pages_path, class: "admin-nav-link #{active.("admin/pages") ? "admin-nav-active" : ""}" %>
         <%= link_to "FAQs", admin_faqs_path, class: "admin-nav-link #{active.("admin/faqs") ? "admin-nav-active" : ""}" %>
+        <%= link_to "Files", admin_stored_files_path, class: "admin-nav-link #{active.("admin/stored_files") ? "admin-nav-active" : ""}" %>
       </nav>
 
       <%# User / sign out %>

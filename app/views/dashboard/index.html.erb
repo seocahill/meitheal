@@ -62,27 +62,6 @@
           <%= link_to "View all proposals →", admin_proposals_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
         </div>
 
-        <!-- Admin Todos -->
-        <% if @admin_todos %>
-          <div class="card p-5">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-semibold text-gray-900">Admin Todos</h3>
-              <% if @admin_todos.any? %>
-                <span class="bg-rose-100 text-rose-700 text-xs font-medium px-2 py-1 rounded-full"><%= @admin_todos.size %></span>
-              <% end %>
-            </div>
-            <% if @admin_todos.any? %>
-              <ul class="space-y-2 mb-4">
-                <% @admin_todos.take(5).each do |todo| %>
-                  <li class="text-sm text-gray-700 truncate"><%= todo.title %></li>
-                <% end %>
-              </ul>
-            <% else %>
-              <p class="text-sm text-gray-500">All caught up!</p>
-            <% end %>
-            <%= link_to "View all todos →", admin_todos_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
-          </div>
-        <% end %>
       </div>
     </div>
   <% end %>
@@ -145,29 +124,6 @@
           <%= link_to "All events →", events_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
         </div>
 
-        <!-- Draft Newsletters -->
-        <div class="card p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="font-semibold text-gray-900">Draft Newsletters</h3>
-            <% if @draft_newsletters.any? %>
-              <span class="bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded-full"><%= @draft_newsletters.size %></span>
-            <% end %>
-          </div>
-          <% if @draft_newsletters.any? %>
-            <ul class="space-y-2 mb-4">
-              <% @draft_newsletters.each do |newsletter| %>
-                <li class="text-sm">
-                  <%= link_to edit_newsletter_path(newsletter), class: "text-gray-700 hover:text-purple-600" do %>
-                    <%= truncate(newsletter.subject, length: 35) %>
-                  <% end %>
-                </li>
-              <% end %>
-            </ul>
-          <% else %>
-            <p class="text-sm text-gray-500">No drafts in progress</p>
-          <% end %>
-          <%= link_to "All newsletters →", newsletters_path, class: "text-sm text-purple-600 hover:text-purple-700" %>
-        </div>
       </div>
     </div>
   <% end %>

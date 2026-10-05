@@ -4,15 +4,50 @@
     <%= link_to "View Calendar", calendar_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
   </div>
 
+  <% base = { q: params[:q], space_id: params[:space_id] }.compact_blank %>
+  <% filters = base.merge(status: params[:status], paid: params[:paid], overdue: params[:overdue], when: params[:when]).compact_blank %>
+  <% tab = "px-4 py-2 rounded-lg text-sm font-medium" %>
+  <% idle = "text-gray-600 hover:bg-gray-100" %>
+
   <!-- Filter tabs -->
-  <div class="flex flex-wrap gap-2 mb-6">
-    <%= link_to "Upcoming", admin_bookings_path, class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status].blank? && params[:paid].blank? ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Pending Confirmation", admin_bookings_path(status: "pending"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'pending' ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Confirmed", admin_bookings_path(status: "confirmed"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'confirmed' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Unpaid", admin_bookings_path(paid: "unpaid"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:paid] == 'unpaid' ? 'bg-red-100 text-red-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Paid", admin_bookings_path(paid: "paid"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:paid] == 'paid' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Cancelled", admin_bookings_path(status: "cancelled"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:status] == 'cancelled' ? 'bg-gray-200 text-gray-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+  <div class="flex flex-wrap gap-2 mb-4">
+    <%= link_to "Upcoming", admin_bookings_path(base), class: "#{tab} #{filters.except(:q, :space_id).empty? ? 'bg-purple-100 text-purple-700' : idle}" %>
+    <%= link_to admin_bookings_path(base.merge(paid: "unpaid")), data: { count: :unpaid }, class: "#{tab} #{params[:paid] == 'unpaid' && params[:overdue].blank? ? 'bg-red-100 text-red-700' : idle}" do %>
+      Unpaid <span class="font-semibold"><%= @counts[:unpaid] %></span>
+    <% end %>
+    <%= link_to admin_bookings_path(base.merge(overdue: "1")), data: { count: :overdue }, title: "Unpaid and ended more than two weeks ago. These block the booker from making a new booking.", class: "#{tab} #{params[:overdue].present? ? 'bg-rose-100 text-rose-700' : idle}" do %>
+      Overdue <span class="font-semibold"><%= @counts[:overdue] %></span>
+    <% end %>
+    <%= link_to "Paid", admin_bookings_path(base.merge(paid: "paid")), class: "#{tab} #{params[:paid] == 'paid' ? 'bg-blue-100 text-blue-700' : idle}" %>
+    <%= link_to admin_bookings_path(base.merge(status: "pending")), data: { count: :pending }, class: "#{tab} #{params[:status] == 'pending' ? 'bg-amber-100 text-amber-700' : idle}" do %>
+      Pending Confirmation <span class="font-semibold"><%= @counts[:pending] %></span>
+    <% end %>
+    <%= link_to "Confirmed", admin_bookings_path(base.merge(status: "confirmed")), class: "#{tab} #{params[:status] == 'confirmed' ? 'bg-green-100 text-green-700' : idle}" %>
+    <%= link_to "Cancelled", admin_bookings_path(base.merge(status: "cancelled")), class: "#{tab} #{params[:status] == 'cancelled' ? 'bg-gray-200 text-gray-700' : idle}" %>
   </div>
+
+  <!-- Search, space and timeframe -->
+  <%= form_with url: admin_bookings_path, method: :get, class: "flex flex-wrap items-end gap-3 mb-6" do |f| %>
+    <% %i[status paid overdue].each do |key| %>
+      <%= hidden_field_tag key, params[key], id: nil if params[key].present? %>
+    <% end %>
+    <div>
+      <label for="q" class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+      <%= text_field_tag :q, params[:q], placeholder: "Title, name or email", class: "w-56 border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+    </div>
+    <div>
+      <label for="space_id" class="block text-xs font-medium text-gray-500 mb-1">Space</label>
+      <%= select_tag :space_id, options_from_collection_for_select(@spaces, :id, :name, params[:space_id]), include_blank: "All spaces", class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+    </div>
+    <div>
+      <label for="when" class="block text-xs font-medium text-gray-500 mb-1">When</label>
+      <%= select_tag :when, options_for_select([ [ "Any time", "all" ], [ "Upcoming", "upcoming" ], [ "Already started", "past" ] ], params[:when]), include_blank: "Default", class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+    </div>
+    <%= submit_tag "Apply", name: nil, class: "bg-gray-800 text-white px-4 py-2 rounded-lg text-sm cursor-pointer" %>
+    <% if filters.present? %>
+      <%= link_to "Clear", admin_bookings_path, class: "text-sm text-gray-500 hover:text-gray-700 py-2" %>
+    <% end %>
+  <% end %>
 
   <div class="bg-white shadow rounded-lg overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
@@ -63,6 +98,11 @@
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Paid</span>
                   <% else %>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Unpaid</span>
+                    <% if booking.payment_overdue? %>
+                      <span class="block text-xs text-rose-700 mt-1">Overdue, ended <%= time_ago_in_words(booking.ends_at) %> ago</span>
+                    <% elsif booking.ends_at < Time.current %>
+                      <span class="block text-xs text-gray-500 mt-1">Ended <%= time_ago_in_words(booking.ends_at) %> ago</span>
+                    <% end %>
                   <% end %>
                 <% else %>
                   <span class="text-xs text-gray-400">N/A</span>
@@ -75,7 +115,7 @@
                   <% end %>
                   <% if booking.confirmed? %>
                     <%= button_to booking.paid ? "Mark Unpaid" : "Mark Paid",
-                        toggle_paid_admin_booking_path(booking),
+                        toggle_paid_admin_booking_path(booking, filters.merge(page: params[:page]).compact_blank),
                         method: :patch,
                         class: "px-3 py-1.5 rounded text-xs font-medium text-white transition-colors #{booking.paid ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}" %>
                   <% end %>

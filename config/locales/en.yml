@@ -12,6 +12,7 @@ en:
   art: "Art"
   news: "News"
   faq: "FAQ"
+  files: "Files"
   faqs: "FAQs"
   space: "Space"
   bookings: "Bookings"
@@ -41,20 +42,14 @@ en:
 
   # Authenticated sidebar — links
   dashboard: "Dashboard"
-  newsletters: "Newsletters"
   pages: "Pages"
   book_space: "Book Space"
   make_payment: "Make a Payment"
-  inbox: "Inbox"
-  email_groups: "Email Groups"
   users: "Users"
   memberships: "Memberships"
   payments: "Payments"
-  transactions: "Transactions"
   ticket_sales: "Ticket Sales"
   proposals: "Proposals"
-  funding_opps: "Funding Opps"
-  todos: "Todos"
 
   # Home page
   upcoming: "Upcoming"
@@ -125,7 +120,6 @@ en:
   draft_for_discussion: "draft: for discussion"
 
   # Funding
-  pending_approval: "Pending approval"
   expired: "Expired"
   days_left: "days left"
   due: "Due"

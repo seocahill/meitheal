@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_22_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -430,6 +430,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_120000) do
     t.index ["component_of_id"], name: "index_spaces_on_component_of_id"
   end
 
+  create_table "stored_files", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["created_at"], name: "index_stored_files_on_created_at"
+    t.index ["user_id"], name: "index_stored_files_on_user_id"
+  end
+
   create_table "thredded_categories", force: :cascade do |t|
     t.datetime "created_at", precision: nil, null: false
     t.text "description"
@@ -726,6 +735,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_22_120000) do
   add_foreign_key "proposals", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "spaces", "spaces", column: "component_of_id"
+  add_foreign_key "stored_files", "users"
   add_foreign_key "thredded_messageboard_users", "thredded_messageboards", on_delete: :cascade
   add_foreign_key "thredded_messageboard_users", "thredded_user_details", on_delete: :cascade
   add_foreign_key "thredded_user_post_notifications", "thredded_posts", column: "post_id", on_delete: :cascade

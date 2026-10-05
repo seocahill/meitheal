@@ -24,6 +24,10 @@ class Booking < ApplicationRecord
   scope :unpaid, -> { where(paid: false).where.not(status: :cancelled) }
   scope :overdue, -> { where("ends_at < ?", 2.weeks.ago) }
 
+  def payment_overdue?
+    confirmed? && !paid? && ends_at < 2.weeks.ago
+  end
+
   def editable_by?(user)
     return false unless user
     self.user == user || user.can_edit?
