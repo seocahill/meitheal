@@ -44,6 +44,32 @@ class BrevoServiceTest < ActiveSupport::TestCase
     assert_equal "Invalid email", error.message
   end
 
+  test "sent_campaigns asks Brevo for sent campaigns newest first without HTML bodies" do
+    captured = nil
+    fake_response = OpenStruct.new(campaigns: [ { id: 42, subject: "Test" } ])
+
+    with_stubbed_campaigns_api(get_email_campaigns: ->(opts) { captured = opts; fake_response }) do |service|
+      assert_equal [ { id: 42, subject: "Test" } ], service.sent_campaigns
+    end
+
+    assert_equal "sent", captured[:status]
+    assert_equal "desc", captured[:sort]
+    assert_equal true, captured[:exclude_html_content]
+  end
+
+  test "sent_campaigns raises ConfigurationError when not configured" do
+    service = BrevoService.new
+    service.instance_variable_set(:@api_key, nil)
+    assert_raises(BrevoService::ConfigurationError) { service.sent_campaigns }
+  end
+
+  test "sent_campaigns wraps Brevo::ApiError as BrevoService::ApiError" do
+    error = Brevo::ApiError.new(code: 500, response_body: { message: "boom" }.to_json)
+    with_stubbed_campaigns_api(get_email_campaigns: ->(_opts) { raise error }) do |service|
+      assert_raises(BrevoService::ApiError) { service.sent_campaigns }
+    end
+  end
+
   test "list_contacts returns contacts from configured list" do
     fake_contacts = [
       OpenStruct.new(email: "alice@example.com", attributes: { "FIRSTNAME" => "Alice" }),
@@ -71,6 +97,21 @@ class BrevoServiceTest < ActiveSupport::TestCase
     service.instance_variable_set(:@sender_email, "test@example.com")
     service.instance_variable_set(:@list_id, 1)
     service.instance_variable_set(:@contacts_api, fake_contacts_api)
+
+    yield service
+  end
+
+  def with_stubbed_campaigns_api(handlers)
+    fake_campaigns_api = Object.new
+    handlers.each do |method, handler|
+      fake_campaigns_api.define_singleton_method(method) { |opts = {}| handler.call(opts) }
+    end
+
+    service = BrevoService.new
+    service.instance_variable_set(:@api_key, "test-key")
+    service.instance_variable_set(:@sender_email, "test@example.com")
+    service.instance_variable_set(:@list_id, 1)
+    service.instance_variable_set(:@campaigns_api, fake_campaigns_api)
 
     yield service
   end

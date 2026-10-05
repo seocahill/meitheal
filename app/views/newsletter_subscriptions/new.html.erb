@@ -38,4 +38,18 @@
     </div>
   </div>
 
+  <% if sent_newsletters.any? %>
+    <div class="card p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Past Issues</h2>
+
+      <ul class="space-y-3">
+        <% sent_newsletters.each do |newsletter| %>
+          <li class="flex justify-between items-center gap-4">
+            <%= link_to newsletter.subject, newsletter.url, target: "_blank", rel: "noopener", class: "text-purple-600 hover:text-purple-700 font-medium" %>
+            <span class="text-sm text-gray-500 whitespace-nowrap"><%= newsletter.sent_on.strftime("%-d %B %Y") %></span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
 </div>
