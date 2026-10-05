@@ -54,7 +54,6 @@
 
         <% if current_user&.can_edit? %>
           <div class="sidebar-nav-section">Manage</div>
-          <%= link_to "Newsletters", main_app.newsletters_path, class: "sidebar-nav-link" %>
           <%= link_to "Pages", main_app.admin_pages_path, class: "sidebar-nav-link" %>
           <%= link_to "FAQs", main_app.admin_faqs_path, class: "sidebar-nav-link" %>
         <% end %>

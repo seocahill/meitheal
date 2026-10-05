@@ -21,17 +21,3 @@ production:
     class: CleanupOrphanedBlobsJob
     queue: default
     schedule: every day at 4am
-  sync_brevo_newsletters:
-    class: SyncBrevoNewslettersJob
-    queue: default
-    schedule: every monday at 8am
-  # refresh_funding_opportunities:
-  #   class: RefreshFundingOpportunitiesJob
-  #   queue: default
-  #   schedule: every monday at 9am
-
-development:
-  # refresh_funding_opportunities:
-  #   class: RefreshFundingOpportunitiesJob
-  #   queue: default
-  #   schedule: every day at 10am

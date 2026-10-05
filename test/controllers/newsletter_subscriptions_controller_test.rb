@@ -28,22 +28,10 @@ class NewsletterSubscriptionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "new shows signup form and archive" do
+  test "new shows signup form" do
     get newsletter_page_path
     assert_response :success
     assert_includes response.body, "Subscribe"
-  end
-
-  test "new shows sent newsletters in archive" do
-    sent = newsletters(:sent_newsletter)
-    get newsletter_page_path
-    assert_includes response.body, sent.subject
-  end
-
-  test "new does not show draft newsletters in archive" do
-    draft = newsletters(:monthly_update)
-    get newsletter_page_path
-    refute_includes response.body, draft.subject
   end
 
   test "create with new email creates user and associate membership" do

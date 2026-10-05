@@ -20,7 +20,6 @@ Rails.application.routes.draw do
       resources :pages, **resources_only
       resources :posts, **resources_only
       resources :events, **resources_only
-      resources :newsletters, **resources_only
       resources :funding_opportunities, **resources_only
       resources :spaces, **resources_only
       resources :bookings, **resources_only
@@ -152,14 +151,6 @@ Rails.application.routes.draw do
     get :complete
   end
 
-  # Newsletters (editor-only)
-  resources :newsletters do
-    member do
-      post :compose_with_ai
-      post :export_to_brevo
-    end
-  end
-
   # Funding opportunities
   resources :funding_opportunities do
     resources :proposals, only: [ :new, :create, :edit, :update ] do
@@ -194,7 +185,7 @@ Rails.application.routes.draw do
   # Forum
   mount Thredded::Engine => "/forum"
 
-  # Newsletter (public archive + signup)
+  # Newsletter signup
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
   get "newsletter/qr.svg", to: "newsletter_subscriptions#qr_code", as: :newsletter_qr_code

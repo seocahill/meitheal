@@ -120,7 +120,7 @@ module Api
       # --- Every resource is reachable --------------------------------------
 
       RESOURCE_INDEX_PATHS = %w[
-        faqs pages posts events newsletters funding_opportunities spaces bookings
+        faqs pages posts events funding_opportunities spaces bookings
         memberships proposals payments tickets profiles users
       ].freeze
 

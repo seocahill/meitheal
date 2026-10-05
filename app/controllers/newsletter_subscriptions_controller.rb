@@ -5,7 +5,6 @@ class NewsletterSubscriptionsController < ApplicationController
   }
 
   def new
-    @sent_newsletters = Newsletter.sent.order(sent_at: :desc)
   end
 
   def qr_code
@@ -17,13 +16,11 @@ class NewsletterSubscriptionsController < ApplicationController
     @email = params[:email]&.strip&.downcase
 
     if @email.blank?
-      @sent_newsletters = Newsletter.sent.order(sent_at: :desc)
       flash.now[:alert] = "Please enter your email address."
       return render :new, status: :unprocessable_entity
     end
 
     if Rails.env.production? && !verify_recaptcha(action: "newsletter_signup", minimum_score: 0.5)
-      @sent_newsletters = Newsletter.sent.order(sent_at: :desc)
       flash.now[:alert] = "Verification failed. Please try again."
       return render :new, status: :unprocessable_entity
     end

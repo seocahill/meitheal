@@ -28,7 +28,6 @@ class DashboardController < ApplicationController
     if @user.can_edit?
       @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)
       @draft_events = Event.draft.includes(:user).order(updated_at: :desc).limit(10)
-      @draft_newsletters = Newsletter.draft.order(updated_at: :desc).limit(5)
     end
 
     # Owner/admin items

@@ -43,88 +43,6 @@ class BrevoServiceTest < ActiveSupport::TestCase
     assert_equal "Invalid email", error.message
   end
 
-  test "sent_campaigns returns campaigns from API" do
-    # The real API returns campaign list items as Hashes with symbol keys
-    fake_campaign = { id: 42, subject: "Test", sentDate: "2026-01-15" }
-    fake_response = OpenStruct.new(campaigns: [ fake_campaign ])
-
-    with_stubbed_campaigns_api(get_email_campaigns: fake_response) do |service|
-      result = service.sent_campaigns
-      assert_equal 1, result.size
-      assert_equal 42, result.first[:id]
-    end
-  end
-
-  test "strip_email_wrapper extracts body content from full HTML email" do
-    html = <<~HTML
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <style>body { font-family: sans-serif; }</style>
-      </head>
-      <body>
-        <h1>Hello World</h1>
-        <p>Newsletter content here.</p>
-      </body>
-      </html>
-    HTML
-
-    result = BrevoService.strip_email_wrapper(html)
-    assert_includes result, "<h1>Hello World</h1>"
-    assert_includes result, "<p>Newsletter content here.</p>"
-    refute_includes result, "<!DOCTYPE"
-    refute_includes result, "<html"
-    refute_includes result, "<head"
-    refute_includes result, "<style"
-    refute_includes result, "</html>"
-  end
-
-  test "strip_email_wrapper removes unsubscribe footer" do
-    html = <<~HTML
-      <!DOCTYPE html>
-      <html>
-      <body>
-        <p>Content</p>
-        <hr style="margin-top: 40px;">
-        <p style="font-size: 12px;">
-          You're receiving this because you're subscribed.<br>
-          <a href="{{ unsubscribe }}">Unsubscribe</a>
-        </p>
-      </body>
-      </html>
-    HTML
-
-    result = BrevoService.strip_email_wrapper(html)
-    assert_includes result, "<p>Content</p>"
-    refute_includes result, "unsubscribe"
-    refute_includes result, "You're receiving this"
-  end
-
-  test "strip_email_wrapper returns content as-is when no wrapper present" do
-    html = "<h2>Just a heading</h2><p>Some text</p>"
-    result = BrevoService.strip_email_wrapper(html)
-    assert_includes result, "<h2>Just a heading</h2>"
-    assert_includes result, "<p>Some text</p>"
-  end
-
-  test "strip_email_wrapper handles nil gracefully" do
-    assert_equal "", BrevoService.strip_email_wrapper(nil)
-  end
-
-  test "strip_email_wrapper handles empty string" do
-    assert_equal "", BrevoService.strip_email_wrapper("")
-  end
-
-  test "campaign_content returns single campaign details" do
-    fake_campaign = OpenStruct.new(id: 42, subject: "Test", html_content: "<p>Content</p>", sent_date: "2026-01-15")
-
-    with_stubbed_campaigns_api(get_email_campaign: fake_campaign) do |service|
-      result = service.campaign_content(42)
-      assert_equal "<p>Content</p>", result.html_content
-    end
-  end
-
   test "list_contacts returns contacts from configured list" do
     fake_contacts = [
       OpenStruct.new(email: "alice@example.com", attributes: { "FIRSTNAME" => "Alice" }),
@@ -152,21 +70,6 @@ class BrevoServiceTest < ActiveSupport::TestCase
     service.instance_variable_set(:@sender_email, "test@example.com")
     service.instance_variable_set(:@list_id, 1)
     service.instance_variable_set(:@contacts_api, fake_contacts_api)
-
-    yield service
-  end
-
-  def with_stubbed_campaigns_api(responses = {})
-    fake_campaigns_api = Object.new
-    responses.each do |method, response|
-      fake_campaigns_api.define_singleton_method(method) { |*_args, **_opts| response }
-    end
-
-    service = BrevoService.new
-    service.instance_variable_set(:@api_key, "test-key")
-    service.instance_variable_set(:@sender_email, "test@example.com")
-    service.instance_variable_set(:@list_id, 1)
-    service.instance_variable_set(:@campaigns_api, fake_campaigns_api)
 
     yield service
   end

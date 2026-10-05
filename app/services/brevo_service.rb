@@ -13,79 +13,6 @@ class BrevoService
     @api_key.present? && @sender_email.present? && @list_id.present?
   end
 
-  # Extract body content from a full HTML email document,
-  # removing DOCTYPE, head, styles, and unsubscribe footer.
-  def self.strip_email_wrapper(html)
-    return "" if html.blank?
-
-    # Only parse as full document if it looks like one
-    unless html.include?("<html") || html.include?("<!DOCTYPE")
-      return html.strip
-    end
-
-    doc = Nokogiri::HTML(html)
-    body = doc.at_css("body")
-    return html.strip unless body
-
-    # Remove unsubscribe links and their surrounding elements
-    body.css("a[href*='unsubscribe']").each do |link|
-      link.parent.remove if link.parent
-    end
-
-    # Remove trailing <hr> elements (typically separating footer)
-    body.css("hr").each(&:remove)
-
-    body.inner_html.strip
-  end
-
-  # Create a campaign draft in Brevo
-  def create_campaign(newsletter)
-    ensure_configured!
-
-    campaign = Brevo::CreateEmailCampaign.new(
-      name: campaign_name(newsletter),
-      subject: newsletter.subject,
-      sender: { email: @sender_email, name: @sender_name },
-      html_content: wrap_html_content(newsletter),
-      recipients: { list_ids: [ @list_id ] }
-    )
-
-    result = campaigns_api.create_email_campaign(campaign)
-    result.id
-  rescue Brevo::ApiError => e
-    Rails.logger.error("Brevo API error: #{e.message}")
-    raise ApiError, parse_brevo_error(e)
-  end
-
-  # Update an existing campaign draft
-  def update_campaign(campaign_id, newsletter)
-    ensure_configured!
-
-    campaign = Brevo::UpdateEmailCampaign.new(
-      name: campaign_name(newsletter),
-      subject: newsletter.subject,
-      sender: { email: @sender_email, name: @sender_name },
-      html_content: wrap_html_content(newsletter)
-    )
-
-    campaigns_api.update_email_campaign(campaign_id, campaign)
-    campaign_id
-  rescue Brevo::ApiError => e
-    Rails.logger.error("Brevo API error: #{e.message}")
-    raise ApiError, parse_brevo_error(e)
-  end
-
-  # Get campaign status
-  def campaign_status(campaign_id)
-    ensure_configured!
-
-    result = campaigns_api.get_email_campaign(campaign_id)
-    result.status
-  rescue Brevo::ApiError => e
-    Rails.logger.error("Brevo API error: #{e.message}")
-    raise ApiError, parse_brevo_error(e)
-  end
-
   # Add or update a contact in the configured list
   def add_contact(email, name: nil)
     ensure_configured!
@@ -100,27 +27,6 @@ class BrevoService
     contacts_api.create_contact(contact)
   rescue Brevo::ApiError => e
     Rails.logger.error("Brevo API error adding contact: #{e.message}")
-    raise ApiError, parse_brevo_error(e)
-  end
-
-  # List sent campaigns
-  def sent_campaigns(limit: 50)
-    ensure_configured!
-
-    result = campaigns_api.get_email_campaigns(status: "sent", limit: limit, sort: "desc")
-    result.campaigns || []
-  rescue Brevo::ApiError => e
-    Rails.logger.error("Brevo API error: #{e.message}")
-    raise ApiError, parse_brevo_error(e)
-  end
-
-  # Get a single campaign's full details
-  def campaign_content(campaign_id)
-    ensure_configured!
-
-    campaigns_api.get_email_campaign(campaign_id)
-  rescue Brevo::ApiError => e
-    Rails.logger.error("Brevo API error: #{e.message}")
     raise ApiError, parse_brevo_error(e)
   end
 
@@ -162,47 +68,10 @@ class BrevoService
     raise ConfigurationError, "Missing configuration: #{missing.join(', ')}"
   end
 
-  def campaign_name(newsletter)
-    "NCF Newsletter: #{newsletter.subject}"[0, 64]
-  end
-
-  def wrap_html_content(newsletter)
-    content = newsletter.content.to_s
-
-    <<~HTML
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
-          h1, h2, h3 { color: #1a1a1a; }
-          a { color: #7c3aed; }
-          img { max-width: 100%; height: auto; }
-        </style>
-      </head>
-      <body>
-        #{content}
-        <hr style="margin-top: 40px; border: none; border-top: 1px solid #e5e5e5;">
-        <p style="font-size: 12px; color: #666;">
-          You're receiving this because you're subscribed to NCF newsletters.<br>
-          <a href="{{ unsubscribe }}">Unsubscribe</a>
-        </p>
-      </body>
-      </html>
-    HTML
-  end
-
   def configure_brevo
     Brevo.configure do |config|
       config.api_key["api-key"] = @api_key
     end
-  end
-
-  def campaigns_api
-    configure_brevo
-    @campaigns_api ||= Brevo::EmailCampaignsApi.new
   end
 
   def contacts_api
