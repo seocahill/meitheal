@@ -1,12 +1,7 @@
 class MembershipPaymentsController < ApplicationController
   before_action :set_membership
 
-  MEMBERSHIP_PRICES = {
-    associate: 0,
-    youth: 500,       # €5
-    concession: 1000, # €10
-    full: 2000        # €20
-  }.freeze
+  MEMBERSHIP_PRICES = { associate: 0 }.merge(Membership::FEE_CENTS).freeze
 
   PAID_TYPES = MEMBERSHIP_PRICES.select { |_, v| v > 0 }.keys.freeze
 

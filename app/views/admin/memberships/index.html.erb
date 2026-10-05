@@ -1,7 +1,17 @@
+<% filters = { q: params[:q], status: params[:status], type: params[:type] }.compact_blank %>
+<% status_tabs = [
+  [ nil, "All", :all, "bg-gray-800 text-white border-gray-800" ],
+  [ "paid", "Paid", :paid, "bg-green-600 text-white border-green-600" ],
+  [ "renewing", "Renewing soon", :renewing, "bg-amber-500 text-white border-amber-500" ],
+  [ "lapsed", "Lapsed", :lapsed, "bg-red-600 text-white border-red-600" ],
+  [ "unpaid", "Unpaid", :unpaid, "bg-rose-600 text-white border-rose-600" ],
+  [ "no_fee", "Associate (no fee)", :no_fee, "bg-gray-500 text-white border-gray-500" ]
+] %>
 <div class="max-w-6xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-6">
     <div>
       <h1 class="text-3xl font-bold">Memberships</h1>
+      <p class="text-sm text-gray-500 mt-1">Paid means a contribution is on record and has not yet expired. Associates pay no fee.</p>
     </div>
     <div class="flex items-center gap-3">
       <%= form_with url: admin_memberships_path, method: :get, local: true do |f| %>
@@ -10,7 +20,7 @@
             type="text"
             name="q"
             value="<%= params[:q] %>"
-            placeholder="Search by email..."
+            placeholder="Search by name or email..."
             class="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
           >
           <% if params[:status].present? %>
@@ -30,69 +40,90 @@
     </div>
   </div>
 
-  <!-- Status filter -->
-  <div class="flex gap-2 mb-2">
-    <%= link_to "All", admin_memberships_path(q: params[:q].presence, type: params[:type].presence),
-          class: "px-3 py-1 rounded-full text-sm border #{params[:status].blank? ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
-    <%= link_to "Active", admin_memberships_path(status: "active", q: params[:q].presence, type: params[:type].presence),
-          class: "px-3 py-1 rounded-full text-sm border #{params[:status] == 'active' ? 'bg-green-600 text-white border-green-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
-    <%= link_to "Expired", admin_memberships_path(status: "expired", q: params[:q].presence, type: params[:type].presence),
-          class: "px-3 py-1 rounded-full text-sm border #{params[:status] == 'expired' ? 'bg-red-600 text-white border-red-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
+  <!-- Payment status filter, with counts -->
+  <div class="flex flex-wrap gap-2 mb-2">
+    <% status_tabs.each do |value, label, key, active_class| %>
+      <%= link_to admin_memberships_path(filters.merge(status: value).compact_blank),
+            data: { status_count: key },
+            class: "px-3 py-1 rounded-full text-sm border #{params[:status].presence == value ? active_class : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" do %>
+        <%= label %> <span class="font-semibold"><%= @counts[key] %></span>
+      <% end %>
+    <% end %>
   </div>
 
   <!-- Type filter -->
-  <div class="flex gap-2 mb-4">
-    <%= link_to "All types", admin_memberships_path(q: params[:q].presence, status: params[:status].presence),
+  <div class="flex flex-wrap gap-2 mb-4">
+    <%= link_to "All types", admin_memberships_path(filters.except(:type)),
           class: "px-3 py-1 rounded-full text-sm border #{params[:type].blank? ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
     <% Membership.membership_types.each_key do |type| %>
-      <%= link_to type.humanize, admin_memberships_path(type: type, q: params[:q].presence, status: params[:status].presence),
+      <%= link_to type.humanize, admin_memberships_path(filters.merge(type: type)),
             class: "px-3 py-1 rounded-full text-sm border #{params[:type] == type ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
     <% end %>
   </div>
 
-  <div class="bg-white rounded-lg shadow overflow-hidden">
+  <div class="bg-white rounded-lg shadow overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Started</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expires</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Paid until</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last payment</th>
           <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <% @memberships.each do |membership| %>
+          <% status = membership.payment_status %>
           <tr>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm font-medium text-gray-900"><%= membership.user.email_address %></div>
-              <div class="text-sm font-medium text-gray-900"><%= membership.user.name %></div>
+              <div class="text-sm text-gray-500"><%= membership.user.name %></div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <%= membership.full? ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' %>">
                 <%= membership.membership_type.humanize %>
               </span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <%= membership.starts_on.strftime("%d %b %Y") %>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <%= membership.expires_on&.strftime("%d %b %Y") || "Never" %>
-            </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <% if membership.expired? %>
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
+              <% case status %>
+              <% when :paid %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+              <% when :lapsed %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Lapsed</span>
+              <% when :unpaid %>
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-100 text-rose-800">Unpaid</span>
               <% else %>
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                <span class="text-xs text-gray-400">No fee</span>
               <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <%= membership.expires_on&.strftime("%d %b %Y") || "—" %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <% last_payment = membership.payments.select(&:completed?).max_by(&:paid_on) %>
+              <%= last_payment ? "#{last_payment.paid_on.strftime('%d %b %Y')} (#{last_payment.payment_method.humanize.downcase})" : "—" %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <%= link_to "View", admin_membership_path(membership), class: "text-pink-600 hover:text-pink-900 mr-4" %>
-              <%= link_to "Edit", edit_admin_membership_path(membership), class: "text-gray-600 hover:text-gray-900 mr-4" %>
-              <% unless membership.full? %>
-                <%= button_to "Mark Paid", mark_as_paid_admin_membership_path(membership), method: :post, class: "inline text-green-600 hover:text-green-900", form: { class: "inline" } %>
-              <% end %>
+              <div class="flex items-center gap-3">
+                <%= link_to "View", admin_membership_path(membership), class: "text-pink-600 hover:text-pink-900" %>
+                <%= link_to "Edit", edit_admin_membership_path(membership), class: "text-gray-600 hover:text-gray-900" %>
+                <% if status == :paid %>
+                  <%= button_to "Mark unpaid", toggle_paid_admin_membership_path(membership, filters.merge(page: @page)),
+                        method: :patch, form: { class: "inline", data: { turbo_confirm: "Mark this membership unpaid? Use this to correct a mistake. The payment record is kept." } },
+                        class: "text-amber-700 hover:text-amber-900" %>
+                <% elsif status != :no_fee %>
+                  <%= form_with url: toggle_paid_admin_membership_path(membership, filters.merge(page: @page)), method: :patch, class: "inline-flex items-center gap-1" do |f| %>
+                    <%= select_tag :payment_method,
+                          options_for_select([ [ "Cash", "cash" ], [ "Bank transfer", "bank_transfer" ], [ "Other", "other" ] ]),
+                          id: "payment_method_#{membership.id}",
+                          "aria-label": "Payment method",
+                          class: "border border-gray-300 rounded text-xs py-1" %>
+                    <%= f.submit "Mark paid", class: "text-green-700 hover:text-green-900 cursor-pointer" %>
+                  <% end %>
+                <% end %>
+              </div>
             </td>
           </tr>
         <% end %>
@@ -110,13 +141,11 @@
       <div>Page <%= @page %></div>
       <div class="flex gap-2">
         <% if @page > 1 %>
-          <%= link_to "Previous",
-                admin_memberships_path(q: params[:q].presence, status: params[:status].presence, type: params[:type].presence, page: @page - 1),
+          <%= link_to "Previous", admin_memberships_path(filters.merge(page: @page - 1)),
                 class: "px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50" %>
         <% end %>
         <% if @has_more %>
-          <%= link_to "Next",
-                admin_memberships_path(q: params[:q].presence, status: params[:status].presence, type: params[:type].presence, page: @page + 1),
+          <%= link_to "Next", admin_memberships_path(filters.merge(page: @page + 1)),
                 class: "px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50" %>
         <% end %>
       </div>

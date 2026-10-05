@@ -330,4 +330,17 @@ class BookingTest < ActiveSupport::TestCase
     )
     assert new_booking.valid?
   end
+
+  test "payment_overdue? is true for confirmed unpaid bookings that ended over two weeks ago" do
+    booking = Booking.new(status: :confirmed, paid: false, starts_at: 1.month.ago, ends_at: 1.month.ago + 1.hour)
+    assert booking.payment_overdue?
+  end
+
+  test "payment_overdue? is false when paid, recent, upcoming or not confirmed" do
+    ended_long_ago = { starts_at: 1.month.ago, ends_at: 1.month.ago + 1.hour }
+    assert_not Booking.new(status: :confirmed, paid: true, **ended_long_ago).payment_overdue?
+    assert_not Booking.new(status: :pending, paid: false, **ended_long_ago).payment_overdue?
+    assert_not Booking.new(status: :confirmed, paid: false, starts_at: 2.days.ago, ends_at: 2.days.ago + 1.hour).payment_overdue?
+    assert_not Booking.new(status: :confirmed, paid: false, starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour).payment_overdue?
+  end
 end

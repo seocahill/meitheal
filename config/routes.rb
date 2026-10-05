@@ -102,7 +102,7 @@ Rails.application.routes.draw do
     end
     resources :memberships do
       member do
-        post :mark_as_paid
+        patch :toggle_paid
       end
       resources :payments, only: [ :create, :destroy ]
     end

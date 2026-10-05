@@ -104,4 +104,108 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     patch toggle_paid_admin_booking_path(booking)
     assert_redirected_to root_path
   end
+
+  # Payment follow-up
+  def create_booking(title:, starts_at:, paid: false, status: :confirmed, user: @viewer, space: @space)
+    Booking.create!(
+      space: space, user: user, title: title,
+      starts_at: starts_at, ends_at: starts_at + 1.hour,
+      status: status, paid: paid,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+  end
+
+  test "unpaid filter includes confirmed bookings that already happened" do
+    sign_in_as(@editor)
+    create_booking(title: "Happened Last Month", starts_at: 1.month.ago, user: users(:owner))
+    create_booking(title: "Coming Up Unpaid", starts_at: 1.week.from_now)
+    create_booking(title: "Settled Booking", starts_at: 1.week.from_now, paid: true, user: @editor)
+
+    get admin_bookings_path(paid: "unpaid")
+    assert_includes response.body, "Happened Last Month"
+    assert_includes response.body, "Coming Up Unpaid"
+    assert_not_includes response.body, "Settled Booking"
+  end
+
+  test "unpaid bookings are listed oldest first so the longest outstanding is on top" do
+    sign_in_as(@editor)
+    create_booking(title: "Newer Unpaid", starts_at: 2.days.ago, user: users(:owner))
+    create_booking(title: "Older Unpaid", starts_at: 10.days.ago)
+
+    get admin_bookings_path(paid: "unpaid")
+    assert_operator response.body.index("Older Unpaid"), :<, response.body.index("Newer Unpaid")
+  end
+
+  test "overdue filter shows only unpaid bookings that ended more than two weeks ago" do
+    sign_in_as(@editor)
+    create_booking(title: "Long Overdue", starts_at: 1.month.ago, user: users(:owner))
+    create_booking(title: "Recently Happened", starts_at: 3.days.ago)
+
+    get admin_bookings_path(overdue: "1")
+    assert_includes response.body, "Long Overdue"
+    assert_not_includes response.body, "Recently Happened"
+  end
+
+  test "when=past shows only bookings that have already started" do
+    sign_in_as(@editor)
+    create_booking(title: "Past One", starts_at: 1.week.ago, paid: true)
+    create_booking(title: "Future One", starts_at: 1.week.from_now, paid: true)
+
+    get admin_bookings_path(when: "past")
+    assert_includes response.body, "Past One"
+    assert_not_includes response.body, "Future One"
+  end
+
+  test "when=all shows past and future bookings" do
+    sign_in_as(@editor)
+    create_booking(title: "Past One", starts_at: 1.week.ago, paid: true)
+    create_booking(title: "Future One", starts_at: 1.week.from_now, paid: true)
+
+    get admin_bookings_path(when: "all")
+    assert_includes response.body, "Past One"
+    assert_includes response.body, "Future One"
+  end
+
+  test "space filter narrows the list" do
+    sign_in_as(@editor)
+    create_booking(title: "Front Room Gig", starts_at: 1.week.from_now, space: spaces(:front_room))
+    create_booking(title: "Back Room Gig", starts_at: 1.week.from_now, space: spaces(:back_room), user: @editor)
+
+    get admin_bookings_path(space_id: spaces(:back_room).id)
+    assert_includes response.body, "Back Room Gig"
+    assert_not_includes response.body, "Front Room Gig"
+  end
+
+  test "search matches booking title and booker email" do
+    sign_in_as(@editor)
+    create_booking(title: "Acoustic Night", starts_at: 1.week.from_now)
+    create_booking(title: "Film Screening", starts_at: 2.weeks.from_now, user: @editor)
+
+    get admin_bookings_path(q: "acoustic")
+    assert_includes response.body, "Acoustic Night"
+    assert_not_includes response.body, "Film Screening"
+
+    get admin_bookings_path(q: @editor.email_address)
+    assert_includes response.body, "Film Screening"
+    assert_not_includes response.body, "Acoustic Night"
+  end
+
+  test "filter tabs show how many bookings are unpaid and overdue" do
+    sign_in_as(@editor)
+    create_booking(title: "Overdue One", starts_at: 1.month.ago, user: users(:owner))
+    create_booking(title: "Unpaid Two", starts_at: 1.week.from_now)
+
+    get admin_bookings_path
+    assert_select "a[data-count=unpaid]", text: /#{Booking.confirmed.unpaid.count}/
+    assert_select "a[data-count=overdue]", text: /#{Booking.confirmed.unpaid.overdue.count}/
+  end
+
+  test "toggling paid returns to the same filtered list" do
+    sign_in_as(@editor)
+    booking = create_booking(title: "Chase Me", starts_at: 1.month.ago)
+
+    patch toggle_paid_admin_booking_path(booking), params: { paid: "unpaid", space_id: @space.id }
+    assert_redirected_to admin_bookings_path(paid: "unpaid", space_id: @space.id)
+    assert booking.reload.paid?
+  end
 end
