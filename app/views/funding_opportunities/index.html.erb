@@ -13,11 +13,6 @@
           <div class="flex-1">
             <% days_left = (opportunity.deadline - Date.current).to_i %>
             <div class="flex items-center gap-2 mb-3">
-              <% unless opportunity.approved? %>
-                <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-700">
-                  <%= t("pending_approval") %>
-                </span>
-              <% end %>
               <% if days_left < 0 %>
                 <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
                   <%= t("expired") %> <%= opportunity.deadline.strftime("%d %b %Y") %>

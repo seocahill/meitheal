@@ -4,11 +4,7 @@ class FundingOpportunitiesController < ApplicationController
   before_action :require_editable, only: [ :edit, :update, :destroy ]
 
   def index
-    @funding_opportunities = if authenticated?
-      FundingOpportunity.approved_or_owned_by(Current.user)
-    else
-      FundingOpportunity.approved
-    end
+    @funding_opportunities = FundingOpportunity.all
 
     if params[:category].present?
       @funding_opportunities = @funding_opportunities.by_category(params[:category])
@@ -24,10 +20,6 @@ class FundingOpportunitiesController < ApplicationController
 
   def show
     resume_session
-    unless @funding_opportunity.approved? || @funding_opportunity.created_by == Current.user || current_user_can_edit?
-      redirect_to funding_opportunities_path, alert: "That opportunity is not available."
-      return
-    end
 
     if authenticated?
       @approved_proposals = @funding_opportunity.proposals.approved.includes(:user)
@@ -41,17 +33,8 @@ class FundingOpportunitiesController < ApplicationController
   def create
     @funding_opportunity = FundingOpportunity.new(funding_opportunity_params)
     @funding_opportunity.created_by = Current.user
-    @funding_opportunity.approved = Current.user.can_edit?
     if @funding_opportunity.save
-      unless @funding_opportunity.approved?
-        AdminMailer.new_funding_opportunity_pending_approval(@funding_opportunity).deliver_later
-      end
-      notice = if @funding_opportunity.approved?
-        "Funding opportunity created."
-      else
-        "Funding opportunity submitted for approval."
-      end
-      redirect_to @funding_opportunity, notice: notice
+      redirect_to @funding_opportunity, notice: "Funding opportunity created."
     else
       render :new, status: :unprocessable_entity
     end

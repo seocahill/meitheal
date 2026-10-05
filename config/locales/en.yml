@@ -49,7 +49,6 @@ en:
   payments: "Payments"
   ticket_sales: "Ticket Sales"
   proposals: "Proposals"
-  funding_opps: "Funding Opps"
 
   # Home page
   upcoming: "Upcoming"
@@ -120,7 +119,6 @@ en:
   draft_for_discussion: "draft: for discussion"
 
   # Funding
-  pending_approval: "Pending approval"
   expired: "Expired"
   days_left: "days left"
   due: "Due"

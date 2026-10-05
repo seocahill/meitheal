@@ -3,12 +3,6 @@
     <%= link_to "← Back to all opportunities", funding_opportunities_path, class: "text-pink-600 hover:text-pink-800" %>
   </div>
 
-  <% unless @funding_opportunity.approved? %>
-    <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 px-4 py-3 rounded-r-lg mb-6">
-      This funding opportunity is pending approval and is not visible to other members.
-    </div>
-  <% end %>
-
   <div class="bg-white rounded-lg shadow p-6">
     <div class="flex justify-between items-start mb-4">
       <div>

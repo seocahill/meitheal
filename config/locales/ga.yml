@@ -49,7 +49,6 @@ ga:
   payments: "Íocaíochtaí"
   ticket_sales: "Díolacháin Ticéad"
   proposals: "Tograí"
-  funding_opps: "Deiseanna Maoinithe"
 
   # Home page
   upcoming: "Ag teacht aníos"
@@ -120,7 +119,6 @@ ga:
   draft_for_discussion: "dréacht: le plé"
 
   # Funding
-  pending_approval: "Ag feitheamh le ceadú"
   expired: "Caite"
   days_left: "lá fágtha"
   due: "Sprioc"

@@ -118,14 +118,6 @@ Rails.application.routes.draw do
         post :reject
       end
     end
-    resources :funding_opportunities, only: [ :index ] do
-      collection do
-        post :refresh
-      end
-      member do
-        post :approve
-      end
-    end
   end
 
   # Redirect old /pages/:slug URLs
