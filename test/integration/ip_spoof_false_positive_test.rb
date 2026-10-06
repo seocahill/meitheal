@@ -14,7 +14,7 @@ class IpSpoofFalsePositiveTest < ActiveSupport::TestCase
   def middleware_stack
     inner = lambda { |env|
       ip = ActionDispatch::Request.new(env).remote_ip.to_s
-      [200, {}, [ip]]
+      [ 200, {}, [ ip ] ]
     }
     StripTrustedProxyClientIp.new(ActionDispatch::RemoteIp.new(inner))
   end
