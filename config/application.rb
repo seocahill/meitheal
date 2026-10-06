@@ -6,6 +6,8 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require_relative "../app/middleware/strip_trusted_proxy_client_ip"
+
 module Meitheal
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
@@ -29,5 +31,7 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    config.middleware.insert_before ActionDispatch::RemoteIp, StripTrustedProxyClientIp
   end
 end
