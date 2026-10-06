@@ -1,4 +1,4 @@
-<% filters = { q: params[:q], status: params[:status], type: params[:type] }.compact_blank %>
+<% filters = { q: params[:q], status: params[:status], type: params[:type] }.merge(@date_filter.to_params).compact_blank %>
 <% status_tabs = [
   [ nil, "All", :all, "bg-gray-800 text-white border-gray-800" ],
   [ "paid", "Paid", :paid, "bg-green-600 text-white border-green-600" ],
@@ -29,6 +29,7 @@
           <% if params[:type].present? %>
             <input type="hidden" name="type" value="<%= params[:type] %>">
           <% end %>
+          <%= hidden_filter_fields(:period, :from, :to) %>
           <button type="submit" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"></path>
@@ -61,6 +62,18 @@
     <% end %>
   </div>
 
+  <!-- Paid until -->
+  <%= form_with url: admin_memberships_path, method: :get, class: "mb-4" do %>
+    <%= hidden_filter_fields(:q, :status, :type) %>
+    <div class="flex flex-wrap items-end gap-3">
+      <%= render "admin/shared/date_range_filter", filter: @date_filter, label: "Paid until" %>
+      <%= submit_tag "Apply", name: nil, class: "bg-gray-800 text-white px-4 py-2 rounded-lg text-sm cursor-pointer" %>
+      <% if @date_filter.active? %>
+        <%= link_to "Clear dates", list_path(period: nil, from: nil, to: nil), class: "text-sm text-gray-500 hover:text-gray-700 py-2" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="bg-white rounded-lg shadow overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
@@ -87,16 +100,7 @@
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <% case status %>
-              <% when :paid %>
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
-              <% when :lapsed %>
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Lapsed</span>
-              <% when :unpaid %>
-                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-100 text-rose-800">Unpaid</span>
-              <% else %>
-                <span class="text-xs text-gray-400">No fee</span>
-              <% end %>
+              <%= payment_status_badge(membership) %>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <%= membership.expires_on&.strftime("%d %b %Y") || "—" %>
@@ -110,11 +114,11 @@
                 <%= link_to "View", admin_membership_path(membership), class: "text-pink-600 hover:text-pink-900" %>
                 <%= link_to "Edit", edit_admin_membership_path(membership), class: "text-gray-600 hover:text-gray-900" %>
                 <% if status == :paid %>
-                  <%= button_to "Mark unpaid", toggle_paid_admin_membership_path(membership, filters.merge(page: @page)),
+                  <%= button_to "Mark unpaid", toggle_paid_admin_membership_path(membership, filters.merge(page: params[:page])),
                         method: :patch, form: { class: "inline", data: { turbo_confirm: "Mark this membership unpaid? Use this to correct a mistake. The payment record is kept." } },
                         class: "text-amber-700 hover:text-amber-900" %>
                 <% elsif status != :no_fee %>
-                  <%= form_with url: toggle_paid_admin_membership_path(membership, filters.merge(page: @page)), method: :patch, class: "inline-flex items-center gap-1" do |f| %>
+                  <%= form_with url: toggle_paid_admin_membership_path(membership, filters.merge(page: params[:page])), method: :patch, class: "inline-flex items-center gap-1" do |f| %>
                     <%= select_tag :payment_method,
                           options_for_select([ [ "Cash", "cash" ], [ "Bank transfer", "bank_transfer" ], [ "Other", "other" ] ]),
                           id: "payment_method_#{membership.id}",
@@ -136,19 +140,8 @@
     </table>
   </div>
 
-  <% if @page > 1 || @has_more %>
-    <div class="mt-4 flex items-center justify-between text-sm text-gray-600">
-      <div>Page <%= @page %></div>
-      <div class="flex gap-2">
-        <% if @page > 1 %>
-          <%= link_to "Previous", admin_memberships_path(filters.merge(page: @page - 1)),
-                class: "px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50" %>
-        <% end %>
-        <% if @has_more %>
-          <%= link_to "Next", admin_memberships_path(filters.merge(page: @page + 1)),
-                class: "px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50" %>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
+  <!-- Pagination -->
+  <nav class="mt-8 text-center text-sm">
+    <%== @pagy.series_nav %>
+  </nav>
 </div>

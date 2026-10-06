@@ -208,4 +208,83 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_bookings_path(paid: "unpaid", space_id: @space.id)
     assert booking.reload.paid?
   end
+
+  # Date filters
+  test "date range lists bookings from the past and the future that start inside it" do
+    sign_in_as(@editor)
+    create_booking(title: "March Opening", starts_at: Time.zone.local(2026, 3, 1, 0, 30), paid: true)
+    create_booking(title: "March Closing", starts_at: Time.zone.local(2026, 3, 31, 23, 0), paid: true)
+    create_booking(title: "February Last", starts_at: Time.zone.local(2026, 2, 28, 23, 0), paid: true)
+    create_booking(title: "April First", starts_at: Time.zone.local(2026, 4, 1, 0, 0), paid: true)
+
+    get admin_bookings_path(from: "2026-03-01", to: "2026-03-31")
+
+    assert_includes response.body, "March Opening"
+    assert_includes response.body, "March Closing"
+    assert_not_includes response.body, "February Last"
+    assert_not_includes response.body, "April First"
+  end
+
+  test "date range with only a from date" do
+    sign_in_as(@editor)
+    create_booking(title: "Long Ago", starts_at: Time.zone.local(2024, 1, 10, 12), paid: true)
+    create_booking(title: "Recent Past", starts_at: 1.week.ago, paid: true)
+
+    get admin_bookings_path(from: 1.month.ago.to_date.iso8601)
+
+    assert_includes response.body, "Recent Past"
+    assert_not_includes response.body, "Long Ago"
+  end
+
+  test "date range with only a to date" do
+    sign_in_as(@editor)
+    create_booking(title: "Long Ago", starts_at: Time.zone.local(2024, 1, 10, 12), paid: true)
+    create_booking(title: "Next Week", starts_at: 1.week.from_now, paid: true)
+
+    get admin_bookings_path(to: Date.new(2025, 1, 1).iso8601)
+
+    assert_includes response.body, "Long Ago"
+    assert_not_includes response.body, "Next Week"
+  end
+
+  test "period preset filters by when bookings start" do
+    sign_in_as(@editor)
+    create_booking(title: "Two Years Back", starts_at: 2.years.ago, paid: true)
+    create_booking(title: "Earlier This Year", starts_at: Date.current.beginning_of_year.in_time_zone + 10.hours, paid: true)
+
+    get admin_bookings_path(period: "this_year")
+
+    assert_includes response.body, "Earlier This Year"
+    assert_not_includes response.body, "Two Years Back"
+  end
+
+  test "date range combines with the payment filter" do
+    sign_in_as(@editor)
+    create_booking(title: "March Unpaid", starts_at: Time.zone.local(2026, 3, 10, 12), paid: false, user: users(:owner))
+    create_booking(title: "March Paid", starts_at: Time.zone.local(2026, 3, 11, 12), paid: true)
+    create_booking(title: "May Unpaid", starts_at: Time.zone.local(2026, 5, 10, 12), paid: false, user: @editor)
+
+    get admin_bookings_path(paid: "unpaid", from: "2026-03-01", to: "2026-03-31")
+
+    assert_includes response.body, "March Unpaid"
+    assert_not_includes response.body, "March Paid"
+    assert_not_includes response.body, "May Unpaid"
+  end
+
+  test "tabs and the search form keep the date range" do
+    sign_in_as(@editor)
+    get admin_bookings_path(from: "2026-03-01", to: "2026-03-31", q: "x")
+
+    assert_select "a[href*='paid=unpaid'][href*='from=2026-03-01'][href*='to=2026-03-31']"
+    assert_select "form input[type=date][name=from][value='2026-03-01']"
+    assert_select "form input[type=date][name=to][value='2026-03-31']"
+  end
+
+  test "toggling paid returns to the same date range" do
+    sign_in_as(@editor)
+    booking = create_booking(title: "Chase Me", starts_at: Time.zone.local(2026, 3, 10, 12))
+
+    patch toggle_paid_admin_booking_path(booking), params: { from: "2026-03-01", to: "2026-03-31", period: "" }
+    assert_redirected_to admin_bookings_path(from: "2026-03-01", to: "2026-03-31")
+  end
 end

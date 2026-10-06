@@ -124,3 +124,9 @@ en:
   due: "Due"
   no_funding: "No funding opportunities yet."
   check_back_soon: "Check back soon for new opportunities."
+
+  # Names shown in validation messages
+  activerecord:
+    attributes:
+      payment:
+        amount_cents: "Amount"

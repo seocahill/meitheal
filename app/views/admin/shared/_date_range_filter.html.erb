@@ -1,0 +1,20 @@
+<%# Date filter for an admin list: quick periods plus a from and to date. Takes `filter` (a DateRangeFilter) and `label`. %>
+<div class="flex flex-wrap items-end gap-3" data-date-range-filter>
+  <div>
+    <span class="block text-xs font-medium text-gray-500 mb-1"><%= label %></span>
+    <div class="flex flex-wrap gap-1">
+      <% DateRangeFilter::PRESETS.each do |key, name| %>
+        <%= link_to name, list_path(period: key, from: nil, to: nil),
+              class: "px-3 py-2 rounded-lg text-sm border #{filter.preset == key ? 'bg-gray-800 text-white border-gray-800' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}" %>
+      <% end %>
+    </div>
+  </div>
+  <div>
+    <label for="from" class="block text-xs font-medium text-gray-500 mb-1">From</label>
+    <%= date_field_tag :from, filter.preset ? nil : list_filters["from"], class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+  </div>
+  <div>
+    <label for="to" class="block text-xs font-medium text-gray-500 mb-1">To</label>
+    <%= date_field_tag :to, filter.preset ? nil : list_filters["to"], class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
+  </div>
+</div>

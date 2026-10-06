@@ -1,8 +1,11 @@
 class Admin::MembershipsController < Admin::BaseController
-  before_action :require_owner
+  include Pagy::Method
+
+  # Editors look after fees day to day. Changing what a membership is stays with owners.
+  before_action :require_editor, only: [ :index, :show, :toggle_paid ]
+  before_action :require_owner, except: [ :index, :show, :toggle_paid ]
   before_action :set_membership, only: [ :show, :edit, :update, :destroy, :toggle_paid ]
 
-  PER_PAGE = 10
   OFFLINE_PAYMENT_METHODS = %w[cash bank_transfer other].freeze
 
   def index
@@ -35,10 +38,10 @@ class Admin::MembershipsController < Admin::BaseController
       scope = scope.where(membership_type: params[:type])
     end
 
-    @page = [ (params[:page] || 1).to_i, 1 ].max
-    offset = (@page - 1) * PER_PAGE
-    @memberships = scope.offset(offset).limit(PER_PAGE)
-    @has_more = scope.count > offset + PER_PAGE
+    @date_filter = DateRangeFilter.new(params)
+    scope = scope.where(expires_on: @date_filter.range) if @date_filter.active?
+
+    @pagy, @memberships = pagy(scope, limit: 20)
   end
 
   def show
@@ -84,7 +87,7 @@ class Admin::MembershipsController < Admin::BaseController
       redirect_to admin_memberships_path(list_filters), alert: "Associate memberships have no fee."
     elsif @membership.payment_status == :paid
       @membership.mark_unpaid!
-      redirect_to admin_memberships_path(list_filters), notice: "#{member_label} marked unpaid."
+      redirect_to admin_memberships_path(list_filters), notice: "#{@membership.payer_name} marked unpaid."
     else
       method = params.fetch(:payment_method, "cash")
       unless OFFLINE_PAYMENT_METHODS.include?(method)
@@ -92,7 +95,7 @@ class Admin::MembershipsController < Admin::BaseController
       end
 
       @membership.record_payment!(payment_method: method)
-      redirect_to admin_memberships_path(list_filters), notice: "#{member_label} marked paid until #{@membership.expires_on.strftime('%d %b %Y')}."
+      redirect_to admin_memberships_path(list_filters), notice: "#{@membership.payer_name} marked paid until #{@membership.expires_on.strftime('%d %b %Y')}."
     end
   end
 
@@ -100,11 +103,7 @@ class Admin::MembershipsController < Admin::BaseController
 
   # Keep the current search, filters and page when returning to the list.
   def list_filters
-    params.permit(:status, :type, :q, :page).to_h.compact_blank
-  end
-
-  def member_label
-    @membership.user.name.presence || @membership.user.email_address
+    params.permit(:status, :type, :q, :period, :from, :to, :page).to_h.compact_blank
   end
 
   def set_membership

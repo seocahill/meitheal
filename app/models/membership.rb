@@ -43,23 +43,35 @@ class Membership < ApplicationRecord
     ((paid_until || Date.current) + 1.day).end_of_year
   end
 
+  # Name to put on a payment: the member's profile name, else their email address.
+  def payer_name
+    user.profile&.name.presence || user.email_address
+  end
+
+  # Renews a fee-paying membership to the end of the calendar year.
+  def renew!
+    update!(expires_on: renewal_expiry) unless associate?
+  end
+
   # Records an offline payment (cash, bank transfer, ...) and renews the
-  # membership to the end of the calendar year.
-  def record_payment!(payment_method:)
+  # membership to the end of the calendar year. paid_on is the day the money
+  # arrived, which can be earlier than today; the renewal always runs from today.
+  def record_payment!(payment_method:, paid_on: Date.current, notes: nil)
     raise ArgumentError, "associate memberships have no fee" if associate?
 
     transaction do
       payments.create!(
         amount_cents: FEE_CENTS.fetch(membership_type.to_sym),
-        paid_on: Date.current,
+        paid_on: paid_on,
         payment_method: payment_method,
         purpose: :membership,
         status: :completed,
         user_email: user.email_address,
-        user_name: user.profile&.name.presence || user.email_address,
-        description: "NCF #{membership_type.humanize} Membership"
+        user_name: payer_name,
+        description: "NCF #{membership_type.humanize} Membership",
+        notes: notes
       )
-      update!(expires_on: renewal_expiry)
+      renew!
     end
   end
 

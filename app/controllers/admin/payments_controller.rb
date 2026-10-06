@@ -1,30 +1,41 @@
 class Admin::PaymentsController < Admin::BaseController
   include Pagy::Method
-  before_action :require_owner
+  before_action :require_editor, only: [ :index, :create ]
+  before_action :require_owner, only: [ :destroy ]
   before_action :set_membership, except: [ :index ]
 
   def index
-    scope = Payment.includes(:membership).order(paid_on: :desc, created_at: :desc)
+    @date_filter = DateRangeFilter.new(params)
+    range = @date_filter.range
 
-    # Apply filters
-    scope = scope.by_payment_method(params[:payment_method])
-    scope = scope.by_date_range(params[:start_date], params[:end_date])
-    scope = scope.search(params[:search])
+    scope = Payment.by_payment_method(known(:payment_method, Payment.payment_methods))
+                   .by_purpose(known(:purpose, Payment.purposes))
+                   .by_status(known(:status, Payment.statuses))
+                   .by_date_range(range&.begin, range&.end)
+                   .search(params[:search])
 
-    @pagy, @payments = pagy(scope, items: 20)
+    return send_csv(scope, range) if request.format.csv?
+
+    completed = scope.completed
+    @total_cents = completed.sum(:amount_cents)
+    @completed_count = completed.count
+    @method_totals_cents = completed.group(:payment_method).sum(:amount_cents)
+
+    @pagy, @payments = pagy(scope.includes(membership: { user: :profile }).order(paid_on: :desc, created_at: :desc), limit: 20)
   end
 
   def create
-    user = @membership.user
     @payment = @membership.payments.build(payment_params)
-    @payment.user_email = user.email_address
-    @payment.user_name = user.name
+    @payment.user_email = @membership.user.email_address
+    @payment.user_name = @membership.payer_name
 
-    if @payment.save
-      redirect_to admin_membership_path(@membership), notice: "Payment recorded."
-    else
-      redirect_to admin_membership_path(@membership), alert: "Could not record payment."
+    Payment.transaction do
+      @payment.save!
+      @membership.renew! if @payment.membership? && @payment.completed?
     end
+    redirect_to admin_membership_path(@membership), notice: "Payment recorded."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to admin_membership_path(@membership), alert: "Could not record payment: #{@payment.errors.full_messages.to_sentence}."
   end
 
   def destroy
@@ -35,11 +46,23 @@ class Admin::PaymentsController < Admin::BaseController
 
   private
 
+  # Every payment matching the filters, oldest first, named for the dates they cover.
+  def send_csv(scope, range)
+    name = [ "payments", range&.begin && "from-#{range.begin}", range&.end && "to-#{range.end}" ]
+    name << Date.current if range.nil?
+    send_data PaymentCsv.new(scope.order(:paid_on, :id)).to_s, type: "text/csv", filename: "#{name.compact.join('-')}.csv"
+  end
+
+  # The param's value when it names one of the enum's values, otherwise nil.
+  def known(key, values)
+    params[key].presence_in(values.keys)
+  end
+
   def set_membership
     @membership = Membership.find(params[:membership_id])
   end
 
   def payment_params
-    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :purpose, :description, :notes)
+    params.require(:payment).permit(:amount_euro, :paid_on, :payment_method, :purpose, :description, :notes)
   end
 end
