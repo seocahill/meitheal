@@ -35,4 +35,11 @@ class Payment < ApplicationRecord
   def amount_euro
     amount_cents / 100.0
   end
+
+  # Sets the amount from euros as typed, e.g. "12.50". Anything that is not a number leaves it blank.
+  def amount_euro=(euros)
+    self.amount_cents = (BigDecimal(euros.to_s) * 100).round
+  rescue ArgumentError
+    self.amount_cents = nil
+  end
 end

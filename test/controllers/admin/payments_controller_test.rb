@@ -39,9 +39,83 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@editor)
     assert_difference "@membership.payments.count" do
       post admin_membership_payments_path(@membership), params: {
-        payment: { amount_cents: 2000, paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Fee" }
+        payment: { amount_euro: "20", paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Fee" }
       }
     end
+  end
+
+  test "an amount in euros is stored in cents" do
+    sign_in_as(@owner)
+    post admin_membership_payments_path(@membership), params: {
+      payment: { amount_euro: "12.50", paid_on: Date.current, payment_method: "cash", purpose: "donation", description: "Donation" }
+    }
+    assert_equal 1250, @membership.payments.order(:id).last.amount_cents
+  end
+
+  test "recording a membership payment renews an unpaid membership" do
+    unpaid = Membership.create!(user: @viewer, membership_type: :full, starts_on: Date.current)
+    sign_in_as(@owner)
+
+    post admin_membership_payments_path(unpaid), params: {
+      payment: { amount_euro: "20", paid_on: Date.current, payment_method: "bank_transfer", purpose: "membership", description: "Annual fee" }
+    }
+
+    assert_equal :paid, unpaid.reload.payment_status
+    assert_equal Date.current.end_of_year, unpaid.expires_on
+  end
+
+  test "a payment for something other than the membership fee does not renew it" do
+    unpaid = Membership.create!(user: @viewer, membership_type: :full, starts_on: Date.current)
+    sign_in_as(@owner)
+
+    post admin_membership_payments_path(unpaid), params: {
+      payment: { amount_euro: "30", paid_on: Date.current, payment_method: "cash", purpose: "booking", description: "Hire" }
+    }
+
+    assert_equal :unpaid, unpaid.reload.payment_status
+  end
+
+  test "a membership payment on an associate membership does not give it an expiry" do
+    associate = Membership.create!(user: @viewer, membership_type: :associate, starts_on: Date.current)
+    sign_in_as(@owner)
+
+    post admin_membership_payments_path(associate), params: {
+      payment: { amount_euro: "5", paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Gift" }
+    }
+
+    assert_nil associate.reload.expires_on
+  end
+
+  test "a backdated payment keeps its date" do
+    sign_in_as(@owner)
+    post admin_membership_payments_path(@membership), params: {
+      payment: { amount_euro: "20", paid_on: 5.days.ago.to_date, payment_method: "bank_transfer", purpose: "membership", description: "Fee" }
+    }
+    assert_equal 5.days.ago.to_date, @membership.payments.order(:id).last.paid_on
+  end
+
+  test "payments are recorded for members who have no approved account name" do
+    unapproved = User.create!(email_address: "new@example.com", password: "password", approved: false)
+    membership = Membership.create!(user: unapproved, membership_type: :full, starts_on: Date.current)
+    sign_in_as(@owner)
+
+    assert_difference "membership.payments.count" do
+      post admin_membership_payments_path(membership), params: {
+        payment: { amount_euro: "20", paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Fee" }
+      }
+    end
+    assert_equal "new@example.com", membership.payments.last.user_name
+  end
+
+  test "a payment that cannot be recorded says why" do
+    sign_in_as(@owner)
+    assert_no_difference "Payment.count" do
+      post admin_membership_payments_path(@membership), params: {
+        payment: { amount_euro: "0", paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Fee" }
+      }
+    end
+    assert_redirected_to admin_membership_path(@membership)
+    assert_match(/amount/i, flash[:alert])
   end
 
   test "only owners can delete a payment" do

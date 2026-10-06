@@ -254,9 +254,10 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     assert_difference "Payment.count" do
       post admin_membership_payments_path(@membership), params: {
         payment: {
-          amount_cents: 2000,
+          amount_euro: "20",
           paid_on: Date.current,
           payment_method: "cash",
+          purpose: "membership",
           description: "Annual membership fee"
         }
       }
@@ -348,5 +349,47 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
 
     patch toggle_paid_admin_membership_path(unpaid), params: { payment_method: "cash", from: "2040-12-01", period: "" }
     assert_redirected_to admin_memberships_path(from: "2040-12-01")
+  end
+
+  # Show page
+  test "show says a membership with no payment is unpaid, not active" do
+    sign_in_as(@owner)
+    unpaid = Membership.create!(user: @viewer, membership_type: :full, starts_on: Date.current)
+    get admin_membership_path(unpaid)
+
+    assert_select "[data-payment-status]", text: /Unpaid/
+    assert_select "dd", text: "Never", count: 0
+    assert_select "dd", text: /Active/, count: 0
+  end
+
+  test "show says when a lapsed membership ran out and a paid one is paid until" do
+    sign_in_as(@owner)
+    get admin_membership_path(memberships(:expired_membership))
+    assert_select "[data-payment-status]", text: /Lapsed/
+
+    get admin_membership_path(@membership)
+    assert_select "[data-payment-status]", text: /Paid/
+    assert_select "dt", text: "Paid until"
+  end
+
+  test "show says an associate has no fee" do
+    sign_in_as(@owner)
+    associate = Membership.create!(user: @viewer, membership_type: :associate, starts_on: Date.current)
+    get admin_membership_path(associate)
+    assert_select "[data-payment-status]", text: /No fee/
+  end
+
+  test "record payment form takes euros and starts at the fee for the membership type" do
+    sign_in_as(@owner)
+    get admin_membership_path(@membership)
+
+    assert_select "input[name='payment[amount_euro]'][value='20.00']"
+    assert_select "input[name='payment[amount_cents]']", count: 0
+  end
+
+  test "show lists payments with the member's name" do
+    sign_in_as(@owner)
+    get admin_membership_path(@membership)
+    assert_includes response.body, "Admin User"
   end
 end

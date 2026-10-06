@@ -195,4 +195,34 @@ class MembershipTest < ActiveSupport::TestCase
     assert_equal :unpaid, membership.payment_status
     assert_equal 1, membership.payments.count
   end
+
+  test "renew! moves a fee-paying membership to the end of the calendar year" do
+    membership = membership_with(type: :full, expires_on: nil)
+    membership.renew!
+    assert_equal Date.current.end_of_year, membership.reload.expires_on
+  end
+
+  test "renew! leaves an associate membership alone" do
+    membership = membership_with(type: :associate, expires_on: nil)
+    membership.renew!
+    assert_nil membership.reload.expires_on
+  end
+
+  test "payer_name is the profile name, then the email address" do
+    membership = memberships(:active_membership)
+    assert_equal "Admin User", membership.payer_name
+
+    membership.user.profile.destroy
+    assert_equal membership.user.email_address, membership.reload.payer_name
+  end
+
+  test "record_payment! keeps the date the money arrived and a reference, and still renews from today" do
+    membership = membership_with(type: :full, expires_on: nil)
+    membership.record_payment!(payment_method: :bank_transfer, paid_on: 3.days.ago.to_date, notes: "REF 123")
+
+    payment = membership.payments.last
+    assert_equal 3.days.ago.to_date, payment.paid_on
+    assert_equal "REF 123", payment.notes
+    assert_equal Date.current.end_of_year, membership.reload.expires_on
+  end
 end

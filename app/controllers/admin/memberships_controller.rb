@@ -87,7 +87,7 @@ class Admin::MembershipsController < Admin::BaseController
       redirect_to admin_memberships_path(list_filters), alert: "Associate memberships have no fee."
     elsif @membership.payment_status == :paid
       @membership.mark_unpaid!
-      redirect_to admin_memberships_path(list_filters), notice: "#{member_label} marked unpaid."
+      redirect_to admin_memberships_path(list_filters), notice: "#{@membership.payer_name} marked unpaid."
     else
       method = params.fetch(:payment_method, "cash")
       unless OFFLINE_PAYMENT_METHODS.include?(method)
@@ -95,7 +95,7 @@ class Admin::MembershipsController < Admin::BaseController
       end
 
       @membership.record_payment!(payment_method: method)
-      redirect_to admin_memberships_path(list_filters), notice: "#{member_label} marked paid until #{@membership.expires_on.strftime('%d %b %Y')}."
+      redirect_to admin_memberships_path(list_filters), notice: "#{@membership.payer_name} marked paid until #{@membership.expires_on.strftime('%d %b %Y')}."
     end
   end
 
@@ -104,10 +104,6 @@ class Admin::MembershipsController < Admin::BaseController
   # Keep the current search, filters and page when returning to the list.
   def list_filters
     params.permit(:status, :type, :q, :period, :from, :to, :page).to_h.compact_blank
-  end
-
-  def member_label
-    @membership.user.name.presence || @membership.user.email_address
   end
 
   def set_membership

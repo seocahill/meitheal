@@ -11,7 +11,8 @@
     <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
         <dt class="text-sm font-medium text-gray-500">Member</dt>
-        <dd class="mt-1 text-lg text-gray-900"><%= @membership.user.email_address %></dd>
+        <dd class="mt-1 text-lg text-gray-900"><%= @membership.payer_name %></dd>
+        <dd class="text-sm text-gray-500"><%= @membership.user.email_address %></dd>
       </div>
       <div>
         <dt class="text-sm font-medium text-gray-500">Type</dt>
@@ -26,18 +27,12 @@
         <dd class="mt-1 text-lg text-gray-900"><%= @membership.starts_on.strftime("%d %b %Y") %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Expires</dt>
-        <dd class="mt-1 text-lg text-gray-900"><%= @membership.expires_on&.strftime("%d %b %Y") || "Never" %></dd>
+        <dt class="text-sm font-medium text-gray-500">Paid until</dt>
+        <dd class="mt-1 text-lg text-gray-900"><%= @membership.expires_on&.strftime("%d %b %Y") || "—" %></dd>
       </div>
       <div>
-        <dt class="text-sm font-medium text-gray-500">Status</dt>
-        <dd class="mt-1">
-          <% if @membership.expired? %>
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Expired</span>
-          <% else %>
-            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-          <% end %>
-        </dd>
+        <dt class="text-sm font-medium text-gray-500">Payment</dt>
+        <dd class="mt-1"><%= payment_status_badge(@membership) %></dd>
       </div>
       <% if @membership.notes.present? %>
         <div class="md:col-span-2">
@@ -50,7 +45,8 @@
 
   <!-- Payments Section -->
   <div class="bg-white rounded-lg shadow p-6">
-    <h2 class="text-xl font-bold mb-4">Payment History</h2>
+    <h2 class="text-xl font-bold mb-1">Payment History</h2>
+    <p class="text-sm text-gray-500 mb-4">Deleting a payment removes the record only. It does not change the paid until date.</p>
 
     <% if @membership.payments.any? %>
       <table class="min-w-full divide-y divide-gray-200 mb-6">
@@ -84,12 +80,14 @@
     <% end %>
 
     <!-- Add Payment Form -->
-    <h3 class="text-lg font-medium mb-3">Record Payment</h3>
+    <% fee_cents = Membership::FEE_CENTS[@membership.membership_type.to_sym] %>
+    <h3 class="text-lg font-medium mb-1">Record Payment</h3>
+    <p class="text-sm text-gray-500 mb-3">A payment for the membership fee renews the membership to the end of the year. Use the date the money arrived. Put a bank reference in Notes.</p>
     <%= form_with model: Payment.new, url: admin_membership_payments_path(@membership), class: "space-y-4" do |form| %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <%= form.label :amount_cents, "Amount (cents)", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.number_field :amount_cents, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500", placeholder: "2000" %>
+          <%= form.label :amount_euro, "Amount (€)", class: "block text-sm font-medium text-gray-700" %>
+          <%= form.number_field :amount_euro, required: true, step: "0.01", min: "0.01", value: fee_cents && number_with_precision(fee_cents / 100.0, precision: 2), class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500", placeholder: "20.00" %>
         </div>
         <div>
           <%= form.label :paid_on, "Date", class: "block text-sm font-medium text-gray-700" %>
@@ -103,7 +101,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
           <%= form.label :purpose, "Purpose", class: "block text-sm font-medium text-gray-700" %>
-          <%= form.select :purpose, Payment.purposes.keys.map { |p| [p.humanize.sub("Other purpose", "Other"), p] }, {}, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+          <%= form.select :purpose, Payment.purposes.keys.map { |p| [p.humanize.sub("Other purpose", "Other"), p] }, { selected: "membership" }, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
         </div>
         <div>
           <%= form.label :description, "Description (required)", class: "block text-sm font-medium text-gray-700" %>

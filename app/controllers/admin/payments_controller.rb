@@ -23,16 +23,17 @@ class Admin::PaymentsController < Admin::BaseController
   end
 
   def create
-    user = @membership.user
     @payment = @membership.payments.build(payment_params)
-    @payment.user_email = user.email_address
-    @payment.user_name = user.name
+    @payment.user_email = @membership.user.email_address
+    @payment.user_name = @membership.payer_name
 
-    if @payment.save
-      redirect_to admin_membership_path(@membership), notice: "Payment recorded."
-    else
-      redirect_to admin_membership_path(@membership), alert: "Could not record payment."
+    Payment.transaction do
+      @payment.save!
+      @membership.renew! if @payment.membership? && @payment.completed?
     end
+    redirect_to admin_membership_path(@membership), notice: "Payment recorded."
+  rescue ActiveRecord::RecordInvalid
+    redirect_to admin_membership_path(@membership), alert: "Could not record payment: #{@payment.errors.full_messages.to_sentence}."
   end
 
   def destroy
@@ -53,6 +54,6 @@ class Admin::PaymentsController < Admin::BaseController
   end
 
   def payment_params
-    params.require(:payment).permit(:amount_cents, :paid_on, :payment_method, :purpose, :description, :notes)
+    params.require(:payment).permit(:amount_euro, :paid_on, :payment_method, :purpose, :description, :notes)
   end
 end
