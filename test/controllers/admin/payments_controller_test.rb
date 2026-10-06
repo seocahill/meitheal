@@ -287,4 +287,51 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_select "nav a[href*='payment_method=cash'][href*='page=2']"
   end
+
+  # CSV export
+  test "exports the filtered payments as CSV" do
+    create_payment(description: "March fee", paid_on: Date.new(2026, 3, 5), amount_cents: 2050, payment_method: :bank_transfer, user_name: "Mary Byrne")
+    create_payment(description: "April fee", paid_on: Date.new(2026, 4, 5))
+
+    sign_in_as(@owner)
+    get admin_payments_path(format: :csv, from: "2026-03-01", to: "2026-03-31")
+
+    assert_response :success
+    assert_equal "text/csv", response.media_type
+    assert_match(/attachment; filename="payments-from-2026-03-01-to-2026-03-31\.csv"/, response.headers["Content-Disposition"])
+
+    rows = CSV.parse(response.body, headers: true)
+    assert_equal [ "Date", "Name", "Email", "Purpose", "Description", "Amount (EUR)", "Method", "Status", "Notes", "SumUp transaction" ], rows.headers
+    assert_equal 1, rows.size
+    assert_equal [ "2026-03-05", "Mary Byrne", "payer@example.com", "Membership", "March fee", "20.50", "Bank transfer", "Completed" ], rows.first.fields.first(8)
+  end
+
+  test "export is not paginated" do
+    25.times { |i| create_payment(description: "Fee #{i}") }
+    sign_in_as(@owner)
+    get admin_payments_path(format: :csv, search: "payer@example.com")
+    assert_equal 25, CSV.parse(response.body, headers: true).size
+  end
+
+  test "export neutralises values a spreadsheet would run as a formula" do
+    create_payment(description: "=HYPERLINK(\"http://evil.example\")", user_name: "+cmd")
+    sign_in_as(@owner)
+    get admin_payments_path(format: :csv, search: "payer@example.com")
+
+    row = CSV.parse(response.body, headers: true).first
+    assert_equal "'+cmd", row["Name"]
+    assert row["Description"].start_with?("'=")
+  end
+
+  test "viewers cannot export" do
+    sign_in_as(@viewer)
+    get admin_payments_path(format: :csv)
+    assert_redirected_to root_path
+  end
+
+  test "export link keeps the current filters" do
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "cash", period: "this_year")
+    assert_select "a[href*='.csv'][href*='payment_method=cash'][href*='period=this_year']", text: /Export/
+  end
 end

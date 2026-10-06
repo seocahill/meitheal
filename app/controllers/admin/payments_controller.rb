@@ -14,6 +14,8 @@ class Admin::PaymentsController < Admin::BaseController
                    .by_date_range(range&.begin, range&.end)
                    .search(params[:search])
 
+    return send_csv(scope, range) if request.format.csv?
+
     completed = scope.completed
     @total_cents = completed.sum(:amount_cents)
     @completed_count = completed.count
@@ -43,6 +45,13 @@ class Admin::PaymentsController < Admin::BaseController
   end
 
   private
+
+  # Every payment matching the filters, oldest first, named for the dates they cover.
+  def send_csv(scope, range)
+    name = [ "payments", range&.begin && "from-#{range.begin}", range&.end && "to-#{range.end}" ]
+    name << Date.current if range.nil?
+    send_data PaymentCsv.new(scope.order(:paid_on, :id)).to_s, type: "text/csv", filename: "#{name.compact.join('-')}.csv"
+  end
 
   # The param's value when it names one of the enum's values, otherwise nil.
   def known(key, values)

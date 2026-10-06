@@ -9,6 +9,7 @@
 <div class="max-w-6xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold">Manage Payments</h1>
+    <%= link_to "Export CSV", admin_payments_path(list_filters.symbolize_keys.merge(format: :csv)), class: "border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50" %>
   </div>
 
   <!-- Total for the current filters -->
