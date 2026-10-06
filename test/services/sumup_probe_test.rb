@@ -23,6 +23,16 @@ class SumupProbeTest < ActiveSupport::TestCase
   setup do
     @membership = memberships(:active_membership)
     Payment.where.not(sumup_transaction_id: nil).update_all(sumup_transaction_id: nil)
+    Ticket.where.not(sumup_transaction_id: nil).update_all(sumup_transaction_id: nil)
+  end
+
+  def local_ticket(transaction_id, paid_at: Time.utc(2026, 10, 1, 10), status: :paid)
+    ticket = Ticket.create!(
+      event: Event.first, buyer_name: "Buyer", buyer_email: "buyer@example.com", quantity: 1,
+      amount_cents: 1000, status: status, sumup_transaction_id: transaction_id
+    )
+    ticket.update_columns(updated_at: paid_at)
+    ticket
   end
 
   def local_payment(transaction_id, paid_on: Date.new(2026, 10, 1), status: :completed)
@@ -124,5 +134,35 @@ class SumupProbeTest < ActiveSupport::TestCase
       .to_return(status: 401, body: { "detail" => "Invalid API key" }.to_json)
 
     assert_raises(SumupCheckoutService::CheckoutError) { report }
+  end
+
+  test "ticket sales are not reported as payments with no record" do
+    local_ticket("ticket-id")
+    stub_history([ transaction(code: "TK1", id: "ticket-id", type: "ECOM", summary: "Gig tickets"), transaction(code: "LOST1") ])
+
+    text = report
+
+    assert_includes text, "1 successful SumUp payment has no payment record here"
+    assert_includes text, "LOST1"
+    assert_not_includes text, "TK1"
+  end
+
+  test "says which paid tickets we hold that SumUp did not return" do
+    local_ticket("ticket-known")
+    local_ticket("ticket-missing")
+    stub_history([ transaction(code: "TK1", id: "ticket-known") ])
+
+    text = report
+
+    assert_includes text, "We hold 2 paid SumUp tickets in this window; SumUp returned 1 of them."
+    assert_includes text, "ticket-missing"
+  end
+
+  test "ignores tickets that were never paid or were paid outside the window" do
+    local_ticket("unpaid-ticket", status: :pending)
+    local_ticket("old-ticket", paid_at: Time.utc(2026, 1, 1))
+    stub_history([])
+
+    assert_includes report, "We hold 0 paid SumUp tickets in this window"
   end
 end
