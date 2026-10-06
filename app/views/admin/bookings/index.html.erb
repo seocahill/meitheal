@@ -55,36 +55,36 @@
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Space</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
-          <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Space</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date/Time</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+          <th class="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <% if @bookings.any? %>
           <% @bookings.each do |booking| %>
             <tr>
-              <td class="px-4 py-3">
+              <td class="px-3 py-3">
                 <div class="font-medium text-gray-900"><%= booking.title %></div>
                 <% if booking.description.present? %>
                   <div class="text-sm text-gray-500"><%= truncate(booking.description, length: 40) %></div>
                 <% end %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                 <%= booking.space.name %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                 <%= booking.user.email_address %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+              <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div><%= booking.starts_at.strftime("%b %d, %Y") %></div>
                 <div class="text-xs text-gray-500"><%= booking.starts_at.strftime("%l:%M %p") %> - <%= booking.ends_at.strftime("%l:%M %p") %></div>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap">
+              <td class="px-3 py-3 whitespace-nowrap">
                 <% case booking.status %>
                 <% when "pending" %>
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">Pending</span>
@@ -94,7 +94,7 @@
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Cancelled</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap">
+              <td class="px-3 py-3 whitespace-nowrap">
                 <% if booking.confirmed? %>
                   <% if booking.paid %>
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Paid</span>
@@ -110,20 +110,20 @@
                   <span class="text-xs text-gray-400">N/A</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3 text-right text-sm">
+              <td class="px-3 py-3 text-right text-sm">
                 <div class="flex flex-wrap justify-end gap-2">
                   <% if booking.pending? %>
-                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-green-600 hover:bg-green-700 transition-colors" %>
+                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-green-600 hover:bg-green-700 transition-colors" %>
                   <% end %>
                   <% if booking.confirmed? %>
                     <%= button_to booking.paid ? "Mark Unpaid" : "Mark Paid",
                         toggle_paid_admin_booking_path(booking, filters.merge(page: params[:page]).compact_blank),
                         method: :patch,
-                        class: "px-3 py-1.5 rounded text-xs font-medium text-white transition-colors #{booking.paid ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}" %>
+                        class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white transition-colors #{booking.paid ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}" %>
                   <% end %>
-                  <%= button_to "Edit", edit_booking_path(booking), method: :get, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors" %>
+                  <%= button_to "Edit", edit_booking_path(booking), method: :get, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors" %>
                   <% unless booking.cancelled? %>
-                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-colors" %>
+                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-colors" %>
                   <% end %>
                 </div>
               </td>
