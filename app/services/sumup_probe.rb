@@ -18,7 +18,7 @@ class SumupProbe
     @transactions = @service.list_transactions(order: "descending", limit: PAGE_SIZE, oldest_time: since)
     @window = since.to_date..@now.to_date
 
-    [ summary, by_month, by_status, fields, held_payments, unmatched_payments ].join("\n\n")
+    [ summary, by_month, by_status, fields, held_payments, held_tickets, unmatched_payments ].join("\n\n")
   end
 
   private
@@ -47,14 +47,23 @@ class SumupProbe
     "Fields on a SumUp transaction: #{first ? first.keys.join(', ') : 'none, nothing was returned'}"
   end
 
-  # Completed SumUp payments we hold in the window, and whether SumUp returned each.
   def held_payments
-    held = Payment.sumup.completed.where.not(sumup_transaction_id: nil).where(paid_on: @window)
-    held_ids = held.pluck(:sumup_transaction_id)
+    held_section("SumUp payment", Payment.sumup.completed.where(paid_on: @window))
+  end
+
+  # Event tickets are paid through SumUp too, but are stored on tickets, not payments.
+  # A ticket's updated_at is when it was paid.
+  def held_tickets
+    held_section("paid SumUp ticket", Ticket.paid.where(updated_at: @window.begin.beginning_of_day..@window.end.end_of_day))
+  end
+
+  # What we hold in the window, and whether SumUp returned each one.
+  def held_section(label, scope)
+    held_ids = scope.where.not(sumup_transaction_id: nil).pluck(:sumup_transaction_id)
     returned = held_ids & sumup_ids
     missing = held_ids - returned
 
-    lines = [ "We hold #{pluralize(held_ids.size, 'SumUp payment')} in this window; SumUp returned #{missing.empty? ? 'all of them' : "#{returned.size} of them"}." ]
+    lines = [ "We hold #{pluralize(held_ids.size, label)} in this window; SumUp returned #{missing.empty? ? 'all of them' : "#{returned.size} of them"}." ]
     lines << "Matched our records on: #{matched_on(returned)}" if returned.any?
     lines << "Not returned by SumUp:\n#{missing.map { |id| "  #{id}" }.join("\n")}" if missing.any?
     lines.join("\n")
@@ -64,9 +73,10 @@ class SumupProbe
     %w[id transaction_id].map { |key| "#{key} #{@transactions.count { |t| returned.include?(t[key]) }}" }.join(", ")
   end
 
-  # Successful payments in SumUp with no payment record here: reader sales and lost checkouts.
+  # Successful payments in SumUp with no payment or ticket record here: reader sales and lost checkouts.
   def unmatched_payments
-    known = Payment.where.not(sumup_transaction_id: nil).pluck(:sumup_transaction_id)
+    known = Payment.where.not(sumup_transaction_id: nil).pluck(:sumup_transaction_id) +
+            Ticket.where.not(sumup_transaction_id: nil).pluck(:sumup_transaction_id)
     unmatched = @transactions.select do |t|
       t["status"] == "SUCCESSFUL" && t["type"] == "PAYMENT" && (known & [ t["id"], t["transaction_id"] ]).empty?
     end
