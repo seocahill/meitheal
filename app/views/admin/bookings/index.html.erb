@@ -4,14 +4,15 @@
     <%= link_to "View Calendar", calendar_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
   </div>
 
-  <% base = { q: params[:q], space_id: params[:space_id] }.compact_blank %>
+  <% dates = @date_filter.to_params %>
+  <% base = { q: params[:q], space_id: params[:space_id] }.merge(dates).compact_blank %>
   <% filters = base.merge(status: params[:status], paid: params[:paid], overdue: params[:overdue], when: params[:when]).compact_blank %>
   <% tab = "px-4 py-2 rounded-lg text-sm font-medium" %>
   <% idle = "text-gray-600 hover:bg-gray-100" %>
 
   <!-- Filter tabs -->
   <div class="flex flex-wrap gap-2 mb-4">
-    <%= link_to "Upcoming", admin_bookings_path(base), class: "#{tab} #{filters.except(:q, :space_id).empty? ? 'bg-purple-100 text-purple-700' : idle}" %>
+    <%= link_to "Upcoming", admin_bookings_path(base.except(*dates.keys)), class: "#{tab} #{filters.except(:q, :space_id).empty? ? 'bg-purple-100 text-purple-700' : idle}" %>
     <%= link_to admin_bookings_path(base.merge(paid: "unpaid")), data: { count: :unpaid }, class: "#{tab} #{params[:paid] == 'unpaid' && params[:overdue].blank? ? 'bg-red-100 text-red-700' : idle}" do %>
       Unpaid <span class="font-semibold"><%= @counts[:unpaid] %></span>
     <% end %>
@@ -39,6 +40,7 @@
       <label for="space_id" class="block text-xs font-medium text-gray-500 mb-1">Space</label>
       <%= select_tag :space_id, options_from_collection_for_select(@spaces, :id, :name, params[:space_id]), include_blank: "All spaces", class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
     </div>
+    <%= render "admin/shared/date_range_filter", filter: @date_filter, label: "Starts" %>
     <div>
       <label for="when" class="block text-xs font-medium text-gray-500 mb-1">When</label>
       <%= select_tag :when, options_for_select([ [ "Any time", "all" ], [ "Upcoming", "upcoming" ], [ "Already started", "past" ] ], params[:when]), include_blank: "Default", class: "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>

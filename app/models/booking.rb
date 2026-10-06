@@ -21,6 +21,12 @@ class Booking < ApplicationRecord
   scope :for_date, ->(date) {
     where("starts_at >= ? AND starts_at < ?", date.beginning_of_day, date.end_of_day)
   }
+  # Bookings that start on a day in the range; either end may be open.
+  scope :starting_within, ->(range) {
+    next unless range
+
+    where(starts_at: range.begin&.beginning_of_day..range.end&.end_of_day)
+  }
   scope :unpaid, -> { where(paid: false).where.not(status: :cancelled) }
   scope :overdue, -> { where("ends_at < ?", 2.weeks.ago) }
 

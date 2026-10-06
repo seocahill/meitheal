@@ -7,6 +7,8 @@ class Admin::BookingsController < Admin::BaseController
     scope = Booking.includes(:user, :space)
     scope = scope.where(space_id: params[:space_id]) if params[:space_id].present?
     scope = search(scope, params[:q]) if params[:q].present?
+    @date_filter = DateRangeFilter.new(params)
+    scope = scope.starting_within(@date_filter.range)
 
     scope = case params[:status]
     when "pending"   then scope.pending
@@ -47,7 +49,7 @@ class Admin::BookingsController < Admin::BaseController
       pending: Booking.pending.count
     }
     @spaces = Space.order(:name)
-    @pagy, @bookings = pagy(scope, items: 20)
+    @pagy, @bookings = pagy(scope, limit: 20)
   end
 
   def toggle_paid
@@ -63,12 +65,12 @@ class Admin::BookingsController < Admin::BaseController
   end
 
   def filtered?
-    params[:status].present? || params[:paid].present? || params[:overdue].present?
+    params[:status].present? || params[:paid].present? || params[:overdue].present? || @date_filter.active?
   end
 
   # Keep the current filters and search when returning to the list.
   def list_filters
-    params.permit(:status, :paid, :overdue, :when, :space_id, :q, :page).to_h.compact_blank
+    params.permit(:status, :paid, :overdue, :when, :space_id, :q, :period, :from, :to, :page).to_h.compact_blank
   end
 
   def search(scope, term)

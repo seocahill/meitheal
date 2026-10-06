@@ -19,7 +19,7 @@ class Admin::PaymentsController < Admin::BaseController
     @completed_count = completed.count
     @method_totals_cents = completed.group(:payment_method).sum(:amount_cents)
 
-    @pagy, @payments = pagy(scope.includes(membership: { user: :profile }).order(paid_on: :desc, created_at: :desc), items: 20)
+    @pagy, @payments = pagy(scope.includes(membership: { user: :profile }).order(paid_on: :desc, created_at: :desc), limit: 20)
   end
 
   def create
