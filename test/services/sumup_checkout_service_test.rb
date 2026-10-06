@@ -1,7 +1,9 @@
 require "test_helper"
+require_relative "../test_helpers/sumup_test_helper"
 
 class SumupCheckoutServiceTest < ActiveSupport::TestCase
-  HISTORY_URL = "https://api.sumup.com/v2.1/merchants/TEST_MERCHANT/transactions/history".freeze
+  include SumupTestHelper
+
 
   def page(items, next_query: nil)
     { "items" => items, "links" => next_query ? [ { "rel" => "next", "href" => next_query } ] : [] }.to_json
@@ -9,7 +11,7 @@ class SumupCheckoutServiceTest < ActiveSupport::TestCase
 
   def stub_page(query: nil, body:, status: 200)
     url = query ? "#{HISTORY_URL}?#{query}" : HISTORY_URL
-    stub_request(:get, url).with(headers: { "Authorization" => "Bearer test-api-key" })
+    stub_request(:get, url).with(headers: { "Authorization" => "Bearer #{API_KEY}" })
       .to_return(status: status, body: body, headers: { "Content-Type" => "application/json" })
   end
 

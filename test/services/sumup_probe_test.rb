@@ -1,7 +1,9 @@
 require "test_helper"
+require_relative "../test_helpers/sumup_test_helper"
 
 class SumupProbeTest < ActiveSupport::TestCase
-  HISTORY_URL = "https://api.sumup.com/v2.1/merchants/TEST_MERCHANT/transactions/history".freeze
+  include SumupTestHelper
+
   NOW = Time.utc(2026, 10, 6, 12)
 
   def transaction(code:, id: SecureRandom.uuid, amount: 20.0, type: "ECOM", status: "SUCCESSFUL", at: "2026-10-01T10:00:00.000Z", summary: nil)

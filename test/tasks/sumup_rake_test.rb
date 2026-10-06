@@ -1,8 +1,10 @@
 require "test_helper"
+require_relative "../test_helpers/sumup_test_helper"
 require "rake"
 
 class SumupRakeTest < ActiveSupport::TestCase
-  HISTORY_URL = "https://api.sumup.com/v2.1/merchants/TEST_MERCHANT/transactions/history".freeze
+  include SumupTestHelper
+
 
   teardown { ENV.delete("DAYS") }
 
