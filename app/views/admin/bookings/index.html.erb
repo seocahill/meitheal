@@ -110,8 +110,8 @@
                   <span class="text-xs text-gray-400">N/A</span>
                 <% end %>
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
-                <div class="flex justify-end gap-2">
+              <td class="px-4 py-3 text-right text-sm">
+                <div class="flex flex-wrap justify-end gap-2">
                   <% if booking.pending? %>
                     <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1.5 rounded text-xs font-medium text-white bg-green-600 hover:bg-green-700 transition-colors" %>
                   <% end %>
