@@ -10,7 +10,7 @@ class DateRangeFilter
   }.freeze
 
   def initialize(params, today: Date.current)
-    @params = params.to_h.with_indifferent_access
+    @params = params
     @today = today
   end
 

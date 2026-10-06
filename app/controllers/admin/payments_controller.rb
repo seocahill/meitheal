@@ -1,17 +1,25 @@
 class Admin::PaymentsController < Admin::BaseController
   include Pagy::Method
-  before_action :require_owner
+  before_action :require_editor, only: [ :index, :create ]
+  before_action :require_owner, only: [ :destroy ]
   before_action :set_membership, except: [ :index ]
 
   def index
-    scope = Payment.includes(:membership).order(paid_on: :desc, created_at: :desc)
+    @date_filter = DateRangeFilter.new(params)
+    range = @date_filter.range
 
-    # Apply filters
-    scope = scope.by_payment_method(params[:payment_method])
-    scope = scope.by_date_range(params[:start_date], params[:end_date])
-    scope = scope.search(params[:search])
+    scope = Payment.by_payment_method(known(:payment_method, Payment.payment_methods))
+                   .by_purpose(known(:purpose, Payment.purposes))
+                   .by_status(known(:status, Payment.statuses))
+                   .by_date_range(range&.begin, range&.end)
+                   .search(params[:search])
 
-    @pagy, @payments = pagy(scope, items: 20)
+    completed = scope.completed
+    @total_cents = completed.sum(:amount_cents)
+    @completed_count = completed.count
+    @method_totals_cents = completed.group(:payment_method).sum(:amount_cents)
+
+    @pagy, @payments = pagy(scope.includes(membership: { user: :profile }).order(paid_on: :desc, created_at: :desc), items: 20)
   end
 
   def create
@@ -34,6 +42,11 @@ class Admin::PaymentsController < Admin::BaseController
   end
 
   private
+
+  # The param's value when it names one of the enum's values, otherwise nil.
+  def known(key, values)
+    params[key].presence_in(values.keys)
+  end
 
   def set_membership
     @membership = Membership.find(params[:membership_id])

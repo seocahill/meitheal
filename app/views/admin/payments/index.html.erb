@@ -1,26 +1,61 @@
+<% method_tabs = [
+  [ nil, "All", "bg-purple-100 text-purple-700" ],
+  [ "cash", "Cash", "bg-green-100 text-green-700" ],
+  [ "bank_transfer", "Bank Transfer", "bg-blue-100 text-blue-700" ],
+  [ "sumup", "SumUp", "bg-purple-100 text-purple-700" ],
+  [ "other", "Other", "bg-gray-200 text-gray-700" ]
+] %>
+<% field = "border border-gray-300 rounded-lg px-3 py-2 text-sm" %>
 <div class="max-w-6xl mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-8">
+  <div class="flex justify-between items-center mb-6">
     <h1 class="text-3xl font-bold">Manage Payments</h1>
   </div>
 
-  <!-- Filter tabs -->
-  <div class="flex flex-wrap gap-2 mb-6">
-    <%= link_to "All", admin_payments_path, class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method].blank? ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Cash", admin_payments_path(payment_method: "cash"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method] == 'cash' ? 'bg-green-100 text-green-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Bank Transfer", admin_payments_path(payment_method: "bank_transfer"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method] == 'bank_transfer' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "SumUp", admin_payments_path(payment_method: "sumup"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method] == 'sumup' ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to "Other", admin_payments_path(payment_method: "other"), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method] == 'other' ? 'bg-gray-200 text-gray-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+  <!-- Total for the current filters -->
+  <div class="bg-white shadow rounded-lg px-5 py-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-2">
+    <div>
+      <div class="text-xs font-medium text-gray-500 uppercase tracking-wider">Collected</div>
+      <div class="text-2xl font-bold text-gray-900" data-total>&euro;<%= number_with_precision(@total_cents / 100.0, precision: 2, delimiter: ",") %></div>
+      <div class="text-xs text-gray-500" data-total-count><%= pluralize(@completed_count, "completed payment") %>, pending and failed not counted</div>
+    </div>
+    <% @method_totals_cents.sort_by { |_, cents| -cents }.each do |method, cents| %>
+      <div data-method-total="<%= method %>">
+        <div class="text-xs font-medium text-gray-500"><%= method.humanize %></div>
+        <div class="text-lg font-semibold text-gray-900">&euro;<%= number_with_precision(cents / 100.0, precision: 2, delimiter: ",") %></div>
+      </div>
+    <% end %>
   </div>
 
-  <!-- Search and date filters -->
-  <%= form_with url: admin_payments_path, method: :get, class: "mb-6 flex gap-4 flex-wrap" do |form| %>
-    <%= form.text_field :search, value: params[:search], placeholder: "Search user or description...", class: "form-input flex-1 min-w-[200px]" %>
-    <%= form.date_field :start_date, value: params[:start_date], placeholder: "From", class: "form-input" %>
-    <%= form.date_field :end_date, value: params[:end_date], placeholder: "To", class: "form-input" %>
-    <%= form.submit "Filter", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
-    <% if params[:search].present? || params[:start_date].present? %>
-      <%= link_to "Clear", admin_payments_path, class: "bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300" %>
+  <!-- Method tabs -->
+  <div class="flex flex-wrap gap-2 mb-4">
+    <% method_tabs.each do |value, label, active_class| %>
+      <%= link_to label, list_path(payment_method: value),
+            class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:payment_method].presence == value ? active_class : 'text-gray-600 hover:bg-gray-100'}" %>
     <% end %>
+  </div>
+
+  <!-- Search, purpose, status and dates -->
+  <%= form_with url: admin_payments_path, method: :get, class: "mb-6 space-y-4" do |form| %>
+    <%= hidden_filter_fields(:payment_method) %>
+    <%= render "admin/shared/date_range_filter", filter: @date_filter, label: "Paid" %>
+    <div class="flex flex-wrap items-end gap-3">
+      <div class="flex-1 min-w-[200px]">
+        <label for="search" class="block text-xs font-medium text-gray-500 mb-1">Search</label>
+        <%= form.text_field :search, value: params[:search], placeholder: "Name, email or description", class: "#{field} w-full" %>
+      </div>
+      <div>
+        <label for="purpose" class="block text-xs font-medium text-gray-500 mb-1">Purpose</label>
+        <%= form.select :purpose, Payment.purposes.keys.map { |p| [ p.humanize.sub("Other purpose", "Other"), p ] }, { include_blank: "All", selected: params[:purpose] }, class: field %>
+      </div>
+      <div>
+        <label for="status" class="block text-xs font-medium text-gray-500 mb-1">Status</label>
+        <%= form.select :status, Payment.statuses.keys.map { |s| [ s.humanize, s ] }, { include_blank: "All", selected: params[:status] }, class: field %>
+      </div>
+      <%= form.submit "Apply", name: nil, class: "bg-pink-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-pink-700 cursor-pointer" %>
+      <% if list_filters.present? %>
+        <%= link_to "Clear", admin_payments_path, class: "text-sm text-gray-500 hover:text-gray-700 py-2" %>
+      <% end %>
+    </div>
   <% end %>
 
   <div class="bg-white shadow rounded-lg overflow-x-auto">
@@ -42,7 +77,7 @@
           <% @payments.each do |payment| %>
             <tr>
               <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                <%= payment.paid_on.strftime("%b %d, %Y") %>
+                <%= payment.paid_on.strftime("%d %b %Y") %>
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="font-medium text-gray-900"><%= payment.user_name %></div>

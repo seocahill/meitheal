@@ -1,0 +1,216 @@
+require "test_helper"
+
+class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
+  setup do
+    @owner = users(:owner)
+    @editor = users(:editor)
+    @viewer = users(:viewer)
+    @membership = memberships(:active_membership)
+  end
+
+  def create_payment(description:, paid_on: Date.current, amount_cents: 2000, payment_method: :cash,
+                     purpose: :membership, status: :completed, membership: @membership, user_name: "Test User")
+    Payment.create!(
+      membership: membership, amount_cents: amount_cents, paid_on: paid_on, payment_method: payment_method,
+      purpose: purpose, status: status, user_email: "payer@example.com", user_name: user_name,
+      description: description
+    )
+  end
+
+  # Access control
+  test "editors can see payments" do
+    sign_in_as(@editor)
+    get admin_payments_path
+    assert_response :success
+  end
+
+  test "viewers cannot see payments" do
+    sign_in_as(@viewer)
+    get admin_payments_path
+    assert_redirected_to root_path
+  end
+
+  test "signed out visitors are sent to sign in" do
+    get admin_payments_path
+    assert_redirected_to new_session_path
+  end
+
+  test "editors can record a payment" do
+    sign_in_as(@editor)
+    assert_difference "@membership.payments.count" do
+      post admin_membership_payments_path(@membership), params: {
+        payment: { amount_cents: 2000, paid_on: Date.current, payment_method: "cash", purpose: "membership", description: "Fee" }
+      }
+    end
+  end
+
+  test "only owners can delete a payment" do
+    payment = create_payment(description: "Mistake")
+    sign_in_as(@editor)
+    assert_no_difference "Payment.count" do
+      delete admin_membership_payment_path(@membership, payment)
+    end
+    assert_redirected_to root_path
+
+    sign_in_as(@owner)
+    assert_difference "Payment.count", -1 do
+      delete admin_membership_payment_path(@membership, payment)
+    end
+  end
+
+  # Filters
+  test "filters combine instead of replacing each other" do
+    create_payment(description: "Cash hire deposit", payment_method: :cash, purpose: :booking)
+    create_payment(description: "Transfer hire deposit", payment_method: :bank_transfer, purpose: :booking)
+    create_payment(description: "Cash annual fee", payment_method: :cash, purpose: :membership)
+
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "cash", purpose: "booking", search: "deposit")
+
+    assert_includes response.body, "Cash hire deposit"
+    assert_not_includes response.body, "Transfer hire deposit"
+    assert_not_includes response.body, "Cash annual fee"
+  end
+
+  test "filter by status" do
+    create_payment(description: "Went through", status: :completed)
+    create_payment(description: "Never finished", status: :pending)
+
+    sign_in_as(@owner)
+    get admin_payments_path(status: "pending")
+
+    assert_includes response.body, "Never finished"
+    assert_not_includes response.body, "Went through"
+  end
+
+  test "ignores a payment method or status that does not exist" do
+    create_payment(description: "Still listed")
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "bitcoin", status: "bogus", purpose: "nope")
+    assert_response :success
+    assert_includes response.body, "Still listed"
+  end
+
+  test "date range with only a from date" do
+    create_payment(description: "Ancient history", paid_on: Date.new(2020, 1, 1))
+    create_payment(description: "Last week", paid_on: 1.week.ago.to_date)
+
+    sign_in_as(@owner)
+    get admin_payments_path(from: 1.month.ago.to_date.iso8601)
+
+    assert_includes response.body, "Last week"
+    assert_not_includes response.body, "Ancient history"
+  end
+
+  test "date range with only a to date" do
+    create_payment(description: "Ancient history", paid_on: Date.new(2020, 1, 1))
+    create_payment(description: "Last week", paid_on: 1.week.ago.to_date)
+
+    sign_in_as(@owner)
+    get admin_payments_path(to: Date.new(2021, 1, 1).iso8601)
+
+    assert_includes response.body, "Ancient history"
+    assert_not_includes response.body, "Last week"
+  end
+
+  test "date range includes the first and last day" do
+    create_payment(description: "On the first", paid_on: Date.new(2026, 3, 1))
+    create_payment(description: "On the last", paid_on: Date.new(2026, 3, 31))
+    create_payment(description: "Day before", paid_on: Date.new(2026, 2, 28))
+    create_payment(description: "Day after", paid_on: Date.new(2026, 4, 1))
+
+    sign_in_as(@owner)
+    get admin_payments_path(from: "2026-03-01", to: "2026-03-31")
+
+    assert_includes response.body, "On the first"
+    assert_includes response.body, "On the last"
+    assert_not_includes response.body, "Day before"
+    assert_not_includes response.body, "Day after"
+  end
+
+  test "period presets filter by date" do
+    create_payment(description: "This year", paid_on: Date.current.beginning_of_year)
+    create_payment(description: "Two years back", paid_on: 2.years.ago.to_date)
+
+    sign_in_as(@owner)
+    get admin_payments_path(period: "this_year")
+
+    assert_includes response.body, "This year"
+    assert_not_includes response.body, "Two years back"
+  end
+
+  test "search matches the member's current email, not just the one copied onto the payment" do
+    payment = create_payment(description: "Fee", user_name: "Stale Name")
+    payment.update_columns(user_email: "stale@example.com")
+
+    sign_in_as(@owner)
+    get admin_payments_path(search: @membership.user.email_address)
+
+    assert_includes response.body, "Stale Name"
+  end
+
+  # Totals
+  test "shows the total of completed payments for the current filter" do
+    create_payment(description: "A", amount_cents: 2000, paid_on: Date.new(2026, 3, 1))
+    create_payment(description: "B", amount_cents: 1050, paid_on: Date.new(2026, 3, 2))
+    create_payment(description: "Unfinished", amount_cents: 5000, paid_on: Date.new(2026, 3, 3), status: :pending)
+    create_payment(description: "Other month", amount_cents: 9900, paid_on: Date.new(2026, 4, 3))
+
+    sign_in_as(@owner)
+    get admin_payments_path(from: "2026-03-01", to: "2026-03-31")
+
+    assert_select "[data-total]", text: /€30\.50/
+    assert_select "[data-total-count]", text: /2 completed/
+  end
+
+  test "total is broken down by method" do
+    create_payment(description: "A", amount_cents: 2000, payment_method: :cash)
+    create_payment(description: "B", amount_cents: 1000, payment_method: :bank_transfer)
+
+    sign_in_as(@owner)
+    get admin_payments_path(search: "payer@example.com")
+
+    assert_select "[data-method-total='cash']", text: /€20\.00/
+    assert_select "[data-method-total='bank_transfer']", text: /€10\.00/
+  end
+
+  # Navigation keeps filters
+  test "method tabs keep the search and date filters" do
+    sign_in_as(@owner)
+    get admin_payments_path(search: "mary", from: "2026-01-01", to: "2026-01-31")
+
+    assert_select "a[href*='payment_method=cash'][href*='search=mary'][href*='from=2026-01-01'][href*='to=2026-01-31']"
+  end
+
+  test "search form keeps the method filter and shows the chosen purpose and status" do
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "cash", status: "pending", purpose: "booking")
+
+    assert_select "form input[type=hidden][name=payment_method][value=cash]"
+    assert_select "form select[name=status] option[selected][value=pending]"
+    assert_select "form select[name=purpose] option[selected][value=booking]"
+  end
+
+  test "period links keep the other filters" do
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "cash")
+
+    assert_select "a[href*='period=last_month'][href*='payment_method=cash']"
+  end
+
+  test "dates are shown day month year" do
+    create_payment(description: "Dated", paid_on: Date.new(2026, 3, 5))
+    sign_in_as(@owner)
+    get admin_payments_path
+
+    assert_includes response.body, "05 Mar 2026"
+  end
+
+  test "pagination keeps filters" do
+    21.times { |i| create_payment(description: "Fee #{i}", payment_method: :cash) }
+    sign_in_as(@owner)
+    get admin_payments_path(payment_method: "cash")
+
+    assert_select "nav a[href*='payment_method=cash'][href*='page=2']"
+  end
+end
