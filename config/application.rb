@@ -29,5 +29,11 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    # Kamal Proxy sets HTTP_CLIENT_IP to its own loopback (127.0.0.1) within Docker,
+    # which disagrees with X-Forwarded-For and triggers a false positive IpSpoofAttackError.
+    # The real client IP is correctly carried in X-Forwarded-For; disabling the check
+    # is the standard Rails recommendation for proxies that set these headers inconsistently.
+    config.action_dispatch.ip_spoofing_check = false
   end
 end
