@@ -1,4 +1,5 @@
 require_relative "boot"
+require_relative "../lib/ip_spoof_attack_handler"
 
 require "rails/all"
 
@@ -29,5 +30,11 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    # Bots send Client-IP: 127.0.0.1 to probe for localhost bypass. Rails
+    # correctly detects this as spoofing (IpSpoofAttackError) but the error
+    # propagates before ShowExceptions can render it, causing a 500. This
+    # middleware wraps RemoteIp to return 400 Bad Request instead.
+    config.middleware.insert_before(ActionDispatch::RemoteIp, IpSpoofAttackHandler)
   end
 end
