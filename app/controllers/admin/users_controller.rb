@@ -2,8 +2,12 @@ module Admin
   class UsersController < BaseController
     include Pagy::Method
 
-    before_action :require_owner
+    # Editors look after members day to day. Adding and deleting users, and
+    # editing anyone who is not a plain member, stays with owners.
+    before_action :require_editor, only: [ :index, :approve, :edit, :update ]
+    before_action :require_owner, except: [ :index, :approve, :edit, :update ]
     before_action :set_user, only: [ :edit, :update, :destroy, :approve ]
+    before_action :require_owner_for_privileged_user, only: [ :edit, :update ]
 
     def index
       users_scope = User.order(:email_address)
@@ -60,8 +64,19 @@ module Admin
       @user = User.find(params[:id])
     end
 
+    # An editor who could edit an owner or editor could reset their password and
+    # sign in as them, so those accounts are owner-only.
+    def require_owner_for_privileged_user
+      return if current_user_can_manage? || @user.viewer?
+
+      redirect_to root_path, alert: "You don't have permission to do that."
+    end
+
+    # Only owners set roles.
     def user_params
-      params.require(:user).permit(:email_address, :password, :role, :approved)
+      permitted = [ :email_address, :password, :approved ]
+      permitted << :role if current_user_can_manage?
+      params.require(:user).permit(permitted)
     end
 
     def password_params

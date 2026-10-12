@@ -14,10 +14,10 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "editor cannot access users index" do
+  test "editor can access users index" do
     sign_in_as(@editor)
     get admin_users_path
-    assert_redirected_to root_path
+    assert_response :success
   end
 
   test "viewer cannot access users index" do
@@ -126,6 +126,104 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action='#{admin_users_path}'] input[name='q'][value='mary']"
     assert_select "form input[type='hidden'][name='approved'][value='pending']"
     assert_select "a[href*='q=mary']", text: /All Users/
+  end
+
+  # Editor access
+  test "editor sees users without owner-only controls" do
+    User.create!(email_address: "pending@example.com", password: "password", approved: false)
+    sign_in_as(@editor)
+    get admin_users_path
+
+    assert_select "a", text: "Add User", count: 0
+    assert_select "button", text: "Delete", count: 0
+    assert_select "button", text: "Approve", count: 1
+    assert_select "a[href='#{edit_admin_user_path(@viewer)}']", text: "Edit"
+    assert_select "a[href='#{edit_admin_user_path(@owner)}']", count: 0
+    assert_select "a[href='#{edit_admin_user_path(@editor)}']", count: 0
+  end
+
+  test "owner sees every control" do
+    sign_in_as(@owner)
+    get admin_users_path
+    assert_select "a", text: "Add User"
+    assert_select "button", text: "Delete"
+    assert_select "a[href='#{edit_admin_user_path(@editor)}']", text: "Edit"
+  end
+
+  test "editor can approve a pending user" do
+    pending = User.create!(email_address: "pending@example.com", password: "password", approved: false)
+    sign_in_as(@editor)
+
+    assert_difference "Membership.count", 1 do
+      post approve_admin_user_path(pending)
+    end
+    assert pending.reload.approved?
+  end
+
+  test "editor can edit a viewer's email, password and approval but the form has no role" do
+    sign_in_as(@editor)
+    get edit_admin_user_path(@viewer)
+    assert_response :success
+    assert_select "select[name='user[role]']", count: 0
+
+    patch admin_user_path(@viewer), params: { user: { email_address: "renamed@example.com", password: "newpassword1", approved: "0" } }
+    assert_redirected_to admin_users_path
+    @viewer.reload
+    assert_equal "renamed@example.com", @viewer.email_address
+    assert @viewer.authenticate("newpassword1")
+    assert_not @viewer.approved?
+  end
+
+  test "editor cannot change a role" do
+    sign_in_as(@editor)
+    patch admin_user_path(@viewer), params: { user: { role: "owner" } }
+    assert @viewer.reload.viewer?
+  end
+
+  test "editor cannot edit owners or other editors" do
+    sign_in_as(@editor)
+    [ @owner, @editor ].each do |target|
+      get edit_admin_user_path(target)
+      assert_redirected_to root_path
+
+      assert_no_changes -> { target.reload.password_digest } do
+        patch admin_user_path(target), params: { user: { password: "takeover123" } }
+      end
+      assert_redirected_to root_path
+    end
+  end
+
+  test "editor cannot add or delete users" do
+    sign_in_as(@editor)
+    get new_admin_user_path
+    assert_redirected_to root_path
+
+    assert_no_difference "User.count" do
+      post admin_users_path, params: { user: { email_address: "new@example.com", password: "password123", role: "viewer" } }
+      delete admin_user_path(@viewer)
+    end
+  end
+
+  test "viewer cannot approve or edit users" do
+    pending = User.create!(email_address: "pending@example.com", password: "password", approved: false)
+    sign_in_as(@viewer)
+
+    post approve_admin_user_path(pending)
+    assert_redirected_to root_path
+    assert_not pending.reload.approved?
+
+    get edit_admin_user_path(@viewer)
+    assert_redirected_to root_path
+  end
+
+  test "editors see the admin links they can use in the sidebar" do
+    sign_in_as(@editor)
+    get admin_users_path
+
+    %w[users memberships payments bookings].each do |section|
+      assert_select "nav a[href='/admin/#{section}']", text: /#{section}/i
+    end
+    assert_select "nav a[href='/admin/proposals']", count: 0
   end
 
   # Approval tests

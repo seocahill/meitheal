@@ -25,23 +25,42 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
-  test "editors cannot create, edit or delete memberships" do
+  test "editors can create and edit memberships" do
     sign_in_as(@editor)
 
     get new_admin_membership_path
-    assert_redirected_to root_path
-
-    assert_no_difference "Membership.count" do
-      post admin_memberships_path, params: { membership: { user_id: @viewer.id, membership_type: "full", starts_on: Date.current } }
-      delete admin_membership_path(@membership)
+    assert_response :success
+    assert_difference "Membership.count" do
+      post admin_memberships_path, params: { membership: { user_id: @viewer.id, membership_type: "youth", starts_on: Date.current } }
     end
+    assert_redirected_to admin_membership_path(Membership.order(:id).last)
 
     get edit_admin_membership_path(@membership)
-    assert_redirected_to root_path
-
+    assert_response :success
     patch admin_membership_path(@membership), params: { membership: { membership_type: "youth" } }
-    assert_redirected_to root_path
-    assert_equal "full", @membership.reload.membership_type
+    assert_redirected_to admin_membership_path(@membership)
+    assert_equal "youth", @membership.reload.membership_type
+  end
+
+  test "editors cannot delete memberships or payments" do
+    payment = payments(:recent_payment)
+    sign_in_as(@editor)
+
+    get admin_membership_path(@membership)
+    assert_select "button", text: /Delete/, count: 0
+
+    assert_no_difference [ "Membership.count", "Payment.count" ] do
+      delete admin_membership_path(@membership)
+      assert_redirected_to root_path
+      delete admin_membership_payment_path(@membership, payment)
+      assert_redirected_to root_path
+    end
+  end
+
+  test "owners see the delete buttons" do
+    sign_in_as(@owner)
+    get admin_membership_path(@membership)
+    assert_select "button", text: "Delete Membership"
   end
 
   test "owner can access index" do
