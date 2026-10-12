@@ -34,7 +34,7 @@
           <% if current_user_can_edit? %>
             <%= link_to t("pages"), admin_pages_path, class: "menu-highlight inline-block text-sm" %>
           <% end %>
-          <% if current_user_can_manage? %>
+          <% if current_user_can_edit? %>
             <%= link_to t("admin"), admin_users_path, class: "menu-highlight inline-block text-sm" %>
           <% end %>
         </div>

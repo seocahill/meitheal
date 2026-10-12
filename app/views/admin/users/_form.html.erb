@@ -20,6 +20,7 @@
     <%= form.password_field :password, class: "form-input", autocomplete: "new-password", required: user.new_record? %>
   </div>
 
+  <% if current_user_can_manage? %>
   <div>
     <%= form.label :role, class: "form-label" %>
     <%= form.select :role, User.roles.keys.map { |r| [r.capitalize, r] }, {}, class: "form-input" %>
@@ -29,6 +30,7 @@
       <strong>Owner:</strong> Full administrative access
     </p>
   </div>
+  <% end %>
 
   <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-100">
     <%= link_to "Cancel", admin_users_path, class: "text-gray-600 hover:text-gray-900" %>

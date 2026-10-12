@@ -1,9 +1,9 @@
 class Admin::MembershipsController < Admin::BaseController
   include Pagy::Method
 
-  # Editors look after fees day to day. Changing what a membership is stays with owners.
-  before_action :require_editor, only: [ :index, :show, :toggle_paid ]
-  before_action :require_owner, except: [ :index, :show, :toggle_paid ]
+  # Editors look after memberships day to day. Deleting one stays with owners.
+  before_action :require_editor, except: [ :destroy ]
+  before_action :require_owner, only: [ :destroy ]
   before_action :set_membership, only: [ :show, :edit, :update, :destroy, :toggle_paid ]
 
   OFFLINE_PAYMENT_METHODS = %w[cash bank_transfer other].freeze
