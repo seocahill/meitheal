@@ -37,6 +37,7 @@
           </button>
         </div>
       <% end %>
+      <%= link_to "Export CSV", admin_memberships_path(list_filters.symbolize_keys.merge(format: :csv)), class: "border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50" %>
       <%= link_to "New Membership", new_admin_membership_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 text-sm" %>
     </div>
   </div>
@@ -106,7 +107,7 @@
               <%= membership.expires_on&.strftime("%d %b %Y") || "—" %>
             </td>
             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-              <% last_payment = membership.payments.select(&:completed?).max_by(&:paid_on) %>
+              <% last_payment = membership.last_payment %>
               <%= last_payment ? "#{last_payment.paid_on.strftime('%d %b %Y')} (#{last_payment.payment_method.humanize.downcase})" : "—" %>
             </td>
             <td class="px-4 py-4 text-sm font-medium">

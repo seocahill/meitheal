@@ -248,6 +248,82 @@ class Admin::MembershipsControllerTest < ActionDispatch::IntegrationTest
     assert_select "tbody tr", Membership.full.count - 20
   end
 
+  # CSV export
+  test "exports the filtered memberships as CSV" do
+    sign_in_as(@owner)
+    get admin_memberships_path(format: :csv, status: "lapsed")
+
+    assert_response :success
+    assert_equal "text/csv", response.media_type
+    assert_match(/attachment; filename="memberships-lapsed-#{Date.current}\.csv"/, response.headers["Content-Disposition"])
+
+    rows = CSV.parse(response.body, headers: true)
+    assert_equal [ "Name", "Email", "Type", "Payment status", "Started", "Paid until", "Last payment", "Last payment method", "Notes" ], rows.headers
+    assert_equal 1, rows.size
+    expired = memberships(:expired_membership)
+    last_payment = payments(:old_payment)
+    assert_equal [ "Editor User", "editor@example.com", "Concession", "Lapsed", expired.starts_on.iso8601, expired.expires_on.iso8601,
+                   last_payment.paid_on.iso8601, "Bank transfer", "Expired concession membership" ], rows.first.fields
+  end
+
+  test "export applies search, type and paid until filters together" do
+    sign_in_as(@owner)
+    get admin_memberships_path(format: :csv, q: "example.com", type: "full", period: "this_year")
+
+    emails = CSV.parse(response.body, headers: true).map { |row| row["Email"] }
+    expected = Membership.full.where(expires_on: Date.current.all_year).map { |m| m.user.email_address }
+    assert_equal expected.sort, emails.sort
+  end
+
+  test "export gives the last payment and how it was made" do
+    create_membership(type: :full, expires_on: nil, email: "payer@example.org").record_payment!(payment_method: "bank_transfer", paid_on: Date.new(2026, 3, 5))
+    create_membership(type: :full, expires_on: nil, email: "never-paid@example.org")
+    sign_in_as(@owner)
+    get admin_memberships_path(format: :csv, q: "example.org")
+
+    rows = CSV.parse(response.body, headers: true).index_by { |row| row["Email"] }
+    assert_equal [ "2026-03-05", "Bank transfer" ], rows["payer@example.org"].fields.values_at(6, 7)
+    assert_equal [ nil, nil ], rows["never-paid@example.org"].fields.values_at(6, 7)
+  end
+
+  test "export is not paginated" do
+    sign_in_as(@owner)
+    21.times { |i| create_membership(type: :full, expires_on: nil, email: "bulk#{i}@example.org") }
+
+    get admin_memberships_path(format: :csv, status: "unpaid")
+    assert_equal 21, CSV.parse(response.body, headers: true).size
+  end
+
+  test "export neutralises values a spreadsheet would run as a formula" do
+    @membership.update!(notes: "=HYPERLINK(\"http://evil.example\")")
+    @owner.profile.update!(name: "+cmd")
+    sign_in_as(@owner)
+    get admin_memberships_path(format: :csv, q: "owner@example")
+
+    row = CSV.parse(response.body, headers: true).first
+    assert_equal "'+cmd", row["Name"]
+    assert row["Notes"].start_with?("'=")
+  end
+
+  test "editors can export" do
+    sign_in_as(@editor)
+    get admin_memberships_path(format: :csv)
+    assert_response :success
+    assert_equal "text/csv", response.media_type
+  end
+
+  test "viewers cannot export" do
+    sign_in_as(@viewer)
+    get admin_memberships_path(format: :csv)
+    assert_redirected_to root_path
+  end
+
+  test "export link keeps the current filters but not the page" do
+    sign_in_as(@owner)
+    get admin_memberships_path(status: "paid", type: "full", q: "example", period: "this_year", page: 1)
+    assert_select "a[href*='.csv'][href*='status=paid'][href*='type=full'][href*='q=example'][href*='period=this_year']:not([href*='page='])", text: /Export/
+  end
+
   # Payment management
   test "can add payment to membership" do
     sign_in_as(@owner)

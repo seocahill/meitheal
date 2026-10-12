@@ -1,13 +1,32 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">Manage Users</h1>
-    <%= link_to "Add User", new_admin_user_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+    <div class="flex items-center gap-3">
+      <%= form_with url: admin_users_path, method: :get, local: true do %>
+        <div class="relative">
+          <input
+            type="text"
+            name="q"
+            value="<%= params[:q] %>"
+            placeholder="Search by name or email..."
+            class="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+          >
+          <%= hidden_filter_fields(:approved) %>
+          <button type="submit" aria-label="Search" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"></path>
+            </svg>
+          </button>
+        </div>
+      <% end %>
+      <%= link_to "Add User", new_admin_user_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
+    </div>
   </div>
 
   <!-- Filter tabs -->
   <div class="flex gap-4 mb-6">
-    <%= link_to "All Users", admin_users_path, class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:approved].blank? ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
-    <%= link_to admin_users_path(approved: "pending"), class: "px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 #{params[:approved] == 'pending' ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'}" do %>
+    <%= link_to "All Users", list_path(approved: nil), class: "px-4 py-2 rounded-lg text-sm font-medium #{params[:approved].blank? ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-100'}" %>
+    <%= link_to list_path(approved: "pending"), class: "px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 #{params[:approved] == 'pending' ? 'bg-amber-100 text-amber-700' : 'text-gray-600 hover:bg-gray-100'}" do %>
       Pending Approval
       <% if @pending_count > 0 %>
         <span class="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full"><%= @pending_count %></span>
@@ -75,6 +94,11 @@
                 <%= button_to "Delete", admin_user_path(user), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "text-red-600 hover:text-red-900" %>
               <% end %>
             </td>
+          </tr>
+        <% end %>
+        <% if @users.empty? %>
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center text-gray-500">No users found.</td>
           </tr>
         <% end %>
       </tbody>

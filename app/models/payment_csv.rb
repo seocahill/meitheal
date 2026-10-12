@@ -1,10 +1,10 @@
 require "csv"
 
-# Payments as a CSV for accounts. Text is prefixed with an apostrophe when a
-# spreadsheet would otherwise run it as a formula.
+# Payments as a CSV for accounts.
 class PaymentCsv
+  include SpreadsheetSafe
+
   HEADERS = [ "Date", "Name", "Email", "Purpose", "Description", "Amount (EUR)", "Method", "Status", "Notes", "SumUp transaction" ].freeze
-  FORMULA_START = /\A[=+\-@\t\r]/
 
   def initialize(payments)
     @payments = payments
@@ -32,9 +32,5 @@ class PaymentCsv
       payment.notes,
       payment.sumup_transaction_id
     ].map { |value| safe(value) }
-  end
-
-  def safe(value)
-    value.is_a?(String) && value.match?(FORMULA_START) ? "'#{value}" : value
   end
 end

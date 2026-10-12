@@ -9,21 +9,8 @@ class Admin::MembershipsController < Admin::BaseController
   OFFLINE_PAYMENT_METHODS = %w[cash bank_transfer other].freeze
 
   def index
-    scope = Membership.includes({ user: :profile }, :payments).joins(:user).left_joins(user: :profile)
-
-    if params[:q].present?
-      term = "%#{Membership.sanitize_sql_like(params[:q].downcase)}%"
-      scope = scope.where("LOWER(users.email_address) LIKE :term OR LOWER(profiles.name) LIKE :term", term: term)
-    end
-
-    scope = case params[:status]
-    when "paid"     then scope.paid.order(:expires_on)
-    when "lapsed"   then scope.lapsed.order(expires_on: :desc)
-    when "unpaid"   then scope.unpaid.order(created_at: :desc)
-    when "renewing" then scope.renewing_soon.order(:expires_on)
-    when "no_fee"   then scope.no_fee.order(created_at: :desc)
-    else scope.order(created_at: :desc)
-    end
+    scope = filtered_memberships
+    return send_csv(scope) if request.format.csv?
 
     @counts = {
       all: Membership.count,
@@ -33,13 +20,6 @@ class Admin::MembershipsController < Admin::BaseController
       unpaid: Membership.unpaid.count,
       no_fee: Membership.no_fee.count
     }
-
-    if params[:type].present? && Membership.membership_types.key?(params[:type])
-      scope = scope.where(membership_type: params[:type])
-    end
-
-    @date_filter = DateRangeFilter.new(params)
-    scope = scope.where(expires_on: @date_filter.range) if @date_filter.active?
 
     @pagy, @memberships = pagy(scope, limit: 20)
   end
@@ -100,6 +80,35 @@ class Admin::MembershipsController < Admin::BaseController
   end
 
   private
+
+  # Memberships matching the list's search and filters, in the order the list shows them.
+  def filtered_memberships
+    scope = Membership.includes({ user: :profile }, :payments)
+    scope = scope.where(user_id: User.search(params[:q]).select(:id)) if params[:q].present?
+
+    scope = case params[:status]
+    when "paid"     then scope.paid.order(:expires_on)
+    when "lapsed"   then scope.lapsed.order(expires_on: :desc)
+    when "unpaid"   then scope.unpaid.order(created_at: :desc)
+    when "renewing" then scope.renewing_soon.order(:expires_on)
+    when "no_fee"   then scope.no_fee.order(created_at: :desc)
+    else scope.order(created_at: :desc)
+    end
+
+    if params[:type].present? && Membership.membership_types.key?(params[:type])
+      scope = scope.where(membership_type: params[:type])
+    end
+
+    @date_filter = DateRangeFilter.new(params)
+    scope = scope.where(expires_on: @date_filter.range) if @date_filter.active?
+    scope
+  end
+
+  # Every membership matching the filters, not just the current page.
+  def send_csv(scope)
+    name = [ "memberships", params[:status].presence_in(%w[paid lapsed unpaid renewing no_fee]), Date.current ]
+    send_data MembershipCsv.new(scope).to_s, type: "text/csv", filename: "#{name.compact.join('-')}.csv"
+  end
 
   # Keep the current search, filters and page when returning to the list.
   def list_filters
