@@ -35,6 +35,11 @@ class Membership < ApplicationRecord
     expired? ? :lapsed : :paid
   end
 
+  # The most recent completed payment, or nil. Uses loaded payments when present.
+  def last_payment
+    payments.select(&:completed?).max_by(&:paid_on)
+  end
+
   # Where the membership is paid up to after the next payment. Membership runs by
   # calendar year: a payment covers the rest of this year, or, if the member is
   # already paid up to a later date, the calendar year after that.

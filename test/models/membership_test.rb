@@ -225,4 +225,17 @@ class MembershipTest < ActiveSupport::TestCase
     assert_equal "REF 123", payment.notes
     assert_equal Date.current.end_of_year, membership.reload.expires_on
   end
+
+  test "last_payment is the most recent completed payment" do
+    membership = membership_with(type: :full, expires_on: nil)
+    assert_nil membership.last_payment
+
+    membership.record_payment!(payment_method: :cash, paid_on: 10.days.ago.to_date)
+    membership.record_payment!(payment_method: :bank_transfer, paid_on: 2.days.ago.to_date)
+    membership.payments.create!(amount_cents: 2000, paid_on: Date.current, payment_method: :cash, purpose: :membership,
+                                status: :failed, user_email: "x@example.com", user_name: "X", description: "Failed")
+
+    assert_equal 2.days.ago.to_date, membership.reload.last_payment.paid_on
+    assert membership.last_payment.bank_transfer?
+  end
 end

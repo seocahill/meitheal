@@ -7,6 +7,7 @@ module Admin
 
     def index
       users_scope = User.order(:email_address)
+      users_scope = users_scope.search(params[:q]) if params[:q].present?
       users_scope = users_scope.where(approved: false) if params[:approved] == "pending"
       @pagy, @users = pagy(users_scope, limit: 25)
       @pending_count = User.where(approved: false).count

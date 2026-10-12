@@ -19,6 +19,12 @@ class User < ApplicationRecord
   # owner: full administrative access
   enum :role, { viewer: 0, editor: 1, owner: 2 }, default: :viewer
 
+  # Case-insensitive match on email address or profile name.
+  scope :search, ->(term) {
+    pattern = "%#{sanitize_sql_like(term.to_s.downcase)}%"
+    left_joins(:profile).where("LOWER(users.email_address) LIKE :pattern OR LOWER(profiles.name) LIKE :pattern", pattern: pattern)
+  }
+
   def can_edit?
     editor? || owner?
   end

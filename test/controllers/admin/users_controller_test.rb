@@ -85,6 +85,49 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_users_path
   end
 
+  # Search
+  test "index searches by email" do
+    sign_in_as(@owner)
+    get admin_users_path(q: "VIEWER@exam")
+    assert_response :success
+    assert_includes response.body, "viewer@example.com"
+    refute_includes response.body, "editor@example.com"
+  end
+
+  test "index searches by profile name" do
+    sign_in_as(@owner)
+    get admin_users_path(q: "editor user")
+    assert_response :success
+    assert_includes response.body, "editor@example.com"
+    refute_includes response.body, "viewer@example.com"
+  end
+
+  test "index search treats % and _ literally" do
+    sign_in_as(@owner)
+    get admin_users_path(q: "%")
+    assert_response :success
+    assert_select "tbody tr", text: /No users found/
+  end
+
+  test "index search combines with the pending tab" do
+    User.create!(email_address: "pending-mary@example.com", password: "password", approved: false)
+    User.create!(email_address: "pending-sean@example.com", password: "password", approved: false)
+    sign_in_as(@owner)
+
+    get admin_users_path(approved: "pending", q: "mary")
+    assert_includes response.body, "pending-mary@example.com"
+    refute_includes response.body, "pending-sean@example.com"
+    refute_includes response.body, "viewer@example.com"
+  end
+
+  test "search form and tabs keep each other's filters" do
+    sign_in_as(@owner)
+    get admin_users_path(approved: "pending", q: "mary")
+    assert_select "form[action='#{admin_users_path}'] input[name='q'][value='mary']"
+    assert_select "form input[type='hidden'][name='approved'][value='pending']"
+    assert_select "a[href*='q=mary']", text: /All Users/
+  end
+
   # Approval tests
   test "approve creates associate membership for user without one" do
     sign_in_as(@owner)
