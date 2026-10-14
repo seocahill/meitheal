@@ -37,6 +37,26 @@
     </div>
   <% end %>
 
+  <% if @card_sales.any? %>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold mb-1">Use a card payment from SumUp</h2>
+      <p class="text-sm text-gray-500 mb-4">Successful SumUp payments that are not matched to a payment or ticket yet, such as card reader sales. Picking one records it as a payment from <%= @booking.user.email_address %>.</p>
+      <%= form_with url: admin_booking_payments_path(@booking), class: "space-y-3" do |form| %>
+        <%= filter_fields %>
+        <% @card_sales.each do |sale| %>
+          <label class="flex items-start gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50">
+            <%= radio_button_tag :sumup_transaction_id, sale.id, false, required: true, class: "mt-1" %>
+            <span class="text-sm">
+              <span class="font-medium text-gray-900">&euro;<%= sprintf("%.2f", sale.amount_cents / 100.0) %> &middot; <%= sale.occurred_at.strftime("%d %b %Y, %l:%M %p").squish %></span>
+              <span class="block text-gray-500"><%= [ sale.payment_type, sale.product_summary ].compact_blank.join(" · ").presence || "No details from SumUp" %></span>
+            </span>
+          </label>
+        <% end %>
+        <%= form.submit "Use selected card payment", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
   <div class="bg-white rounded-lg shadow p-6">
     <h2 class="text-xl font-bold mb-1">Record a new payment</h2>
     <p class="text-sm text-gray-500 mb-4">Use the date the money arrived. Put a bank reference in Notes. This does not change the booker's membership.</p>

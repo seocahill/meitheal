@@ -52,26 +52,30 @@ class Booking < ApplicationRecord
     end
   end
 
-  # Records an offline payment from the booker and settles the booking. The payment sits on
-  # the booker's membership, which does not renew. A booker with no membership gets an
-  # associate one.
-  def record_payment!(amount_euro:, payment_method:, paid_on: Date.current, notes: nil)
+  # Card takings SumUp reports that no payment or ticket accounts for, newest first. Card
+  # sales carry nothing that says who paid, so these are not limited to the booker.
+  def sumup_candidates
+    SumupTransaction.unmatched.order(occurred_at: :desc)
+  end
+
+  # Settles the booking with a card sale from SumUp, recording it as the booker's payment.
+  # Raises RecordNotFound unless the sale is one of the candidates.
+  def attach_sumup_transaction!(sumup_transaction)
     transaction do
-      membership = user.memberships.first || user.memberships.create!(membership_type: :associate, starts_on: Date.current)
-      payments.create!(
-        membership: membership,
-        amount_euro: amount_euro,
-        paid_on: paid_on,
-        payment_method: payment_method,
-        purpose: :booking,
-        status: :completed,
-        user_email: user.email_address,
-        user_name: membership.payer_name,
-        description: "Booking: #{title}",
-        notes: notes
+      sale = sumup_candidates.find(sumup_transaction.id)
+      settle_with_new_payment!(
+        amount_cents: sale.amount_cents,
+        payment_method: :sumup,
+        paid_on: sale.occurred_at.to_date,
+        notes: sale.product_summary,
+        sumup_transaction_id: sale.transaction_id.presence || sale.sumup_id
       )
-      update!(paid: true)
     end
+  end
+
+  # Records an offline payment from the booker and settles the booking.
+  def record_payment!(amount_euro:, payment_method:, paid_on: Date.current, notes: nil)
+    settle_with_new_payment!(amount_euro: amount_euro, payment_method: payment_method, paid_on: paid_on, notes: notes)
   end
 
   # Corrects a payment recorded in error. The payments stay on file and can be used again.
@@ -88,6 +92,24 @@ class Booking < ApplicationRecord
   end
 
   private
+
+  # The payment sits on the booker's membership, which it does not renew. A booker with no
+  # membership gets an associate one.
+  def settle_with_new_payment!(**payment_attributes)
+    transaction do
+      membership = user.memberships.first || user.memberships.create!(membership_type: :associate, starts_on: Date.current)
+      payments.create!(
+        membership: membership,
+        purpose: :booking,
+        status: :completed,
+        user_email: user.email_address,
+        user_name: membership.payer_name,
+        description: "Booking: #{title}",
+        **payment_attributes
+      )
+      update!(paid: true)
+    end
+  end
 
   def no_overlapping_bookings
     return if starts_at.blank? || ends_at.blank? || space.blank?

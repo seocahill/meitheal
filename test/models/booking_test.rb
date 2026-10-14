@@ -462,4 +462,70 @@ class BookingTest < ActiveSupport::TestCase
     assert Payment.exists?(payment.id)
     assert_nil payment.reload.booking_id
   end
+
+  # SumUp card takings
+  def create_card_sale(sumup_id: "card-1", amount_cents: 6000, occurred_at: 2.days.ago, **attrs)
+    SumupTransaction.create!({
+      sumup_id: sumup_id, transaction_id: "txn-#{sumup_id}", amount_cents: amount_cents, occurred_at: occurred_at,
+      kind: "PAYMENT", status: "SUCCESSFUL", payment_type: "POS", product_summary: "Hall hire"
+    }.merge(attrs))
+  end
+
+  test "sumup_candidates are successful card takings nothing accounts for, newest first" do
+    booking = create_booking
+    older = create_card_sale(sumup_id: "older", occurred_at: 5.days.ago)
+    newer = create_card_sale(sumup_id: "newer", occurred_at: 1.day.ago)
+    create_card_sale(sumup_id: "refunded", status: "FAILED")
+    create_card_sale(sumup_id: "claimed").tap do |sale|
+      memberships(:active_membership).payments.create!(
+        amount_cents: 6000, paid_on: Date.current, payment_method: :sumup, sumup_transaction_id: sale.transaction_id,
+        user_email: "a@example.com", user_name: "A", description: "Fee"
+      )
+    end
+
+    assert_equal [ newer, older ], booking.sumup_candidates.to_a
+  end
+
+  test "attach_sumup_transaction! records the card sale as the booker's payment and marks the booking paid" do
+    booking = create_booking
+    sale = create_card_sale(amount_cents: 7550, occurred_at: Time.zone.local(2026, 10, 3, 21, 30))
+
+    assert_difference "memberships(:viewer_membership).payments.count" do
+      booking.attach_sumup_transaction!(sale)
+    end
+
+    payment = booking.payments.sole
+    assert_equal 7550, payment.amount_cents
+    assert_equal Date.new(2026, 10, 3), payment.paid_on
+    assert payment.sumup?
+    assert payment.booking?
+    assert payment.completed?
+    assert_equal "txn-card-1", payment.sumup_transaction_id
+    assert_equal "Hall hire", payment.notes
+    assert_equal "Booking: Open Mic", payment.description
+    assert booking.reload.paid?
+    assert_not_includes booking.sumup_candidates, sale
+  end
+
+  test "attach_sumup_transaction! refuses a card sale that is already accounted for" do
+    sale = create_card_sale
+    create_booking.attach_sumup_transaction!(sale)
+    second = create_booking
+
+    assert_raises(ActiveRecord::RecordNotFound) { second.attach_sumup_transaction!(sale) }
+    assert_not second.reload.paid?
+  end
+
+  test "mark_unpaid! keeps the card sale matched and offers its payment for the booking again" do
+    booking = create_booking
+    sale = create_card_sale
+    booking.attach_sumup_transaction!(sale)
+    payment = booking.payments.sole
+
+    booking.mark_unpaid!
+
+    assert_not booking.reload.paid?
+    assert_not_includes booking.sumup_candidates, sale
+    assert_includes booking.payment_candidates, payment
+  end
 end
