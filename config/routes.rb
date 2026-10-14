@@ -177,8 +177,7 @@ Rails.application.routes.draw do
   # Dashboard (authenticated users)
   get "dashboard", to: "dashboard#index", as: :dashboard
 
-  # Newsletters: public signup page (with past issues) and the archived copies
-  get "newsletters/:id", to: "newsletters#show", as: :newsletter
+  # Newsletter signup
   get "newsletter", to: "newsletter_subscriptions#new", as: :newsletter_page
   post "newsletter/subscribe", to: "newsletter_subscriptions#create", as: :newsletter_subscribe
   get "newsletter/qr.svg", to: "newsletter_subscriptions#qr_code", as: :newsletter_qr_code
