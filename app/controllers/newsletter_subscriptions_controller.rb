@@ -1,3 +1,6 @@
+# The public newsletter page, open to anyone (member or not): sign up, the QR
+# code for the signup page, and the past issues. Signing up goes straight to
+# the Brevo mailing list; nothing is created on the platform.
 class NewsletterSubscriptionsController < ApplicationController
   allow_unauthenticated_access
   rate_limit to: 5, within: 1.hour, only: :create, with: -> {
@@ -15,22 +18,21 @@ class NewsletterSubscriptionsController < ApplicationController
   end
 
   def create
-    @email = params[:email]&.strip&.downcase
+    @email = params[:email].to_s.strip.downcase
 
     if @email.blank?
-      flash.now[:alert] = "Please enter your email address."
-      return render :new, status: :unprocessable_entity
+      return reject("Please enter your email address.")
+    elsif !@email.match?(URI::MailTo::EMAIL_REGEXP)
+      return reject("That doesn't look like an email address.")
+    elsif Rails.env.production? && !verify_recaptcha(action: "newsletter_signup", minimum_score: 0.5)
+      return reject("Verification failed. Please try again.")
     end
 
-    if Rails.env.production? && !verify_recaptcha(action: "newsletter_signup", minimum_score: 0.5)
-      flash.now[:alert] = "Verification failed. Please try again."
-      return render :new, status: :unprocessable_entity
-    end
-
-    subscribe_user(@email)
-    sync_to_brevo(@email)
-
+    BrevoService.new.add_contact(@email)
     redirect_to newsletter_page_path, notice: "Thanks for subscribing! You'll receive our next newsletter."
+  rescue BrevoService::ApiError => e
+    Rails.logger.warn("Newsletter signup failed in Brevo: #{e.message}")
+    reject("Sorry, we couldn't sign you up just now. Please try again later.")
   end
 
   private
@@ -41,28 +43,8 @@ class NewsletterSubscriptionsController < ApplicationController
     @sent_newsletters ||= SentNewsletter.all
   end
 
-  def subscribe_user(email)
-    user = User.find_by(email_address: email)
-
-    if user
-      unless user.memberships.active.exists?
-        user.memberships.create!(membership_type: :associate, starts_on: Date.current)
-      end
-    else
-      user = User.create!(
-        email_address: email,
-        password: SecureRandom.hex(32),
-        approved: true
-      )
-      user.create_profile!(name: email.split("@").first)
-      user.memberships.create!(membership_type: :associate, starts_on: Date.current)
-    end
-  end
-
-  def sync_to_brevo(email)
-    brevo = BrevoService.new
-    brevo.add_contact(email) if brevo.configured?
-  rescue BrevoService::ApiError => e
-    Rails.logger.warn("Failed to sync newsletter subscriber to Brevo: #{e.message}")
+  def reject(message)
+    flash.now[:alert] = message
+    render :new, status: :unprocessable_entity
   end
 end

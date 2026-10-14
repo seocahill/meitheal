@@ -30,13 +30,26 @@ class BrevoService
     raise ApiError, parse_brevo_error(e)
   end
 
-  # List sent campaigns, newest first. Returns hashes with Brevo's own keys
-  # (:id, :subject, :sentDate, :shareLink, ...). HTML bodies are left out.
-  def sent_campaigns(limit: 50)
+  CAMPAIGNS_PAGE_SIZE = 100
+
+  # List every sent campaign, newest first, reading Brevo a page at a time.
+  # Returns hashes with Brevo's own keys (:id, :subject, :sentDate, :shareLink,
+  # ...). HTML bodies are left out.
+  def sent_campaigns
     ensure_configured!
 
-    result = campaigns_api.get_email_campaigns(status: "sent", sort: "desc", limit: limit, exclude_html_content: true)
-    result.campaigns || []
+    campaigns = []
+    offset = 0
+    loop do
+      page = campaigns_api.get_email_campaigns(
+        status: "sent", sort: "desc", limit: CAMPAIGNS_PAGE_SIZE, offset: offset, exclude_html_content: true
+      ).campaigns || []
+      campaigns.concat(page)
+      break if page.size < CAMPAIGNS_PAGE_SIZE
+
+      offset += CAMPAIGNS_PAGE_SIZE
+    end
+    campaigns
   rescue Brevo::ApiError => e
     Rails.logger.error("Brevo API error: #{e.message}")
     raise ApiError, parse_brevo_error(e)

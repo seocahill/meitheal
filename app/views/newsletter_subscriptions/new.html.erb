@@ -45,7 +45,11 @@
       <ul class="space-y-3">
         <% sent_newsletters.each do |newsletter| %>
           <li class="flex justify-between items-center gap-4">
-            <%= link_to newsletter.subject, newsletter.url, target: "_blank", rel: "noopener", class: "text-purple-600 hover:text-purple-700 font-medium" %>
+            <% if newsletter.archive_id %>
+              <%= link_to newsletter.subject, newsletter_path(newsletter.archive_id), class: "text-purple-600 hover:text-purple-700 font-medium" %>
+            <% else %>
+              <%= link_to newsletter.subject, newsletter.url, target: "_blank", rel: "noopener", class: "text-purple-600 hover:text-purple-700 font-medium" %>
+            <% end %>
             <span class="text-sm text-gray-500 whitespace-nowrap"><%= newsletter.sent_on.strftime("%-d %B %Y") %></span>
           </li>
         <% end %>

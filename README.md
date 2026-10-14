@@ -24,7 +24,7 @@ A curated directory of grants and funding calls, with deadline tracking and cate
 Members can submit funding proposals against opportunities. Proposals move through a draft → submitted → approved/rejected workflow, with document upload support.
 
 ### Newsletters
-Newsletters are written and sent in Brevo. The site has a public signup page (with QR code) that adds subscribers to the Brevo list, and lists the newsletters Brevo has sent.
+Newsletters are written and sent in Brevo. The public `/newsletter` page (open to everyone, with a QR code) adds subscribers straight to the Brevo list without creating an account, and lists every past newsletter. The list updates itself from Brevo; newsletters the site holds its own copy of link to that copy, so old links keep working.
 
 ### Member directory & profiles
 An opt-in public directory of member artists with skill-based search and portfolio images.

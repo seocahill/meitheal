@@ -1,0 +1,12 @@
+# Newsletter fixtures: the archive of newsletters sent through Brevo
+
+monthly_update:
+  subject: January Monthly Update
+  status: 0
+  sent_at:
+
+sent_newsletter:
+  subject: December Newsletter
+  status: 1
+  sent_at: <%= 1.month.ago %>
+  brevo_campaign_id: 11
