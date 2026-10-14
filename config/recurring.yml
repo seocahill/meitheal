@@ -21,3 +21,7 @@ production:
     class: CleanupOrphanedBlobsJob
     queue: default
     schedule: every day at 4am
+  sync_sumup_transactions:
+    class: SyncSumupTransactionsJob
+    queue: default
+    schedule: every 6 hours

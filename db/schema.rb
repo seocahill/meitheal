@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -437,6 +437,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_05_120000) do
     t.integer "user_id", null: false
     t.index ["created_at"], name: "index_stored_files_on_created_at"
     t.index ["user_id"], name: "index_stored_files_on_user_id"
+  end
+
+  create_table "sumup_transactions", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.datetime "created_at", null: false
+    t.string "currency"
+    t.string "kind"
+    t.datetime "occurred_at", null: false
+    t.string "payment_type"
+    t.string "product_summary"
+    t.string "status"
+    t.string "sumup_id", null: false
+    t.string "transaction_code"
+    t.string "transaction_id"
+    t.datetime "updated_at", null: false
+    t.index ["occurred_at"], name: "index_sumup_transactions_on_occurred_at"
+    t.index ["sumup_id"], name: "index_sumup_transactions_on_sumup_id", unique: true
   end
 
   create_table "thredded_categories", force: :cascade do |t|
