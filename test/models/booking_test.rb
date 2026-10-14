@@ -343,4 +343,123 @@ class BookingTest < ActiveSupport::TestCase
     assert_not Booking.new(status: :confirmed, paid: false, starts_at: 2.days.ago, ends_at: 2.days.ago + 1.hour).payment_overdue?
     assert_not Booking.new(status: :confirmed, paid: false, starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour).payment_overdue?
   end
+
+  # Payments
+  def create_booking(user: @user, paid: false)
+    Booking.create!(
+      space: @space, user: user, title: "Open Mic", status: :confirmed, paid: paid,
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 3.hours,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+  end
+
+  def create_payment(membership:, purpose: :booking, status: :completed, booking: nil)
+    Payment.create!(
+      membership: membership, booking: booking, amount_cents: 5000, paid_on: Date.current,
+      payment_method: :bank_transfer, purpose: purpose, status: status,
+      user_email: membership.user.email_address, user_name: membership.payer_name, description: "Hire"
+    )
+  end
+
+  test "record_payment! records a booking payment on the booker's membership and marks the booking paid" do
+    booking = create_booking
+    membership = memberships(:viewer_membership)
+
+    assert_difference "membership.payments.count" do
+      booking.record_payment!(amount_euro: "75.00", payment_method: :cash, paid_on: 2.days.ago.to_date, notes: "Cash at the door")
+    end
+
+    payment = booking.payments.sole
+    assert_equal membership, payment.membership
+    assert_equal 7500, payment.amount_cents
+    assert_equal 2.days.ago.to_date, payment.paid_on
+    assert payment.cash?
+    assert payment.booking?
+    assert payment.completed?
+    assert_equal "Cash at the door", payment.notes
+    assert_equal "Booking: Open Mic", payment.description
+    assert_equal @user.email_address, payment.user_email
+    assert booking.reload.paid?
+  end
+
+  test "record_payment! does not renew the booker's membership" do
+    membership = memberships(:viewer_membership)
+
+    assert_no_changes -> { membership.reload.expires_on } do
+      create_booking.record_payment!(amount_euro: "50", payment_method: :cash)
+    end
+  end
+
+  test "record_payment! gives a booker with no membership an associate one to hold the payment" do
+    booking = create_booking(user: users(:owner).tap { |u| u.memberships.destroy_all })
+
+    assert_difference "Membership.count" do
+      booking.record_payment!(amount_euro: "50", payment_method: :bank_transfer)
+    end
+
+    assert booking.payments.sole.membership.associate?
+  end
+
+  test "record_payment! with an invalid payment changes nothing" do
+    booking = create_booking
+
+    assert_raises(ActiveRecord::RecordInvalid) { booking.record_payment!(amount_euro: "0", payment_method: :cash) }
+    assert_not booking.reload.paid?
+    assert_empty booking.payments
+  end
+
+  test "attach_payment! links an existing payment and marks the booking paid" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership))
+
+    booking.attach_payment!(payment)
+
+    assert_equal booking, payment.reload.booking
+    assert booking.reload.paid?
+  end
+
+  test "attach_payment! refuses a payment that is not among the candidates" do
+    booking = create_booking
+    others = create_payment(membership: memberships(:active_membership))
+    taken = create_payment(membership: memberships(:viewer_membership), booking: create_booking)
+
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_payment!(others) }
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_payment!(taken) }
+    assert_not booking.reload.paid?
+  end
+
+  test "payment_candidates are the booker's completed payments not yet used for a booking or a membership fee" do
+    booking = create_booking
+    viewer = memberships(:viewer_membership)
+    open_payment = create_payment(membership: viewer)
+    unspecified = create_payment(membership: viewer, purpose: nil)
+    create_payment(membership: viewer, purpose: :membership)
+    create_payment(membership: viewer, status: :pending)
+    create_payment(membership: viewer, booking: create_booking)
+    create_payment(membership: memberships(:active_membership))
+
+    assert_equal [ open_payment, unspecified ].to_set, booking.payment_candidates.to_set
+  end
+
+  test "mark_unpaid! unlinks the payments but keeps them on file" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership))
+    booking.attach_payment!(payment)
+
+    booking.mark_unpaid!
+
+    assert_not booking.reload.paid?
+    assert_nil payment.reload.booking
+    assert_includes booking.payment_candidates, payment
+  end
+
+  test "deleting a booking keeps its payments" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership), booking: booking)
+
+    booking.destroy
+
+    assert Payment.exists?(payment.id)
+    assert_nil payment.reload.booking_id
+  end
 end

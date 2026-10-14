@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="max-w-7xl mx-auto px-4 py-8">
   <div class="flex justify-between items-center mb-8">
     <h1 class="text-3xl font-bold">Manage Bookings</h1>
     <%= link_to "View Calendar", calendar_path, class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700" %>
@@ -111,19 +111,23 @@
                 <% end %>
               </td>
               <td class="px-3 py-3 text-right text-sm">
-                <div class="flex flex-wrap justify-end gap-2">
+                <% row_filters = filters.merge(page: params[:page]).compact_blank %>
+                <div class="flex items-center justify-end gap-3 whitespace-nowrap">
                   <% if booking.pending? %>
-                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-green-600 hover:bg-green-700 transition-colors" %>
+                    <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, form: { class: "inline" }, class: "text-green-700 hover:text-green-900" %>
                   <% end %>
                   <% if booking.confirmed? %>
-                    <%= button_to booking.paid ? "Mark Unpaid" : "Mark Paid",
-                        toggle_paid_admin_booking_path(booking, filters.merge(page: params[:page]).compact_blank),
-                        method: :patch,
-                        class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white transition-colors #{booking.paid ? 'bg-amber-600 hover:bg-amber-700' : 'bg-blue-600 hover:bg-blue-700'}" %>
+                    <% if booking.paid %>
+                      <%= button_to "Mark unpaid", mark_unpaid_admin_booking_path(booking, row_filters), method: :patch,
+                            form: { class: "inline", data: { turbo_confirm: "Mark this booking unpaid? Use this to correct a mistake. The payment record is kept." } },
+                            class: "text-amber-700 hover:text-amber-900" %>
+                    <% else %>
+                      <%= link_to "Record payment", new_admin_booking_payment_path(booking, row_filters), class: "text-green-700 hover:text-green-900" %>
+                    <% end %>
                   <% end %>
-                  <%= button_to "Edit", edit_booking_path(booking), method: :get, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-purple-600 hover:bg-purple-700 transition-colors" %>
+                  <%= link_to "Edit", edit_booking_path(booking), class: "text-gray-600 hover:text-gray-900" %>
                   <% unless booking.cancelled? %>
-                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, data: { turbo_confirm: "Cancel this booking?" }, class: "px-3 py-1.5 whitespace-nowrap rounded text-xs font-medium text-white bg-red-600 hover:bg-red-700 transition-colors" %>
+                    <%= button_to "Cancel", cancel_booking_path(booking), method: :patch, form: { class: "inline", data: { turbo_confirm: "Cancel this booking?" } }, class: "text-red-600 hover:text-red-900" %>
                   <% end %>
                 </div>
               </td>

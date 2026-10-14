@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_120000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -344,6 +344,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
 
   create_table "payments", force: :cascade do |t|
     t.integer "amount_cents", null: false
+    t.integer "booking_id"
     t.datetime "created_at", null: false
     t.text "description", null: false
     t.integer "membership_id", null: false
@@ -358,6 +359,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
     t.datetime "updated_at", null: false
     t.string "user_email", null: false
     t.string "user_name", null: false
+    t.index ["booking_id"], name: "index_payments_on_booking_id"
     t.index ["membership_id"], name: "index_payments_on_membership_id"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_email"], name: "index_payments_on_user_email"
@@ -745,6 +747,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
+  add_foreign_key "payments", "bookings"
   add_foreign_key "payments", "memberships"
   add_foreign_key "posts", "users"
   add_foreign_key "profiles", "users"

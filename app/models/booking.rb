@@ -2,6 +2,7 @@ class Booking < ApplicationRecord
   belongs_to :space
   belongs_to :user
   belongs_to :approved_by, class_name: "User", optional: true
+  has_many :payments, dependent: :nullify
 
   # Virtual attributes for agreement checkboxes
   attr_accessor :agree_booking_rules, :agree_ethics
@@ -32,6 +33,53 @@ class Booking < ApplicationRecord
 
   def payment_overdue?
     confirmed? && !paid? && ends_at < 2.weeks.ago
+  end
+
+  # Completed payments from the booker that can settle this booking: not yet used for
+  # another booking and not a membership fee.
+  def payment_candidates
+    Payment.completed
+           .where(membership_id: user.memberships.select(:id), booking_id: nil)
+           .where(purpose: [ nil, *Payment.purposes.keys - [ "membership" ] ])
+  end
+
+  # Settles the booking with a payment already on file. Raises RecordNotFound unless the
+  # payment is one of the candidates.
+  def attach_payment!(payment)
+    transaction do
+      payment_candidates.find(payment.id).update!(booking: self)
+      update!(paid: true)
+    end
+  end
+
+  # Records an offline payment from the booker and settles the booking. The payment sits on
+  # the booker's membership, which does not renew. A booker with no membership gets an
+  # associate one.
+  def record_payment!(amount_euro:, payment_method:, paid_on: Date.current, notes: nil)
+    transaction do
+      membership = user.memberships.first || user.memberships.create!(membership_type: :associate, starts_on: Date.current)
+      payments.create!(
+        membership: membership,
+        amount_euro: amount_euro,
+        paid_on: paid_on,
+        payment_method: payment_method,
+        purpose: :booking,
+        status: :completed,
+        user_email: user.email_address,
+        user_name: membership.payer_name,
+        description: "Booking: #{title}",
+        notes: notes
+      )
+      update!(paid: true)
+    end
+  end
+
+  # Corrects a payment recorded in error. The payments stay on file and can be used again.
+  def mark_unpaid!
+    transaction do
+      payments.update_all(booking_id: nil)
+      update!(paid: false)
+    end
   end
 
   def editable_by?(user)

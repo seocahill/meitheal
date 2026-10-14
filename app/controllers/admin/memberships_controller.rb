@@ -6,8 +6,6 @@ class Admin::MembershipsController < Admin::BaseController
   before_action :require_owner, only: [ :destroy ]
   before_action :set_membership, only: [ :show, :edit, :update, :destroy, :toggle_paid ]
 
-  OFFLINE_PAYMENT_METHODS = %w[cash bank_transfer other].freeze
-
   def index
     scope = filtered_memberships
     return send_csv(scope) if request.format.csv?
@@ -70,7 +68,7 @@ class Admin::MembershipsController < Admin::BaseController
       redirect_to admin_memberships_path(list_filters), notice: "#{@membership.payer_name} marked unpaid."
     else
       method = params.fetch(:payment_method, "cash")
-      unless OFFLINE_PAYMENT_METHODS.include?(method)
+      unless Payment::OFFLINE_METHODS.include?(method)
         return redirect_to admin_memberships_path(list_filters), alert: "Choose cash, bank transfer or other."
       end
 
