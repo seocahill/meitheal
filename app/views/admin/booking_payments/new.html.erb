@@ -1,0 +1,109 @@
+<% input = "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500" %>
+<% label = "block text-sm font-medium text-gray-700" %>
+<% filter_fields = safe_join(Admin::BookingsController::LIST_FILTERS.filter_map { |key| hidden_field_tag(key, params[key], id: nil) if params[key].present? }) %>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold">Record Payment</h1>
+    <%= link_to "Back", admin_bookings_path(params.permit(*Admin::BookingsController::LIST_FILTERS).to_h.compact_blank), class: "text-gray-600 hover:text-gray-800" %>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <div class="font-medium text-gray-900 text-lg"><%= @booking.title %></div>
+    <div class="text-sm text-gray-500">
+      <%= @booking.space.name %> &middot;
+      <%= @booking.starts_at.strftime("%b %d, %Y") %>, <%= @booking.starts_at.strftime("%l:%M %p").strip %> - <%= @booking.ends_at.strftime("%l:%M %p").strip %>
+    </div>
+    <div class="text-sm text-gray-500"><%= @booking.user.email_address %></div>
+  </div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-bold mb-1">Use a bank transfer</h2>
+    <p class="text-sm text-gray-500 mb-4">Money received in the SumUp bank account that is not matched to a payment yet. Picking one records it as a payment from <%= @booking.user.email_address %>.</p>
+    <div class="mb-4"><%= render "admin/bank_imports/status", upload_link: true %></div>
+    <% if @bank_transactions.any? %>
+      <%= form_with url: admin_booking_payments_path(@booking), class: "space-y-3" do |form| %>
+        <%= filter_fields %>
+        <div class="space-y-3 max-h-80 overflow-y-auto">
+          <% @bank_transactions.each do |bank_transaction| %>
+            <label class="flex items-start gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50">
+              <%= radio_button_tag :bank_transaction_id, bank_transaction.id, false, required: true, class: "mt-1" %>
+              <span class="text-sm">
+                <span class="font-medium text-gray-900">&euro;<%= sprintf("%.2f", bank_transaction.amount_cents / 100.0) %> &middot; <%= bank_transaction.occurred_on.strftime("%d %b %Y") %></span>
+                <span class="block text-gray-500"><%= bank_transaction.reference.presence || "No reference" %></span>
+              </span>
+            </label>
+          <% end %>
+        </div>
+        <%= form.submit "Use selected bank transfer", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @sumup_transactions.any? %>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold mb-1">Use a SumUp payment</h2>
+      <p class="text-sm text-gray-500 mb-4">Successful payments into the SumUp account that are not matched to a payment or ticket yet. Picking one records it as a payment from <%= @booking.user.email_address %>.</p>
+      <%= form_with url: admin_booking_payments_path(@booking), class: "space-y-3" do |form| %>
+        <%= filter_fields %>
+        <% @sumup_transactions.each do |sumup_transaction| %>
+          <label class="flex items-start gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50">
+            <%= radio_button_tag :sumup_transaction_id, sumup_transaction.id, false, required: true, class: "mt-1" %>
+            <span class="text-sm">
+              <span class="font-medium text-gray-900">&euro;<%= sprintf("%.2f", sumup_transaction.amount_cents / 100.0) %> &middot; <%= sumup_transaction.occurred_at.strftime("%d %b %Y, %l:%M %p").squish %></span>
+              <span class="block text-gray-500"><%= [ sumup_transaction.payment_type, sumup_transaction.product_summary ].compact_blank.join(" · ").presence || "No details from SumUp" %></span>
+            </span>
+          </label>
+        <% end %>
+        <%= form.submit "Use selected SumUp payment", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @candidates.any? %>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-bold mb-1">Use a payment on file</h2>
+      <p class="text-sm text-gray-500 mb-4">Completed payments from <%= @booking.user.email_address %> that are not yet used for a booking.</p>
+      <%= form_with url: admin_booking_payments_path(@booking), class: "space-y-3" do |form| %>
+        <%= filter_fields %>
+        <% @candidates.each do |payment| %>
+          <label class="flex items-start gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50">
+            <%= radio_button_tag :payment_id, payment.id, false, required: true, class: "mt-1" %>
+            <span class="text-sm">
+              <span class="font-medium text-gray-900">&euro;<%= sprintf("%.2f", payment.amount_euro) %> &middot; <%= payment.payment_method.humanize %> &middot; <%= payment.paid_on.strftime("%d %b %Y") %></span>
+              <span class="block text-gray-500"><%= payment.description %><%= " (#{payment.notes})" if payment.notes.present? %></span>
+            </span>
+          </label>
+        <% end %>
+        <%= form.submit "Use selected payment", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="bg-white rounded-lg shadow p-6">
+    <h2 class="text-xl font-bold mb-1">Record a new payment</h2>
+    <p class="text-sm text-gray-500 mb-4">For money that is in neither SumUp nor the bank statement, such as cash. Use the date it arrived and put any reference in Notes. This does not change the booker's membership.</p>
+    <%= form_with model: Payment.new, url: admin_booking_payments_path(@booking), class: "space-y-4" do |form| %>
+      <%= filter_fields %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <%= form.label :amount_euro, "Amount (€)", class: label %>
+          <%= form.number_field :amount_euro, required: true, step: "0.01", min: "0.01", value: nil, class: input, placeholder: "50.00" %>
+        </div>
+        <div>
+          <%= form.label :paid_on, "Date", class: label %>
+          <%= form.date_field :paid_on, required: true, value: Date.current, class: input %>
+        </div>
+        <div>
+          <%= form.label :payment_method, "Method", class: label %>
+          <%= form.select :payment_method, Payment::OFFLINE_METHODS.map { |m| [ m.humanize, m ] }, {}, class: input %>
+        </div>
+      </div>
+      <div>
+        <%= form.label :notes, "Notes (optional)", class: label %>
+        <%= form.text_field :notes, class: input %>
+      </div>
+      <%= form.submit "Record payment", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

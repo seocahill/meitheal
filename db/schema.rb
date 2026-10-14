@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -97,6 +97,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
     t.datetime "updated_at", null: false
     t.index ["email_group_id"], name: "index_archived_emails_on_email_group_id"
     t.index ["received_at"], name: "index_archived_emails_on_received_at"
+  end
+
+  create_table "bank_imports", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.integer "rows_added", null: false
+    t.integer "rows_read", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_bank_imports_on_user_id"
+  end
+
+  create_table "bank_transactions", force: :cascade do |t|
+    t.integer "amount_cents", null: false
+    t.integer "bank_import_id", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.date "occurred_on", null: false
+    t.integer "payment_id"
+    t.string "reference", default: "", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bank_import_id"], name: "index_bank_transactions_on_bank_import_id"
+    t.index ["code"], name: "index_bank_transactions_on_code", unique: true
+    t.index ["occurred_on"], name: "index_bank_transactions_on_occurred_on"
+    t.index ["payment_id"], name: "index_bank_transactions_on_payment_id"
   end
 
   create_table "bookings", force: :cascade do |t|
@@ -344,6 +369,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
 
   create_table "payments", force: :cascade do |t|
     t.integer "amount_cents", null: false
+    t.integer "booking_id"
     t.datetime "created_at", null: false
     t.text "description", null: false
     t.integer "membership_id", null: false
@@ -358,6 +384,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
     t.datetime "updated_at", null: false
     t.string "user_email", null: false
     t.string "user_name", null: false
+    t.index ["booking_id"], name: "index_payments_on_booking_id"
     t.index ["membership_id"], name: "index_payments_on_membership_id"
     t.index ["status"], name: "index_payments_on_status"
     t.index ["user_email"], name: "index_payments_on_user_email"
@@ -728,6 +755,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "archived_emails", "email_groups"
+  add_foreign_key "bank_imports", "users"
+  add_foreign_key "bank_transactions", "bank_imports"
+  add_foreign_key "bank_transactions", "payments"
   add_foreign_key "bookings", "spaces"
   add_foreign_key "bookings", "users"
   add_foreign_key "bookings", "users", column: "approved_by_id"
@@ -745,6 +775,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_090000) do
   add_foreign_key "oauth_access_grants", "users", column: "resource_owner_id"
   add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "oauth_access_tokens", "users", column: "resource_owner_id"
+  add_foreign_key "payments", "bookings"
   add_foreign_key "payments", "memberships"
   add_foreign_key "posts", "users"
   add_foreign_key "profiles", "users"

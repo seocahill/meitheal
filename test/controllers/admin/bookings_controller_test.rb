@@ -64,21 +64,7 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Unpaid Booking"
   end
 
-  test "editor can toggle booking from unpaid to paid" do
-    sign_in_as(@editor)
-    booking = Booking.create!(
-      space: @space, user: @viewer, title: "Test Booking",
-      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
-      status: :confirmed, paid: false,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-
-    patch toggle_paid_admin_booking_path(booking)
-    assert_redirected_to admin_bookings_path
-    assert booking.reload.paid?
-  end
-
-  test "editor can toggle booking from paid to unpaid" do
+  test "editor can mark a paid booking unpaid" do
     sign_in_as(@editor)
     booking = Booking.create!(
       space: @space, user: @viewer, title: "Test Booking",
@@ -87,22 +73,23 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
       agree_booking_rules: "1", agree_ethics: "1"
     )
 
-    patch toggle_paid_admin_booking_path(booking)
+    patch mark_unpaid_admin_booking_path(booking)
     assert_redirected_to admin_bookings_path
     assert_not booking.reload.paid?
   end
 
-  test "viewer cannot toggle paid status" do
+  test "viewer cannot mark a booking unpaid" do
     sign_in_as(@viewer)
     booking = Booking.create!(
       space: @space, user: @viewer, title: "Test Booking",
       starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour,
-      status: :confirmed, paid: false,
+      status: :confirmed, paid: true,
       agree_booking_rules: "1", agree_ethics: "1"
     )
 
-    patch toggle_paid_admin_booking_path(booking)
+    patch mark_unpaid_admin_booking_path(booking)
     assert_redirected_to root_path
+    assert booking.reload.paid?
   end
 
   # Payment follow-up
@@ -200,13 +187,27 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[data-count=overdue]", text: /#{Booking.confirmed.unpaid.overdue.count}/
   end
 
-  test "toggling paid returns to the same filtered list" do
+  test "marking unpaid returns to the same filtered list" do
     sign_in_as(@editor)
-    booking = create_booking(title: "Chase Me", starts_at: 1.month.ago)
+    booking = create_booking(title: "Chase Me", starts_at: 1.month.ago, paid: true)
 
-    patch toggle_paid_admin_booking_path(booking), params: { paid: "unpaid", space_id: @space.id }
-    assert_redirected_to admin_bookings_path(paid: "unpaid", space_id: @space.id)
-    assert booking.reload.paid?
+    patch mark_unpaid_admin_booking_path(booking), params: { paid: "paid", space_id: @space.id }
+    assert_redirected_to admin_bookings_path(paid: "paid", space_id: @space.id)
+    assert_not booking.reload.paid?
+  end
+
+  test "an unpaid booking offers to record a payment, a paid one to mark it unpaid" do
+    sign_in_as(@editor)
+    unpaid = create_booking(title: "Owes Money", starts_at: 1.week.from_now)
+    paid = create_booking(title: "Settled", starts_at: 2.weeks.from_now, paid: true, user: @editor)
+
+    get admin_bookings_path(paid: "unpaid", space_id: @space.id)
+    assert_select "a[href=?]", new_admin_booking_payment_path(unpaid, paid: "unpaid", space_id: @space.id), text: "Record payment"
+    assert_select "form[action*=mark_unpaid]", count: 0
+
+    get admin_bookings_path(when: "all")
+    assert_select "form[action=?]", mark_unpaid_admin_booking_path(paid, when: "all")
+    assert_select "a[href=?]", new_admin_booking_payment_path(paid, when: "all"), count: 0
   end
 
   # Date filters
@@ -280,11 +281,23 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form input[type=date][name=to][value='2026-03-31']"
   end
 
-  test "toggling paid returns to the same date range" do
+  test "marking unpaid returns to the same date range" do
     sign_in_as(@editor)
-    booking = create_booking(title: "Chase Me", starts_at: Time.zone.local(2026, 3, 10, 12))
+    booking = create_booking(title: "Chase Me", starts_at: Time.zone.local(2026, 3, 10, 12), paid: true)
 
-    patch toggle_paid_admin_booking_path(booking), params: { from: "2026-03-01", to: "2026-03-31", period: "" }
+    patch mark_unpaid_admin_booking_path(booking), params: { from: "2026-03-01", to: "2026-03-31", period: "" }
     assert_redirected_to admin_bookings_path(from: "2026-03-01", to: "2026-03-31")
+  end
+
+  test "each row shows its status and payment state together in one cell" do
+    sign_in_as(@editor)
+    create_booking(title: "Long Overdue", starts_at: 1.month.ago, user: users(:owner))
+    create_booking(title: "Settled", starts_at: 1.week.from_now, paid: true, user: @editor)
+
+    get admin_bookings_path(when: "all")
+
+    assert_select "th", text: "Payment", count: 0
+    assert_select "tr:contains('Long Overdue') td[data-status]", text: /Confirmed.*Unpaid.*Overdue/m
+    assert_select "tr:contains('Settled') td[data-status]", text: /Confirmed.*Paid/m
   end
 end

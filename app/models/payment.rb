@@ -1,9 +1,14 @@
 class Payment < ApplicationRecord
   belongs_to :membership
+  belongs_to :booking, optional: true
+  has_one :bank_transaction, dependent: :nullify
 
   enum :payment_method, { cash: 0, bank_transfer: 1, other: 2, sumup: 3 }
   enum :purpose, { membership: 0, booking: 1, donation: 2, other_purpose: 3 }
   enum :status, { completed: 0, pending: 1, failed: 2 }
+
+  # Methods an admin can record by hand, as opposed to those taken online.
+  OFFLINE_METHODS = %w[cash bank_transfer other].freeze
 
   validates :amount_cents, presence: true, numericality: { greater_than: 0 }
   validates :paid_on, presence: true

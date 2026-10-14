@@ -1,0 +1,21 @@
+<%# How current the bank transactions are. Takes `upload_link` to add a link to the upload page. %>
+<% last_transaction = BankTransaction.latest_date %>
+<% last_import = BankImport.order(:created_at, :id).last %>
+<% due = BankImport.upload_due? %>
+<div data-bank-status data-upload-status class="rounded-lg border px-4 py-3 text-sm <%= due ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-gray-50 border-gray-200 text-gray-700' %>">
+  <% if last_import.nil? %>
+    <div>No bank statement has been uploaded.</div>
+  <% else %>
+    <div data-last-transaction>Last transaction <strong><%= last_transaction.strftime("%d %b %Y") %></strong> (<%= time_ago_in_words(last_transaction) %> ago)</div>
+    <div data-last-upload>Last upload <%= last_import.filename %>, <%= time_ago_in_words(last_import.created_at) %> ago</div>
+  <% end %>
+  <% if due %>
+    <div data-upload-due class="font-medium mt-1">
+      A new upload is due.
+      <% if last_import %>The last one was more than <%= distance_of_time_in_words(BankImport::DUE_AFTER) %> ago, so newer transfers will not be listed.<% end %>
+    </div>
+  <% end %>
+  <% if local_assigns[:upload_link] %>
+    <%= link_to "Upload a statement", admin_bank_imports_path, class: "inline-block mt-1 underline font-medium" %>
+  <% end %>
+</div>

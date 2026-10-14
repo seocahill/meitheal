@@ -1,7 +1,11 @@
 class Admin::BookingsController < Admin::BaseController
   include Pagy::Method
+
+  # Everything the list can be filtered by, kept when moving between the list and a booking's pages.
+  LIST_FILTERS = %i[status paid overdue when space_id q period from to page].freeze
+
   before_action :require_editor
-  before_action :set_booking, only: [ :toggle_paid ]
+  before_action :set_booking, only: [ :mark_unpaid ]
 
   def index
     scope = Booking.includes(:user, :space)
@@ -52,10 +56,10 @@ class Admin::BookingsController < Admin::BaseController
     @pagy, @bookings = pagy(scope, limit: 20)
   end
 
-  def toggle_paid
-    @booking.update!(paid: !@booking.paid)
-    status_text = @booking.paid? ? "paid" : "unpaid"
-    redirect_to admin_bookings_path(list_filters), notice: "Booking marked as #{status_text}"
+  # Corrects a payment recorded in error. Payments are recorded from the booking's payment form.
+  def mark_unpaid
+    @booking.mark_unpaid!
+    redirect_to admin_bookings_path(list_filters), notice: "#{@booking.title} marked unpaid."
   end
 
   private
@@ -70,7 +74,7 @@ class Admin::BookingsController < Admin::BaseController
 
   # Keep the current filters and search when returning to the list.
   def list_filters
-    params.permit(:status, :paid, :overdue, :when, :space_id, :q, :period, :from, :to, :page).to_h.compact_blank
+    params.permit(*LIST_FILTERS).to_h.compact_blank
   end
 
   def search(scope, term)

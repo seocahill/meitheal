@@ -343,4 +343,249 @@ class BookingTest < ActiveSupport::TestCase
     assert_not Booking.new(status: :confirmed, paid: false, starts_at: 2.days.ago, ends_at: 2.days.ago + 1.hour).payment_overdue?
     assert_not Booking.new(status: :confirmed, paid: false, starts_at: 1.week.from_now, ends_at: 1.week.from_now + 1.hour).payment_overdue?
   end
+
+  # Payments
+  def create_booking(user: @user, paid: false)
+    Booking.create!(
+      space: @space, user: user, title: "Open Mic", status: :confirmed, paid: paid,
+      starts_at: 1.week.from_now, ends_at: 1.week.from_now + 3.hours,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+  end
+
+  def create_payment(membership:, purpose: :booking, status: :completed, booking: nil)
+    Payment.create!(
+      membership: membership, booking: booking, amount_cents: 5000, paid_on: Date.current,
+      payment_method: :bank_transfer, purpose: purpose, status: status,
+      user_email: membership.user.email_address, user_name: membership.payer_name, description: "Hire"
+    )
+  end
+
+  test "record_payment! records a booking payment on the booker's membership and marks the booking paid" do
+    booking = create_booking
+    membership = memberships(:viewer_membership)
+
+    assert_difference "membership.payments.count" do
+      booking.record_payment!(amount_euro: "75.00", payment_method: :cash, paid_on: 2.days.ago.to_date, notes: "Cash at the door")
+    end
+
+    payment = booking.payments.sole
+    assert_equal membership, payment.membership
+    assert_equal 7500, payment.amount_cents
+    assert_equal 2.days.ago.to_date, payment.paid_on
+    assert payment.cash?
+    assert payment.booking?
+    assert payment.completed?
+    assert_equal "Cash at the door", payment.notes
+    assert_equal "Booking: Open Mic", payment.description
+    assert_equal @user.email_address, payment.user_email
+    assert booking.reload.paid?
+  end
+
+  test "record_payment! does not renew the booker's membership" do
+    membership = memberships(:viewer_membership)
+
+    assert_no_changes -> { membership.reload.expires_on } do
+      create_booking.record_payment!(amount_euro: "50", payment_method: :cash)
+    end
+  end
+
+  test "record_payment! gives a booker with no membership an associate one to hold the payment" do
+    booking = create_booking(user: users(:owner).tap { |u| u.memberships.destroy_all })
+
+    assert_difference "Membership.count" do
+      booking.record_payment!(amount_euro: "50", payment_method: :bank_transfer)
+    end
+
+    assert booking.payments.sole.membership.associate?
+  end
+
+  test "record_payment! with an invalid payment changes nothing" do
+    booking = create_booking
+
+    assert_raises(ActiveRecord::RecordInvalid) { booking.record_payment!(amount_euro: "0", payment_method: :cash) }
+    assert_not booking.reload.paid?
+    assert_empty booking.payments
+  end
+
+  test "attach_payment! links an existing payment and marks the booking paid" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership))
+
+    booking.attach_payment!(payment)
+
+    assert_equal booking, payment.reload.booking
+    assert booking.reload.paid?
+  end
+
+  test "attach_payment! refuses a payment that is not among the candidates" do
+    booking = create_booking
+    others = create_payment(membership: memberships(:active_membership))
+    taken = create_payment(membership: memberships(:viewer_membership), booking: create_booking)
+
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_payment!(others) }
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_payment!(taken) }
+    assert_not booking.reload.paid?
+  end
+
+  test "payment_candidates are the booker's completed payments not yet used for a booking or a membership fee" do
+    booking = create_booking
+    viewer = memberships(:viewer_membership)
+    open_payment = create_payment(membership: viewer)
+    unspecified = create_payment(membership: viewer, purpose: nil)
+    create_payment(membership: viewer, purpose: :membership)
+    create_payment(membership: viewer, status: :pending)
+    create_payment(membership: viewer, booking: create_booking)
+    create_payment(membership: memberships(:active_membership))
+
+    assert_equal [ open_payment, unspecified ].to_set, booking.payment_candidates.to_set
+  end
+
+  test "mark_unpaid! unlinks the payments but keeps them on file" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership))
+    booking.attach_payment!(payment)
+
+    booking.mark_unpaid!
+
+    assert_not booking.reload.paid?
+    assert_nil payment.reload.booking
+    assert_includes booking.payment_candidates, payment
+  end
+
+  test "deleting a booking keeps its payments" do
+    booking = create_booking
+    payment = create_payment(membership: memberships(:viewer_membership), booking: booking)
+
+    booking.destroy
+
+    assert Payment.exists?(payment.id)
+    assert_nil payment.reload.booking_id
+  end
+
+  # SumUp transactions
+  def create_sumup_transaction(sumup_id: "tx-1", amount_cents: 6000, occurred_at: 2.days.ago, **attrs)
+    SumupTransaction.create!({
+      sumup_id: sumup_id, transaction_id: "txn-#{sumup_id}", amount_cents: amount_cents, occurred_at: occurred_at,
+      kind: "PAYMENT", status: "SUCCESSFUL", payment_type: "POS", product_summary: "Hall hire"
+    }.merge(attrs))
+  end
+
+  test "sumup_candidates are successful SumUp transactions nothing accounts for, newest first" do
+    booking = create_booking
+    older = create_sumup_transaction(sumup_id: "older", occurred_at: 5.days.ago)
+    newer = create_sumup_transaction(sumup_id: "newer", occurred_at: 1.day.ago)
+    create_sumup_transaction(sumup_id: "refunded", status: "FAILED")
+    create_sumup_transaction(sumup_id: "claimed").tap do |received|
+      memberships(:active_membership).payments.create!(
+        amount_cents: 6000, paid_on: Date.current, payment_method: :sumup, sumup_transaction_id: received.transaction_id,
+        user_email: "a@example.com", user_name: "A", description: "Fee"
+      )
+    end
+
+    assert_equal [ newer, older ], booking.sumup_candidates.to_a
+  end
+
+  test "attach_sumup_transaction! records the SumUp transaction as the booker's payment and marks the booking paid" do
+    booking = create_booking
+    received = create_sumup_transaction(amount_cents: 7550, occurred_at: Time.zone.local(2026, 10, 3, 21, 30))
+
+    assert_difference "memberships(:viewer_membership).payments.count" do
+      booking.attach_sumup_transaction!(received)
+    end
+
+    payment = booking.payments.sole
+    assert_equal 7550, payment.amount_cents
+    assert_equal Date.new(2026, 10, 3), payment.paid_on
+    assert payment.sumup?
+    assert payment.booking?
+    assert payment.completed?
+    assert_equal "txn-tx-1", payment.sumup_transaction_id
+    assert_equal "Hall hire", payment.notes
+    assert_equal "Booking: Open Mic", payment.description
+    assert booking.reload.paid?
+    assert_not_includes booking.sumup_candidates, received
+  end
+
+  test "attach_sumup_transaction! refuses a SumUp transaction that is already accounted for" do
+    received = create_sumup_transaction
+    create_booking.attach_sumup_transaction!(received)
+    second = create_booking
+
+    assert_raises(ActiveRecord::RecordNotFound) { second.attach_sumup_transaction!(received) }
+    assert_not second.reload.paid?
+  end
+
+  test "mark_unpaid! keeps the SumUp transaction matched and offers its payment for the booking again" do
+    booking = create_booking
+    received = create_sumup_transaction
+    booking.attach_sumup_transaction!(received)
+    payment = booking.payments.sole
+
+    booking.mark_unpaid!
+
+    assert_not booking.reload.paid?
+    assert_not_includes booking.sumup_candidates, received
+    assert_includes booking.payment_candidates, payment
+  end
+
+  # Bank statement transactions
+  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3))
+    import = BankImport.first || BankImport.create!(user: users(:editor), filename: "report.csv", rows_read: 1, rows_added: 1)
+    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on)
+  end
+
+  test "bank_candidates are the bank transactions nothing accounts for" do
+    booking = create_booking
+    open_transfer = create_bank_transaction(code: "OPEN")
+    create_bank_transaction(code: "SPENT", amount_cents: -5000)
+    create_bank_transaction(code: "PAYOUT", reference: "SUMUP PID1379801 PAYOUT 171025")
+
+    assert_equal [ open_transfer ], booking.bank_candidates.to_a
+  end
+
+  test "attach_bank_transaction! records the transfer as the booker's payment and marks the booking paid" do
+    booking = create_booking
+    transfer = create_bank_transaction
+
+    assert_difference "memberships(:viewer_membership).payments.count" do
+      booking.attach_bank_transaction!(transfer)
+    end
+
+    payment = booking.payments.sole
+    assert_equal 12000, payment.amount_cents
+    assert_equal Date.new(2026, 10, 3), payment.paid_on
+    assert payment.bank_transfer?
+    assert payment.booking?
+    assert payment.completed?
+    assert_equal "SEAN CAHILL IE12ABCD12345678901234", payment.notes
+    assert_equal "Booking: Open Mic", payment.description
+    assert_equal payment, transfer.reload.payment
+    assert booking.reload.paid?
+    assert_not_includes booking.bank_candidates, transfer
+  end
+
+  test "attach_bank_transaction! refuses a transfer that is already accounted for or is not received money" do
+    taken = create_bank_transaction(code: "TAKEN")
+    create_booking.attach_bank_transaction!(taken)
+    spent = create_bank_transaction(code: "SPENT", amount_cents: -5000)
+    booking = create_booking
+
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_bank_transaction!(taken) }
+    assert_raises(ActiveRecord::RecordNotFound) { booking.attach_bank_transaction!(spent) }
+    assert_not booking.reload.paid?
+  end
+
+  test "mark_unpaid! keeps the bank transaction matched and offers its payment for the booking again" do
+    booking = create_booking
+    transfer = create_bank_transaction
+    booking.attach_bank_transaction!(transfer)
+    payment = booking.payments.sole
+
+    booking.mark_unpaid!
+
+    assert_not booking.reload.paid?
+    assert_not_includes booking.bank_candidates, transfer
+    assert_includes booking.payment_candidates, payment
+  end
 end
