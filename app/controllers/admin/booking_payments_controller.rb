@@ -1,16 +1,19 @@
-# Settles a booking with a payment already on file, a SumUp transaction, or a new offline payment.
+# Settles a booking with a bank transfer, a SumUp transaction, a payment already on file, or a new offline payment.
 class Admin::BookingPaymentsController < Admin::BaseController
   before_action :require_editor
   before_action :set_booking
 
   def new
     @candidates = @booking.payment_candidates.order(paid_on: :desc, created_at: :desc)
+    @bank_transactions = @booking.bank_candidates
     @sumup_transactions = @booking.sumup_candidates
   end
 
   def create
     if params[:payment_id].present?
       @booking.attach_payment!(Payment.find(params[:payment_id]))
+    elsif params[:bank_transaction_id].present?
+      @booking.attach_bank_transaction!(BankTransaction.find(params[:bank_transaction_id]))
     elsif params[:sumup_transaction_id].present?
       @booking.attach_sumup_transaction!(SumupTransaction.find(params[:sumup_transaction_id]))
     else

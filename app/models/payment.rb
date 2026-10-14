@@ -1,6 +1,7 @@
 class Payment < ApplicationRecord
   belongs_to :membership
   belongs_to :booking, optional: true
+  has_one :bank_transaction, dependent: :nullify
 
   enum :payment_method, { cash: 0, bank_transfer: 1, other: 2, sumup: 3 }
   enum :purpose, { membership: 0, booking: 1, donation: 2, other_purpose: 3 }

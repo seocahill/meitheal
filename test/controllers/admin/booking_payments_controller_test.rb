@@ -205,4 +205,75 @@ class Admin::BookingPaymentsControllerTest < ActionDispatch::IntegrationTest
     assert_match "no longer available", flash[:alert]
     assert_not @booking.reload.paid?
   end
+
+  # Bank statement transactions
+  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3))
+    import = BankImport.first || BankImport.create!(user: @editor, filename: "report.csv", rows_read: 1, rows_added: 1)
+    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on)
+  end
+
+  test "the form lists bank transactions that nothing accounts for" do
+    sign_in_as(@editor)
+    transfer = create_bank_transaction(reference: "HALL HIRE IE99ZZZZ00000000000000")
+    create_bank_transaction(code: "SPENT", reference: "Gas bill", amount_cents: -8325)
+
+    get new_admin_booking_payment_path(@booking)
+
+    assert_select "input[type=radio][name=bank_transaction_id][value=?]", transfer.id.to_s
+    assert_select "input[type=radio][name=bank_transaction_id]", count: 1
+    assert_includes response.body, "HALL HIRE IE99ZZZZ00000000000000"
+    assert_not_includes response.body, "Gas bill"
+  end
+
+  test "picking a bank transaction records it as the booker's payment and settles the booking" do
+    sign_in_as(@editor)
+    transfer = create_bank_transaction
+
+    assert_difference "@membership.payments.count" do
+      post admin_booking_payments_path(@booking), params: { bank_transaction_id: transfer.id }
+    end
+
+    assert_redirected_to admin_bookings_path
+    payment = @booking.payments.sole
+    assert payment.bank_transfer?
+    assert_equal 12000, payment.amount_cents
+    assert_equal payment, transfer.reload.payment
+    assert @booking.reload.paid?
+  end
+
+  test "a bank transaction that has been matched in the meantime cannot be used again" do
+    sign_in_as(@editor)
+    transfer = create_bank_transaction
+    other = Booking.create!(
+      space: spaces(:back_room), user: @editor, title: "Other", status: :confirmed,
+      starts_at: 2.weeks.from_now, ends_at: 2.weeks.from_now + 2.hours, agree_booking_rules: "1", agree_ethics: "1"
+    )
+    other.attach_bank_transaction!(transfer)
+
+    assert_no_difference "Payment.count" do
+      post admin_booking_payments_path(@booking), params: { bank_transaction_id: transfer.id }
+    end
+
+    assert_redirected_to new_admin_booking_payment_path(@booking)
+    assert_match "no longer available", flash[:alert]
+    assert_not @booking.reload.paid?
+  end
+
+  test "the form says how recent the bank transactions are and links to the upload page" do
+    sign_in_as(@editor)
+    create_bank_transaction(occurred_on: Date.new(2025, 12, 30))
+
+    get new_admin_booking_payment_path(@booking)
+
+    assert_select "[data-bank-status]", text: /30 Dec 2025/
+    assert_select "[data-bank-status] a[href=?]", admin_bank_imports_path
+  end
+
+  test "the form tells the editor to upload when no bank statement has been uploaded" do
+    sign_in_as(@editor)
+
+    get new_admin_booking_payment_path(@booking)
+
+    assert_select "[data-bank-status]", text: /No bank statement/
+  end
 end

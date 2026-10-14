@@ -1,0 +1,78 @@
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <h1 class="text-3xl font-bold mb-6">Bank Statement</h1>
+
+  <div class="mb-6"><%= render "status" %></div>
+
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-bold mb-1">Upload a statement</h2>
+    <p class="text-sm text-gray-500 mb-4">
+      In SumUp, open Business Account, choose a period and download the CSV. Uploading a period that overlaps an earlier upload is fine, transactions already held are skipped.
+    </p>
+    <%= form_with url: admin_bank_imports_path, multipart: true, class: "flex flex-wrap items-center gap-3" do |form| %>
+      <%= form.file_field :file, accept: ".csv,text/csv", required: true, class: "text-sm" %>
+      <%= form.submit "Upload", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <% if @imports.any? %>
+    <div class="bg-white rounded-lg shadow overflow-x-auto mb-6">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recent uploads</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">By</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">New</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Already held</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @imports.each do |import| %>
+            <tr>
+              <td class="px-4 py-2 text-sm text-gray-900">
+                <%= import.filename %>
+                <div class="text-xs text-gray-500"><%= import.created_at.strftime("%d %b %Y, %l:%M %p").squish %></div>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-500"><%= import.user.email_address %></td>
+              <td class="px-4 py-2 text-sm text-gray-900 text-right"><%= import.rows_added %></td>
+              <td class="px-4 py-2 text-sm text-gray-500 text-right"><%= import.rows_skipped %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+
+  <div class="bg-white rounded-lg shadow overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference</th>
+          <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matched</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @transactions.each do |transaction| %>
+          <tr>
+            <td class="px-4 py-2 text-sm text-gray-900 whitespace-nowrap"><%= transaction.occurred_on.strftime("%d %b %Y") %></td>
+            <td class="px-4 py-2 text-sm text-gray-900"><%= transaction.reference %></td>
+            <td class="px-4 py-2 text-sm text-right whitespace-nowrap <%= transaction.amount_cents.negative? ? 'text-red-700' : 'text-gray-900' %>">
+              &euro;<%= number_with_precision(transaction.amount_cents / 100.0, precision: 2, delimiter: ",") %>
+            </td>
+            <td class="px-4 py-2 text-sm text-gray-500" data-matched="<%= transaction.payment_id.present? %>">
+              <%= transaction.payment_id.present? ? "Matched to a payment" : "" %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @transactions.empty? %>
+          <tr><td colspan="4" class="px-4 py-12 text-center text-gray-500">No bank transactions yet.</td></tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <nav class="mt-8 text-center text-sm">
+    <%== @pagy.series_nav %>
+  </nav>
+</div>

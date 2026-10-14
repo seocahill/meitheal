@@ -68,6 +68,7 @@
             <%= link_to t("users"), admin_users_path, class: sidebar_nav_class("admin/users") %>
             <%= link_to t("memberships"), admin_memberships_path, class: sidebar_nav_class("admin/memberships") %>
             <%= link_to t("payments"), admin_payments_path, class: sidebar_nav_class("admin/payments") %>
+            <%= link_to t("bank"), admin_bank_imports_path, class: sidebar_nav_class("admin/bank_imports") %>
             <%= link_to t("bookings"), admin_bookings_path, class: sidebar_nav_class("admin/bookings") %>
             <% if current_user_can_manage? %>
               <%= link_to t("proposals"), admin_proposals_path, class: sidebar_nav_class("admin/proposals") %>

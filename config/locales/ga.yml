@@ -47,6 +47,7 @@ ga:
   users: "Úsáideoirí"
   memberships: "Ballraíochtaí"
   payments: "Íocaíochtaí"
+  bank: "Banc"
   ticket_sales: "Díolacháin Ticéad"
   proposals: "Tograí"
 

@@ -17,6 +17,29 @@
     <div class="text-sm text-gray-500"><%= @booking.user.email_address %></div>
   </div>
 
+  <div class="bg-white rounded-lg shadow p-6 mb-6">
+    <h2 class="text-xl font-bold mb-1">Use a bank transfer</h2>
+    <p class="text-sm text-gray-500 mb-4">Money received in the SumUp bank account that is not matched to a payment yet. Picking one records it as a payment from <%= @booking.user.email_address %>.</p>
+    <div class="mb-4"><%= render "admin/bank_imports/status", upload_link: true %></div>
+    <% if @bank_transactions.any? %>
+      <%= form_with url: admin_booking_payments_path(@booking), class: "space-y-3" do |form| %>
+        <%= filter_fields %>
+        <div class="space-y-3 max-h-80 overflow-y-auto">
+          <% @bank_transactions.each do |bank_transaction| %>
+            <label class="flex items-start gap-3 border border-gray-200 rounded-lg px-4 py-3 cursor-pointer hover:bg-gray-50">
+              <%= radio_button_tag :bank_transaction_id, bank_transaction.id, false, required: true, class: "mt-1" %>
+              <span class="text-sm">
+                <span class="font-medium text-gray-900">&euro;<%= sprintf("%.2f", bank_transaction.amount_cents / 100.0) %> &middot; <%= bank_transaction.occurred_on.strftime("%d %b %Y") %></span>
+                <span class="block text-gray-500"><%= bank_transaction.reference.presence || "No reference" %></span>
+              </span>
+            </label>
+          <% end %>
+        </div>
+        <%= form.submit "Use selected bank transfer", class: "bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700 cursor-pointer" %>
+      <% end %>
+    <% end %>
+  </div>
+
   <% if @sumup_transactions.any? %>
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-xl font-bold mb-1">Use a SumUp payment</h2>
@@ -59,7 +82,7 @@
 
   <div class="bg-white rounded-lg shadow p-6">
     <h2 class="text-xl font-bold mb-1">Record a new payment</h2>
-    <p class="text-sm text-gray-500 mb-4">For money that is not in SumUp, such as cash. Use the date it arrived and put any reference in Notes. This does not change the booker's membership.</p>
+    <p class="text-sm text-gray-500 mb-4">For money that is in neither SumUp nor the bank statement, such as cash. Use the date it arrived and put any reference in Notes. This does not change the booker's membership.</p>
     <%= form_with model: Payment.new, url: admin_booking_payments_path(@booking), class: "space-y-4" do |form| %>
       <%= filter_fields %>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

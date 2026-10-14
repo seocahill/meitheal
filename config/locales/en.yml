@@ -47,6 +47,7 @@ en:
   users: "Users"
   memberships: "Memberships"
   payments: "Payments"
+  bank: "Bank"
   ticket_sales: "Ticket Sales"
   proposals: "Proposals"
 

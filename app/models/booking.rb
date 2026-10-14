@@ -74,6 +74,27 @@ class Booking < ApplicationRecord
     end
   end
 
+  # Money received by bank transfer that no payment accounts for, newest first. Like SumUp
+  # transactions, these do not say who paid, so they are not limited to the booker.
+  def bank_candidates
+    BankTransaction.unmatched
+  end
+
+  # Settles the booking with a bank transfer, recording it as the booker's payment. Raises
+  # RecordNotFound unless the transfer is one of the candidates.
+  def attach_bank_transaction!(bank_transaction)
+    transaction do
+      received = bank_candidates.find(bank_transaction.id)
+      payment = settle_with_new_payment!(
+        amount_cents: received.amount_cents,
+        payment_method: :bank_transfer,
+        paid_on: received.occurred_on,
+        notes: received.reference
+      )
+      received.update!(payment: payment)
+    end
+  end
+
   # Records an offline payment from the booker and settles the booking.
   def record_payment!(amount_euro:, payment_method:, paid_on: Date.current, notes: nil)
     settle_with_new_payment!(amount_euro: amount_euro, payment_method: payment_method, paid_on: paid_on, notes: notes)
@@ -99,7 +120,7 @@ class Booking < ApplicationRecord
   def settle_with_new_payment!(**payment_attributes)
     transaction do
       membership = user.memberships.first || user.memberships.create!(membership_type: :associate, starts_on: Date.current)
-      payments.create!(
+      payment = payments.create!(
         membership: membership,
         purpose: :booking,
         status: :completed,
@@ -109,6 +130,7 @@ class Booking < ApplicationRecord
         **payment_attributes
       )
       update!(paid: true)
+      payment
     end
   end
 
