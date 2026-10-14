@@ -288,4 +288,16 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     patch mark_unpaid_admin_booking_path(booking), params: { from: "2026-03-01", to: "2026-03-31", period: "" }
     assert_redirected_to admin_bookings_path(from: "2026-03-01", to: "2026-03-31")
   end
+
+  test "each row shows its status and payment state together in one cell" do
+    sign_in_as(@editor)
+    create_booking(title: "Long Overdue", starts_at: 1.month.ago, user: users(:owner))
+    create_booking(title: "Settled", starts_at: 1.week.from_now, paid: true, user: @editor)
+
+    get admin_bookings_path(when: "all")
+
+    assert_select "th", text: "Payment", count: 0
+    assert_select "tr:contains('Long Overdue') td[data-status]", text: /Confirmed.*Unpaid.*Overdue/m
+    assert_select "tr:contains('Settled') td[data-status]", text: /Confirmed.*Paid/m
+  end
 end
