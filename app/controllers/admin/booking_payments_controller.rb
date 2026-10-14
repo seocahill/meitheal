@@ -1,11 +1,11 @@
-# Settles a booking with a payment already on file, a card sale SumUp reported, or a new offline payment.
+# Settles a booking with a payment already on file, a SumUp transaction, or a new offline payment.
 class Admin::BookingPaymentsController < Admin::BaseController
   before_action :require_editor
   before_action :set_booking
 
   def new
     @candidates = @booking.payment_candidates.order(paid_on: :desc, created_at: :desc)
-    @card_sales = @booking.sumup_candidates
+    @sumup_transactions = @booking.sumup_candidates
   end
 
   def create

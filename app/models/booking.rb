@@ -52,23 +52,24 @@ class Booking < ApplicationRecord
     end
   end
 
-  # Card takings SumUp reports that no payment or ticket accounts for, newest first. Card
-  # sales carry nothing that says who paid, so these are not limited to the booker.
+  # Successful SumUp transactions that no payment or ticket accounts for, newest first. The
+  # bank account is SumUp's, and its transactions do not say who paid, so these are not
+  # limited to the booker.
   def sumup_candidates
     SumupTransaction.unmatched.order(occurred_at: :desc)
   end
 
-  # Settles the booking with a card sale from SumUp, recording it as the booker's payment.
-  # Raises RecordNotFound unless the sale is one of the candidates.
+  # Settles the booking with a SumUp transaction, recording it as the booker's payment.
+  # Raises RecordNotFound unless the transaction is one of the candidates.
   def attach_sumup_transaction!(sumup_transaction)
     transaction do
-      sale = sumup_candidates.find(sumup_transaction.id)
+      received = sumup_candidates.find(sumup_transaction.id)
       settle_with_new_payment!(
-        amount_cents: sale.amount_cents,
+        amount_cents: received.amount_cents,
         payment_method: :sumup,
-        paid_on: sale.occurred_at.to_date,
-        notes: sale.product_summary,
-        sumup_transaction_id: sale.transaction_id.presence || sale.sumup_id
+        paid_on: received.occurred_at.to_date,
+        notes: received.product_summary,
+        sumup_transaction_id: received.transaction_id.presence || received.sumup_id
       )
     end
   end

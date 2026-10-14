@@ -146,18 +146,18 @@ class Admin::BookingPaymentsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to admin_bookings_path(paid: "unpaid", space_id: "3")
   end
 
-  # SumUp card takings
-  def create_card_sale(sumup_id: "card-1", **attrs)
+  # SumUp transactions
+  def create_sumup_transaction(sumup_id: "tx-1", **attrs)
     SumupTransaction.create!({
       sumup_id: sumup_id, transaction_id: "txn-#{sumup_id}", amount_cents: 6000, occurred_at: 2.days.ago,
       kind: "PAYMENT", status: "SUCCESSFUL", payment_type: "POS", product_summary: "Hall hire"
     }.merge(attrs))
   end
 
-  test "the form lists card takings from SumUp that nothing accounts for" do
+  test "the form lists SumUp transactions that nothing accounts for" do
     sign_in_as(@editor)
-    sale = create_card_sale(product_summary: "Hall hire Friday")
-    claimed = create_card_sale(sumup_id: "claimed", product_summary: "Already matched")
+    received = create_sumup_transaction(product_summary: "Hall hire Friday")
+    claimed = create_sumup_transaction(sumup_id: "claimed", product_summary: "Already matched")
     @membership.payments.create!(
       amount_cents: 6000, paid_on: Date.current, payment_method: :sumup, sumup_transaction_id: claimed.transaction_id,
       user_email: "a@example.com", user_name: "A", description: "Fee"
@@ -165,40 +165,40 @@ class Admin::BookingPaymentsControllerTest < ActionDispatch::IntegrationTest
 
     get new_admin_booking_payment_path(@booking)
 
-    assert_select "input[type=radio][name=sumup_transaction_id][value=?]", sale.id.to_s
+    assert_select "input[type=radio][name=sumup_transaction_id][value=?]", received.id.to_s
     assert_select "input[type=radio][name=sumup_transaction_id]", count: 1
     assert_includes response.body, "Hall hire Friday"
     assert_not_includes response.body, "Already matched"
   end
 
-  test "picking a card sale records it as the booker's payment and settles the booking" do
+  test "picking a SumUp transaction records it as the booker's payment and settles the booking" do
     sign_in_as(@editor)
-    sale = create_card_sale
+    received = create_sumup_transaction
 
     assert_difference "@membership.payments.count" do
-      post admin_booking_payments_path(@booking), params: { sumup_transaction_id: sale.id }
+      post admin_booking_payments_path(@booking), params: { sumup_transaction_id: received.id }
     end
 
     assert_redirected_to admin_bookings_path
     payment = @booking.payments.sole
     assert payment.sumup?
     assert_equal 6000, payment.amount_cents
-    assert_equal "txn-card-1", payment.sumup_transaction_id
+    assert_equal "txn-tx-1", payment.sumup_transaction_id
     assert @booking.reload.paid?
-    assert_not_includes SumupTransaction.unmatched, sale
+    assert_not_includes SumupTransaction.unmatched, received
   end
 
-  test "a card sale that has been matched in the meantime cannot be used again" do
+  test "a SumUp transaction that has been matched in the meantime cannot be used again" do
     sign_in_as(@editor)
-    sale = create_card_sale
+    received = create_sumup_transaction
     other = Booking.create!(
       space: spaces(:back_room), user: @editor, title: "Other", status: :confirmed,
       starts_at: 2.weeks.from_now, ends_at: 2.weeks.from_now + 2.hours, agree_booking_rules: "1", agree_ethics: "1"
     )
-    other.attach_sumup_transaction!(sale)
+    other.attach_sumup_transaction!(received)
 
     assert_no_difference "Payment.count" do
-      post admin_booking_payments_path(@booking), params: { sumup_transaction_id: sale.id }
+      post admin_booking_payments_path(@booking), params: { sumup_transaction_id: received.id }
     end
 
     assert_redirected_to new_admin_booking_payment_path(@booking)
