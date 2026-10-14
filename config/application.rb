@@ -29,5 +29,8 @@ module Meitheal
 
     config.i18n.available_locales = [ :en, :ga ]
     config.i18n.default_locale = :en
+
+    require_relative "../app/middleware/ip_spoof_protection"
+    config.middleware.insert_before ActionDispatch::RemoteIp, IpSpoofProtection
   end
 end
