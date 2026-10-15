@@ -8,7 +8,15 @@ class Admin::BankImportsController < Admin::BaseController
 
   def index
     @imports = BankImport.includes(:user).order(created_at: :desc, id: :desc).limit(5)
-    @pagy, @transactions = pagy(BankTransaction.order(occurred_on: :desc, id: :desc), limit: 20)
+    @date_filter = DateRangeFilter.new(params)
+    range = @date_filter.range
+
+    transactions = BankTransaction.by_type(params[:type])
+                                  .by_direction(params[:direction])
+                                  .by_match(params[:matched])
+                                  .by_date_range(range&.begin, range&.end)
+                                  .search(params[:search])
+    @pagy, @transactions = pagy(transactions.order(occurred_on: :desc, id: :desc), limit: 20)
   end
 
   def create
