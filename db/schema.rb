@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_15_120000) do
   create_table "_litestream_lock", id: false, force: :cascade do |t|
     t.integer "id"
   end
@@ -116,7 +116,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_14_130000) do
     t.datetime "created_at", null: false
     t.date "occurred_on", null: false
     t.integer "payment_id"
+    t.string "payment_reference", default: "", null: false
     t.string "reference", default: "", null: false
+    t.string "transaction_type", default: "", null: false
     t.datetime "updated_at", null: false
     t.index ["bank_import_id"], name: "index_bank_transactions_on_bank_import_id"
     t.index ["code"], name: "index_bank_transactions_on_code", unique: true

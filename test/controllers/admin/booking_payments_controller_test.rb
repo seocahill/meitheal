@@ -207,9 +207,9 @@ class Admin::BookingPaymentsControllerTest < ActionDispatch::IntegrationTest
   end
 
   # Bank statement transactions
-  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3))
+  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3), payment_reference: "")
     import = BankImport.first || BankImport.create!(user: @editor, filename: "report.csv", rows_read: 1, rows_added: 1)
-    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on)
+    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on, payment_reference: payment_reference)
   end
 
   test "the form lists bank transactions that nothing accounts for" do
@@ -223,6 +223,15 @@ class Admin::BookingPaymentsControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=radio][name=bank_transaction_id]", count: 1
     assert_includes response.body, "HALL HIRE IE99ZZZZ00000000000000"
     assert_not_includes response.body, "Gas bill"
+  end
+
+  test "the form shows what the payer wrote against the transfer" do
+    sign_in_as(@editor)
+    create_bank_transaction(reference: "HALL HIRE IE99ZZZZ00000000000000", payment_reference: "Front room Saturday")
+
+    get new_admin_booking_payment_path(@booking)
+
+    assert_includes response.body, "Front room Saturday"
   end
 
   test "picking a bank transaction records it as the booker's payment and settles the booking" do

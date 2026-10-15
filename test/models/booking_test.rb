@@ -530,16 +530,16 @@ class BookingTest < ActiveSupport::TestCase
   end
 
   # Bank statement transactions
-  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3))
+  def create_bank_transaction(code: "BANK1", reference: "SEAN CAHILL IE12ABCD12345678901234", amount_cents: 12000, occurred_on: Date.new(2026, 10, 3), transaction_type: "Incoming bank transfer")
     import = BankImport.first || BankImport.create!(user: users(:editor), filename: "report.csv", rows_read: 1, rows_added: 1)
-    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on)
+    BankTransaction.create!(bank_import: import, code: code, reference: reference, amount_cents: amount_cents, occurred_on: occurred_on, transaction_type: transaction_type)
   end
 
   test "bank_candidates are the bank transactions nothing accounts for" do
     booking = create_booking
     open_transfer = create_bank_transaction(code: "OPEN")
     create_bank_transaction(code: "SPENT", amount_cents: -5000)
-    create_bank_transaction(code: "PAYOUT", reference: "SUMUP PID1379801 PAYOUT 171025")
+    create_bank_transaction(code: "PAYOUT", reference: "SUMUP PID1379801 PAYOUT 171025", transaction_type: "SumUp pay-in")
 
     assert_equal [ open_transfer ], booking.bank_candidates.to_a
   end

@@ -6,7 +6,7 @@
   <div class="bg-white rounded-lg shadow p-6 mb-6">
     <h2 class="text-xl font-bold mb-1">Upload a statement</h2>
     <p class="text-sm text-gray-500 mb-4">
-      In SumUp, open Business Account, choose a period and download the CSV. Uploading a period that overlaps an earlier upload is fine, transactions already held are skipped.
+      In SumUp, open Business Account, choose a period and download the detailed transactions report (CSV). Uploading a period that overlaps an earlier upload is fine, transactions already held are skipped.
     </p>
     <%= form_with url: admin_bank_imports_path, multipart: true, class: "flex flex-wrap items-center gap-3" do |form| %>
       <%= form.file_field :file, accept: ".csv,text/csv", required: true, class: "text-sm" %>
@@ -56,7 +56,12 @@
         <% @transactions.each do |transaction| %>
           <tr>
             <td class="px-4 py-2 text-sm text-gray-900 whitespace-nowrap"><%= transaction.occurred_on.strftime("%d %b %Y") %></td>
-            <td class="px-4 py-2 text-sm text-gray-900"><%= transaction.reference %></td>
+            <td class="px-4 py-2 text-sm text-gray-900">
+              <%= transaction.reference %>
+              <% if transaction.payment_reference.present? %>
+                <div class="text-xs text-gray-500"><%= transaction.payment_reference %></div>
+              <% end %>
+            </td>
             <td class="px-4 py-2 text-sm text-right whitespace-nowrap <%= transaction.amount_cents.negative? ? 'text-red-700' : 'text-gray-900' %>">
               &euro;<%= number_with_precision(transaction.amount_cents / 100.0, precision: 2, delimiter: ",") %>
             </td>

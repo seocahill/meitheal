@@ -1,9 +1,13 @@
 require "csv"
 
-# One upload of the SumUp Business Account transactions report (CSV). Uploads overlap,
-# so a transaction already held is skipped, matched on the code SumUp gives it.
+# One upload of the SumUp Business Account transactions report (CSV), the detailed
+# download that includes the payment reference. Uploads overlap, so a transaction
+# already held is skipped, matched on the code SumUp gives it.
 class BankImport < ApplicationRecord
-  REQUIRED_COLUMNS = [ "Transaction date", "Transaction code", "Reference", "Amount" ].freeze
+  REQUIRED_COLUMNS = [
+    "Transaction date", "Transaction code", "Transaction type", "Reference", "Payment reference",
+    "Billing amount out", "Billing amount in"
+  ].freeze
   DUE_AFTER = 7.days
 
   class InvalidFile < StandardError; end
@@ -54,21 +58,24 @@ class BankImport < ApplicationRecord
   end
   private_class_method :parse
 
-  # The row number counts the header as row 1, as a spreadsheet would.
+  # The row number counts the header as row 1, as a spreadsheet would. Money out is
+  # stored as a negative amount.
   def self.transaction_attributes(row, number:)
     code = row["Transaction code"].to_s.strip
     raise InvalidFile, "Row #{number} has no transaction code." if code.empty?
 
     {
       code: code,
-      occurred_on: Date.iso8601(row["Transaction date"].to_s.strip),
+      occurred_on: Date.strptime(row["Transaction date"].to_s.strip, "%d/%m/%Y, %H:%M"),
+      transaction_type: row["Transaction type"].to_s.squish,
       reference: row["Reference"].to_s.squish,
-      amount_cents: (BigDecimal(row["Amount"].to_s.strip) * 100).round
+      payment_reference: row["Payment reference"].to_s.squish,
+      amount_cents: ((BigDecimal(row["Billing amount in"].to_s.strip) - BigDecimal(row["Billing amount out"].to_s.strip)) * 100).round
     }
   rescue Date::Error
-    raise InvalidFile, "Row #{number} has a date that is not YYYY-MM-DD: #{row['Transaction date'].inspect}."
+    raise InvalidFile, "Row #{number} has a date that is not DD/MM/YYYY, HH:MM: #{row['Transaction date'].inspect}."
   rescue ArgumentError
-    raise InvalidFile, "Row #{number} has an amount that is not a number: #{row['Amount'].inspect}."
+    raise InvalidFile, "Row #{number} has an amount that is not a number: #{row['Billing amount in'].inspect} in, #{row['Billing amount out'].inspect} out."
   end
   private_class_method :transaction_attributes
 end

@@ -6,13 +6,15 @@ class BankTransaction < ApplicationRecord
 
   validates :code, :occurred_on, :amount_cents, presence: true
 
+  SUMUP_PAYOUT = "SumUp pay-in".freeze
+
   # Money received that no payment accounts for, newest first. SumUp's own payouts of card
   # takings are left out: they are the sum of sales the SumUp transaction history lists one
   # by one.
   scope :unmatched, -> {
     where(payment_id: nil)
       .where("amount_cents > 0")
-      .where.not("reference LIKE 'SUMUP PID%' OR reference LIKE 'PID %'")
+      .where.not(transaction_type: SUMUP_PAYOUT)
       .order(occurred_on: :desc, id: :desc)
   }
 
