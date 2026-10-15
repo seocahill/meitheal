@@ -36,9 +36,10 @@ class BankTransactionTest < ActiveSupport::TestCase
   end
 
   test "unmatched leaves out SumUp card payouts, which the SumUp transaction history already covers" do
-    transaction("PAYOUT1", reference: "SUMUP PID1379801 PAYOUT 171025")
-    transaction("PAYOUT2", reference: "PID 911974")
-    kept = transaction("TRANSFER", reference: "SUMUP SOCIAL CLUB IE12ABCD12345678901234")
+    transaction("PAYOUT1", reference: "SUMUP PID1379801 PAYOUT 171025", transaction_type: "SumUp pay-in")
+    transaction("PAYOUT2", reference: "PID 911974", transaction_type: "SumUp pay-in")
+    transaction("PAYOUT3", reference: "Settlement 2026-10-01", transaction_type: "SumUp pay-in")
+    kept = transaction("TRANSFER", reference: "SUMUP SOCIAL CLUB IE12ABCD12345678901234", transaction_type: "Incoming bank transfer")
 
     assert_equal [ kept ], BankTransaction.unmatched.to_a
   end

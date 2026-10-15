@@ -2,6 +2,7 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative "../config/environment"
 require "rails/test_help"
 require_relative "test_helpers/session_test_helper"
+require_relative "test_helpers/bank_report_test_helper"
 require "webmock/minitest"
 
 # Block all real HTTP requests in tests — stubs must be used instead
