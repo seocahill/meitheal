@@ -102,7 +102,7 @@ gem "litestream", "~> 0.14.0"
 
 gem "mission_control-jobs", "~> 1.1"
 
-gem "webmock", "~> 3.26", group: :test
+gem "webmock", "~> 3.34", group: :test
 
 gem "sentry-ruby"
 gem "sentry-rails"
