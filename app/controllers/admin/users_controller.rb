@@ -13,8 +13,10 @@ module Admin
       users_scope = User.order(:email_address)
       users_scope = users_scope.search(params[:q]) if params[:q].present?
       users_scope = users_scope.where(approved: false) if params[:approved] == "pending"
+      users_scope = users_scope.joins(:profile).merge(Profile.with_interest(params[:interest])) if params[:interest].present?
       @pagy, @users = pagy(users_scope, limit: 25)
       @pending_count = User.where(approved: false).count
+      @interest_tags = Profile.interest_tags
     end
 
     def approve
@@ -72,9 +74,10 @@ module Admin
       redirect_to root_path, alert: "You don't have permission to do that."
     end
 
-    # Only owners set roles.
+    # Only owners set roles. Interests are the one profile field admins set here;
+    # members cannot see or edit them.
     def user_params
-      permitted = [ :email_address, :password, :approved ]
+      permitted = [ :email_address, :password, :approved, profile_attributes: [ :interests ] ]
       permitted << :role if current_user_can_manage?
       params.require(:user).permit(permitted)
     end

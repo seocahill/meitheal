@@ -71,6 +71,14 @@ class ProfileTest < ActiveSupport::TestCase
     assert_empty Profile.with_interest("%")
   end
 
+  test "interest_tags lists each interest in use once, sorted" do
+    Profile.create!(user: @user, name: "One", interests: "music, events")
+    other = User.create!(email_address: "tags@test.com", password: "password")
+    Profile.create!(user: other, name: "Two", interests: "events,film-tv")
+
+    assert_equal [ "events", "film-tv", "music" ], Profile.interest_tags
+  end
+
   test "scope visible returns only visible profiles" do
     visible = Profile.create!(user: @user, name: "Visible", visible: true)
     hidden_user = User.create!(email_address: "hidden@test.com", password: "password")

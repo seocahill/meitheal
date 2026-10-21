@@ -128,6 +128,75 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='q=mary']", text: /All Users/
   end
 
+  # Interests
+  test "index shows each member's interests" do
+    @editor.profile.update!(interests: "music, film-tv")
+    sign_in_as(@owner)
+    get admin_users_path
+    assert_select "tbody tr", text: /Editor User/ do
+      assert_select "a[href='#{admin_users_path(interest: "film-tv")}']", text: "film-tv"
+      assert_select "a[href='#{admin_users_path(interest: "music")}']", text: "music"
+    end
+  end
+
+  test "index filters by whole interest" do
+    @owner.profile.update!(interests: "punk-music")
+    @editor.profile.update!(interests: "events, music")
+    sign_in_as(@owner)
+
+    get admin_users_path(interest: "music")
+    assert_select "tbody tr", count: 1
+    assert_select "tbody tr", text: /editor@example.com/
+  end
+
+  test "interest filter combines with search and the pending tab" do
+    @owner.profile.update!(interests: "music")
+    @editor.profile.update!(interests: "music")
+    sign_in_as(@owner)
+
+    get admin_users_path(interest: "music", q: "editor")
+    assert_select "tbody tr", count: 1
+    assert_select "tbody tr", text: /editor@example.com/
+    assert_select "form input[type='hidden'][name='interest'][value='music']"
+    assert_select "a[href*='interest=music']", text: /All Users/
+  end
+
+  test "index offers the interests in use as a filter" do
+    @editor.profile.update!(interests: "music, events")
+    sign_in_as(@owner)
+    get admin_users_path
+    assert_select "select[name='interest'] option", text: "events"
+    assert_select "select[name='interest'] option", text: "music"
+    assert_select "select[name='interest'] option", text: "theatre", count: 0
+  end
+
+  test "edit form has an interests field for members with a profile" do
+    sign_in_as(@owner)
+    get edit_admin_user_path(@viewer)
+    assert_select "input[name='user[profile_attributes][interests]']", count: 0
+
+    Profile.create!(user: @viewer, name: "Viewer", interests: "music")
+    get edit_admin_user_path(@viewer)
+    assert_select "input[name='user[profile_attributes][interests]'][value='music']"
+  end
+
+  test "editor can set a member's interests" do
+    Profile.create!(user: @viewer, name: "Viewer")
+    sign_in_as(@editor)
+
+    patch admin_user_path(@viewer), params: { user: { profile_attributes: { interests: "music, theatre" } } }
+    assert_redirected_to admin_users_path
+    assert_equal "music, theatre", @viewer.profile.reload.interests
+  end
+
+  test "interests cannot rename the profile through the user form" do
+    Profile.create!(user: @viewer, name: "Viewer")
+    sign_in_as(@owner)
+
+    patch admin_user_path(@viewer), params: { user: { profile_attributes: { name: "Renamed", interests: "music" } } }
+    assert_equal "Viewer", @viewer.profile.reload.name
+  end
+
   # Editor access
   test "editor sees users without owner-only controls" do
     User.create!(email_address: "pending@example.com", password: "password", approved: false)

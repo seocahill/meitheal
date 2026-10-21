@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :posts, dependent: :nullify
   has_many :stored_files, dependent: :destroy
   has_one :profile, dependent: :destroy
+  accepts_nested_attributes_for :profile, update_only: true
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 

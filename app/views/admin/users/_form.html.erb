@@ -20,6 +20,16 @@
     <%= form.password_field :password, class: "form-input", autocomplete: "new-password", required: user.new_record? %>
   </div>
 
+  <% if user.profile %>
+    <%= form.fields_for :profile, include_id: false do |profile_form| %>
+      <div>
+        <%= profile_form.label :interests, class: "form-label" %>
+        <%= profile_form.text_field :interests, class: "form-input", placeholder: "music, film-tv, events" %>
+        <p class="form-hint">Comma-separated. Used to target newsletters and notices. Members cannot see this.</p>
+      </div>
+    <% end %>
+  <% end %>
+
   <% if current_user_can_manage? %>
   <div>
     <%= form.label :role, class: "form-label" %>
