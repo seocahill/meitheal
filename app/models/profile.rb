@@ -31,6 +31,10 @@ class Profile < ApplicationRecord
     split_list(skills)
   end
 
+  def self.interest_tags
+    select(:interests).flat_map(&:interests_list).uniq.sort
+  end
+
   def interests_list
     split_list(interests)
   end
