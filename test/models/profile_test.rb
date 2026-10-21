@@ -39,6 +39,26 @@ class ProfileTest < ActiveSupport::TestCase
     assert_equal [], profile.skills_list
   end
 
+  test "interests_list returns array from comma-separated string" do
+    profile = Profile.new(interests: "film, tv production, jazz")
+    assert_equal [ "film", "tv production", "jazz" ], profile.interests_list
+  end
+
+  test "interests_list handles nil" do
+    profile = Profile.new(interests: nil)
+    assert_equal [], profile.interests_list
+  end
+
+  test "scope with_interest finds profiles by interest" do
+    filmmaker = Profile.create!(user: @user, name: "Filmmaker", interests: "film, tv production")
+    musician_user = User.create!(email_address: "jazzer@test.com", password: "password")
+    musician = Profile.create!(user: musician_user, name: "Musician", interests: "jazz, punk music")
+
+    results = Profile.with_interest("film")
+    assert_includes results, filmmaker
+    assert_not_includes results, musician
+  end
+
   test "scope visible returns only visible profiles" do
     visible = Profile.create!(user: @user, name: "Visible", visible: true)
     hidden_user = User.create!(email_address: "hidden@test.com", password: "password")

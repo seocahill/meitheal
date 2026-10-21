@@ -98,4 +98,12 @@ class ProfilesControllerTest < ActionDispatch::IntegrationTest
     @owner_profile.reload
     assert_equal "Updated Name", @owner_profile.name
   end
+
+  test "members cannot set their own interests" do
+    sign_in_as(@owner)
+    patch my_profile_path, params: {
+      profile: { name: "Updated Name", interests: "film" }
+    }
+    assert_nil @owner_profile.reload.interests
+  end
 end
