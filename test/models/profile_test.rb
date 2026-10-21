@@ -59,6 +59,18 @@ class ProfileTest < ActiveSupport::TestCase
     assert_not_includes results, musician
   end
 
+  test "scope with_interest matches whole interests, not parts of them" do
+    punk_user = User.create!(email_address: "punk@test.com", password: "password")
+    punk = Profile.create!(user: punk_user, name: "Punk", interests: "punk-music,visual-art")
+    music = Profile.create!(user: @user, name: "Music", interests: "events, music")
+
+    assert_includes Profile.with_interest("music"), music
+    assert_not_includes Profile.with_interest("music"), punk
+    assert_includes Profile.with_interest("visual-art"), punk
+    assert_empty Profile.with_interest("art")
+    assert_empty Profile.with_interest("%")
+  end
+
   test "scope visible returns only visible profiles" do
     visible = Profile.create!(user: @user, name: "Visible", visible: true)
     hidden_user = User.create!(email_address: "hidden@test.com", password: "password")

@@ -20,7 +20,9 @@ class Profile < ApplicationRecord
   }
   scope :with_skill, ->(skill) { where("skills LIKE ?", "%#{skill}%") }
   # Interests are set by admins to target communications; members can't see or edit them.
-  scope :with_interest, ->(interest) { where("interests LIKE ?", "%#{interest}%") }
+  scope :with_interest, ->(interest) {
+    where("',' || REPLACE(interests, ', ', ',') || ',' LIKE ? ESCAPE '\\'", "%,#{sanitize_sql_like(interest)},%")
+  }
   scope :search, ->(query) {
     where("profiles.name LIKE ? OR profiles.bio LIKE ?", "%#{query}%", "%#{query}%")
   }
