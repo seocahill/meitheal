@@ -84,6 +84,16 @@ module Api
         assert_equal "Updated question", faq.reload.question
       end
 
+      test "profile interests are writable through the API" do
+        profile = profiles(:owner_profile)
+        patch api_v1_profile_url(profile),
+          params: { profile: { interests: "film, tv production" } }.to_json,
+          headers: auth_headers
+        assert_response :success
+        assert_equal "film, tv production", profile.reload.interests
+        assert_equal "film, tv production", response.parsed_body["interests"]
+      end
+
       # --- Rich text round-trips as HTML ------------------------------------
 
       test "rich-text content round-trips as HTML" do

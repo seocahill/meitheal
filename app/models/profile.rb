@@ -19,12 +19,24 @@ class Profile < ApplicationRecord
     ).distinct
   }
   scope :with_skill, ->(skill) { where("skills LIKE ?", "%#{skill}%") }
+  # Interests are set by admins to target communications; members can't see or edit them.
+  scope :with_interest, ->(interest) { where("interests LIKE ?", "%#{interest}%") }
   scope :search, ->(query) {
     where("profiles.name LIKE ? OR profiles.bio LIKE ?", "%#{query}%", "%#{query}%")
   }
 
   def skills_list
-    return [] if skills.blank?
-    skills.split(",").map(&:strip)
+    split_list(skills)
+  end
+
+  def interests_list
+    split_list(interests)
+  end
+
+  private
+
+  def split_list(value)
+    return [] if value.blank?
+    value.split(",").map(&:strip)
   end
 end
