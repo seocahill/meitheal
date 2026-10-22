@@ -1,7 +1,7 @@
 <div class="max-w-6xl mx-auto px-4">
-  <div class="flex justify-between items-center mb-8">
+  <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
     <h1 class="text-3xl font-bold text-gray-900">Proposals</h1>
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "All", admin_proposals_path, class: "px-3 py-1 rounded-lg #{params[:status].blank? ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
       <%= link_to "Pending", admin_proposals_path(status: "submitted"), class: "px-3 py-1 rounded-lg #{params[:status] == 'submitted' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
       <%= link_to "Approved", admin_proposals_path(status: "approved"), class: "px-3 py-1 rounded-lg #{params[:status] == 'approved' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}" %>
@@ -10,7 +10,7 @@
   </div>
 
   <% if @proposals.any? %>
-    <div class="bg-white shadow rounded-lg overflow-hidden">
+    <div class="bg-white shadow rounded-lg overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>

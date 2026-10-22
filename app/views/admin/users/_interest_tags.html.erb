@@ -1,0 +1,3 @@
+<% (profile&.interests_list || []).each do |interest| %>
+  <%= link_to interest, list_path(interest: interest), class: "inline-block px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs hover:bg-gray-200" %>
+<% end %>

@@ -35,6 +35,13 @@ class Profile < ApplicationRecord
     select(:interests).flat_map(&:interests_list).uniq.sort
   end
 
+  # The profiles in each interest, by name: { "music" => [ profile, ... ] }.
+  def self.interest_groups
+    where.not(interests: [ nil, "" ]).order(:name).each_with_object({}) do |profile, groups|
+      profile.interests_list.each { |tag| (groups[tag] ||= []) << profile }
+    end
+  end
+
   def interests_list
     split_list(interests)
   end

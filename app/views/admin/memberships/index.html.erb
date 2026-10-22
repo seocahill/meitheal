@@ -8,20 +8,20 @@
   [ "no_fee", "Associate (no fee)", :no_fee, "bg-gray-500 text-white border-gray-500" ]
 ] %>
 <div class="max-w-6xl mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
     <div>
       <h1 class="text-3xl font-bold">Memberships</h1>
       <p class="text-sm text-gray-500 mt-1">Paid means a contribution is on record and has not yet expired. Associates pay no fee.</p>
     </div>
-    <div class="flex items-center gap-3">
-      <%= form_with url: admin_memberships_path, method: :get, local: true do |f| %>
+    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+      <%= form_with url: admin_memberships_path, method: :get, local: true, class: "flex-1 sm:flex-none" do |f| %>
         <div class="relative">
           <input
             type="text"
             name="q"
             value="<%= params[:q] %>"
             placeholder="Search by name or email..."
-            class="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+            class="w-full sm:w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
           >
           <% if params[:status].present? %>
             <input type="hidden" name="status" value="<%= params[:status] %>">

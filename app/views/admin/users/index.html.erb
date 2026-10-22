@@ -1,15 +1,15 @@
 <div class="max-w-4xl mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-8">
+  <div class="flex flex-wrap justify-between items-center gap-4 mb-8">
     <h1 class="text-3xl font-bold">Manage Users</h1>
-    <div class="flex items-center gap-3">
-      <%= form_with url: admin_users_path, method: :get, local: true do %>
+    <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+      <%= form_with url: admin_users_path, method: :get, local: true, class: "flex-1 sm:flex-none" do %>
         <div class="relative">
           <input
             type="text"
             name="q"
             value="<%= params[:q] %>"
             placeholder="Search by name or email..."
-            class="w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
+            class="w-full sm:w-64 pl-3 pr-10 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
           >
           <%= hidden_filter_fields(:approved, :interest) %>
           <button type="submit" aria-label="Search" class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-400 hover:text-gray-600">
@@ -36,6 +36,13 @@
     <% end %>
   </div>
 
+  <% if params[:interest].present? %>
+    <p class="mb-4 text-sm text-gray-700">
+      Group: <strong><%= params[:interest] %></strong>
+      <%= link_to "All groups", admin_interest_groups_path, class: "ml-2 text-pink-600 hover:text-pink-900" %>
+    </p>
+  <% end %>
+
   <% if @interest_tags.any? %>
     <%= form_with url: admin_users_path, method: :get, local: true, class: "flex items-center gap-2 mb-6" do %>
       <%= hidden_filter_fields(:q, :approved) %>
@@ -45,35 +52,42 @@
     <% end %>
   <% end %>
 
-  <div class="bg-white shadow rounded-lg overflow-hidden">
+  <div class="bg-white shadow rounded-lg overflow-x-auto">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Interests</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Status</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Role</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Interests</th>
+          <th class="px-3 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Created</th>
+          <th class="px-3 md:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-gray-200">
         <% @users.each do |user| %>
           <tr class="<%= 'bg-amber-50' unless user.approved? %>">
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 md:px-6 py-4">
               <div>
                 <div class="font-medium text-gray-900">
                   <%= user.profile&.name || user.email_address.split("@").first %>
                 </div>
-                <div class="text-sm text-gray-500">
+                <div class="text-sm text-gray-500 break-words">
                   <%= user.email_address %>
                   <% if user == Current.user %>
                     <span class="text-xs">(you)</span>
                   <% end %>
                 </div>
+                <div class="md:hidden mt-1 flex flex-wrap items-center gap-1">
+                  <span class="text-xs text-gray-500"><%= user.role.capitalize %></span>
+                  <% unless user.approved? %>
+                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">Pending</span>
+                  <% end %>
+                  <%= render "interest_tags", profile: user.profile %>
+                </div>
               </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 md:px-6 py-4 whitespace-nowrap hidden md:table-cell">
               <% if user.approved? %>
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                   Approved
@@ -84,7 +98,7 @@
                 </span>
               <% end %>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap">
+            <td class="px-3 md:px-6 py-4 whitespace-nowrap hidden md:table-cell">
               <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                 <%= case user.role
                     when 'owner' then 'bg-purple-100 text-purple-800'
@@ -94,15 +108,15 @@
                 <%= user.role.capitalize %>
               </span>
             </td>
-            <td class="px-6 py-4 text-sm">
-              <% (user.profile&.interests_list || []).each do |interest| %>
-                <%= link_to interest, list_path(interest: interest), class: "inline-block px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs hover:bg-gray-200" %>
-              <% end %>
+            <td class="px-3 md:px-6 py-4 text-sm hidden md:table-cell">
+              <div class="flex flex-wrap gap-1">
+                <%= render "interest_tags", profile: user.profile %>
+              </div>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+            <td class="px-3 md:px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
               <%= user.created_at.strftime("%b %d, %Y") %>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+            <td class="px-3 md:px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
               <% unless user.approved? %>
                 <%= button_to "Approve", approve_admin_user_path(user), method: :post, class: "text-green-600 hover:text-green-900 font-medium" %>
               <% end %>
