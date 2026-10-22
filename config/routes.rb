@@ -103,6 +103,7 @@ Rails.application.routes.draw do
         post :approve
       end
     end
+    resources :interest_groups, only: [ :index ]
     resources :memberships do
       member do
         patch :toggle_paid

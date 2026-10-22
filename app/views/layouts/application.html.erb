@@ -66,6 +66,7 @@
           <% if current_user_can_edit? %>
             <div class="sidebar-nav-section"><%= t("admin") %></div>
             <%= link_to t("users"), admin_users_path, class: sidebar_nav_class("admin/users") %>
+            <%= link_to t("groups"), admin_interest_groups_path, class: sidebar_nav_class("admin/interest_groups") %>
             <%= link_to t("memberships"), admin_memberships_path, class: sidebar_nav_class("admin/memberships") %>
             <%= link_to t("payments"), admin_payments_path, class: sidebar_nav_class("admin/payments") %>
             <%= link_to t("bank"), admin_bank_imports_path, class: sidebar_nav_class("admin/bank_imports") %>

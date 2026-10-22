@@ -79,6 +79,19 @@ class ProfileTest < ActiveSupport::TestCase
     assert_equal [ "events", "film-tv", "music" ], Profile.interest_tags
   end
 
+  test "interest_groups lists the profiles in each interest, by name" do
+    zed = Profile.create!(user: @user, name: "Zed", interests: "music, events")
+    other = User.create!(email_address: "groups@test.com", password: "password")
+    amy = Profile.create!(user: other, name: "Amy", interests: "events")
+
+    assert_equal({ "music" => [ zed ], "events" => [ amy, zed ] }, Profile.interest_groups)
+  end
+
+  test "interest_groups skips profiles without interests" do
+    Profile.create!(user: @user, name: "None", interests: "")
+    assert_empty Profile.interest_groups
+  end
+
   test "scope visible returns only visible profiles" do
     visible = Profile.create!(user: @user, name: "Visible", visible: true)
     hidden_user = User.create!(email_address: "hidden@test.com", password: "password")

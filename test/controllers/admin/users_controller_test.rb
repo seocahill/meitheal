@@ -161,6 +161,39 @@ class Admin::UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href*='interest=music']", text: /All Users/
   end
 
+  test "a pending user is flagged under the name for narrow screens" do
+    User.create!(email_address: "pending@example.com", password: "password", approved: false)
+    sign_in_as(@owner)
+
+    get admin_users_path
+    assert_select "tbody tr", text: /pending@example.com/ do
+      assert_select "td:first-child div.md\\:hidden", text: /Pending/
+    end
+    assert_select "tbody tr", text: /editor@example.com/ do
+      assert_select "td:first-child div.md\\:hidden", text: /Pending/, count: 0
+    end
+  end
+
+  test "filtering by an interest says so and links back to all groups" do
+    @editor.profile.update!(interests: "music")
+    sign_in_as(@owner)
+
+    get admin_users_path(interest: "music")
+    assert_select "a[href='#{admin_interest_groups_path}']", text: /All groups/
+    assert_select "main", text: /Group: music/
+  end
+
+  test "index shows role and interests under the name for narrow screens" do
+    @editor.profile.update!(interests: "music")
+    sign_in_as(@owner)
+
+    get admin_users_path
+    assert_select "tbody tr", text: /Editor User/ do
+      assert_select "td:first-child div.md\\:hidden", text: /Editor/
+      assert_select "td:first-child div.md\\:hidden a", text: "music"
+    end
+  end
+
   test "index offers the interests in use as a filter" do
     @editor.profile.update!(interests: "music, events")
     sign_in_as(@owner)
