@@ -10,6 +10,14 @@
     </div>
   <% end %>
 
+  <% if current_user_can_edit? && @users %>
+    <div>
+      <%= form.label :user_id, "Booker", class: "form-label" %>
+      <p class="form-hint mb-2">The member responsible for paying. Overdue unpaid bookings stop them making new ones.</p>
+      <%= form.collection_select :user_id, @users, :id, :email_address, {}, class: "form-input" %>
+    </div>
+  <% end %>
+
   <div>
     <%= form.label :space_id, "Space", class: "form-label" %>
     <%= form.collection_select :space_id, @spaces, :id, :name, { prompt: "Select a space" }, class: "form-input" %>
