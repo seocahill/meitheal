@@ -122,6 +122,53 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_path
   end
 
+  test "edit form lets editors choose the booker" do
+    sign_in_as(@editor)
+    get edit_booking_path(bookings(:pending_booking))
+    assert_response :success
+    assert_select "select[name='booking[user_id]'] option[selected][value='#{@viewer.id}']"
+  end
+
+  test "edit form does not let the booker choose the booker" do
+    sign_in_as(@viewer)
+    get edit_booking_path(bookings(:pending_booking))
+    assert_response :success
+    assert_select "select[name='booking[user_id]']", count: 0
+  end
+
+  test "editor can reassign the booker" do
+    sign_in_as(@editor)
+    booking = bookings(:pending_booking)
+    patch booking_path(booking), params: { booking: { user_id: @owner.id } }
+    assert_redirected_to calendar_path
+    assert_equal @owner, booking.reload.user
+  end
+
+  test "booker cannot reassign their booking to someone else" do
+    sign_in_as(@viewer)
+    booking = bookings(:pending_booking)
+    patch booking_path(booking), params: { booking: { user_id: @owner.id } }
+    assert_equal @viewer, booking.reload.user
+  end
+
+  test "reassigning an overdue booking lets the original booker book again" do
+    overdue = Booking.create!(
+      space: @space, user: @viewer, title: "Fringe gig",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    sign_in_as(@editor)
+    patch booking_path(overdue), params: { booking: { user_id: @owner.id } }
+
+    new_booking = @viewer.bookings.build(
+      space: @space, title: "Next gig",
+      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 2.hours,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    assert new_booking.valid?, new_booking.errors.full_messages.to_sentence
+  end
+
   test "editor can confirm booking" do
     pending_booking = bookings(:pending_booking)
     sign_in_as(@editor)

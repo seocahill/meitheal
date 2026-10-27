@@ -42,6 +42,7 @@ class BookingsController < ApplicationController
 
   def edit
     @spaces = Space.active.order(:name)
+    @users = bookers if Current.user.can_edit?
   end
 
   def update
@@ -49,6 +50,7 @@ class BookingsController < ApplicationController
       redirect_to calendar_path, notice: "Booking updated."
     else
       @spaces = Space.active.order(:name)
+      @users = bookers if Current.user.can_edit?
       render :edit, status: :unprocessable_entity
     end
   end
@@ -79,8 +81,16 @@ class BookingsController < ApplicationController
     @booking = Booking.find(params[:id])
   end
 
+  # Editors can move a booking to whoever is paying for it, e.g. a festival booked by one of its members.
   def booking_params
-    params.require(:booking).permit(:space_id, :title, :description, :starts_at, :ends_at, :agree_booking_rules, :agree_ethics)
+    permitted = [ :space_id, :title, :description, :starts_at, :ends_at, :agree_booking_rules, :agree_ethics ]
+    permitted << :user_id if Current.user.can_edit?
+    params.require(:booking).permit(*permitted)
+  end
+
+  # Approved members, plus the current booker so the form never silently picks someone else.
+  def bookers
+    User.where(approved: true).or(User.where(id: @booking.user_id)).order(:email_address)
   end
 
   def require_editable
