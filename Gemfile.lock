@@ -163,6 +163,18 @@ GEM
     ffi (1.17.3-arm64-darwin)
     ffi (1.17.3-x86_64-linux-gnu)
     ffi (1.17.3-x86_64-linux-musl)
+    flipper (1.4.2)
+      concurrent-ruby (< 2)
+    flipper-active_record (1.4.2)
+      activerecord (>= 4.2, < 9)
+      flipper (~> 1.4.2)
+    flipper-ui (1.4.2)
+      erubi (>= 1.0.0, < 2.0.0)
+      flipper (~> 1.4.2)
+      rack (>= 1.4, < 4)
+      rack-protection (>= 1.5.3, < 5.0.0)
+      rack-session (>= 1.0.2, < 3.0.0)
+      sanitize (< 8)
     fugit (1.14.0)
       et-orbi (~> 1.4)
       raabro (~> 1.4)
@@ -325,6 +337,10 @@ GEM
     raabro (1.5.0)
     racc (1.8.1)
     rack (3.2.7)
+    rack-protection (4.2.1)
+      base64 (>= 0.1.0)
+      logger (>= 1.6.0)
+      rack (>= 3.0.0, < 4)
     rack-session (2.1.2)
       base64 (>= 0.1.0)
       rack (>= 3.0.0)
@@ -416,6 +432,9 @@ GEM
       ffi (~> 1.12)
       logger
     rubyzip (3.7.0)
+    sanitize (7.0.1)
+      crass (~> 1.0.8)
+      nokogiri (>= 1.16.8)
     securerandom (0.4.1)
     selenium-webdriver (4.51.0)
       base64 (~> 0.2)
@@ -533,6 +552,9 @@ DEPENDENCIES
   doorkeeper
   dotenv (~> 3.2)
   faraday
+  flipper (~> 1.4)
+  flipper-active_record (~> 1.4)
+  flipper-ui (~> 1.4)
   image_processing (~> 1.2)
   importmap-rails
   jbuilder
@@ -623,6 +645,9 @@ CHECKSUMS
   ffi (1.17.3-arm64-darwin) sha256=0c690555d4cee17a7f07c04d59df39b2fba74ec440b19da1f685c6579bb0717f
   ffi (1.17.3-x86_64-linux-gnu) sha256=3746b01f677aae7b16dc1acb7cb3cc17b3e35bdae7676a3f568153fb0e2c887f
   ffi (1.17.3-x86_64-linux-musl) sha256=086b221c3a68320b7564066f46fed23449a44f7a1935f1fe5a245bd89d9aea56
+  flipper (1.4.2) sha256=dca7d65b5ec660b525b6c599e727219ac4994073c855b41b6656b2d91a9cb304
+  flipper-active_record (1.4.2) sha256=ab70aeb78a44d59c690b5538fc269b08d1c2918abb720fe82832ac77fb1dfcd1
+  flipper-ui (1.4.2) sha256=d7b2fd886e922ba5e0c8240cbabd27163125b011a6c42e6dba509a1715540dee
   fugit (1.14.0) sha256=e311a9cc85a54bb67649df45060e721282a1e2c8ebad40e41874a3a7d576f37e
   globalid (1.4.0) sha256=037f12fbf1d9d7a014d501c2d5c77356fd4ddd96d7a7991d6700bba96706f427
   hana (1.3.7) sha256=5425db42d651fea08859811c29d20446f16af196308162894db208cac5ce9b0d
@@ -684,6 +709,7 @@ CHECKSUMS
   raabro (1.5.0) sha256=3f998a7bc84f9c84df3ab580634d2e0a5bda4f0841168d56035f529c9877440a
   racc (1.8.1) sha256=4a7f6929691dbec8b5209a0b373bc2614882b55fc5d2e447a21aaa691303d62f
   rack (3.2.7) sha256=93e13e1c24f93556671d85d2d79fa228c3485815c50d7e2f265b5330c6528fb7
+  rack-protection (4.2.1) sha256=cf6e2842df8c55f5e4d1a4be015e603e19e9bc3a7178bae58949ccbb58558bac
   rack-session (2.1.2) sha256=595434f8c0c3473ae7d7ac56ecda6cc6dfd9d37c0b2b5255330aa1576967ffe8
   rack-test (2.2.0) sha256=005a36692c306ac0b4a9350355ee080fd09ddef1148a5f8b2ac636c720f5c463
   rackup (2.3.1) sha256=6c79c26753778e90983761d677a48937ee3192b3ffef6bc963c0950f94688868
@@ -710,6 +736,7 @@ CHECKSUMS
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   ruby-vips (2.3.0) sha256=e685ec02c13969912debbd98019e50492e12989282da5f37d05f5471442f5374
   rubyzip (3.7.0) sha256=65c19294da75297a939006f3516deacc33185fbd721ff1954f7a231db6d3e121
+  sanitize (7.0.1) sha256=6dc0d80edab7e5f6bb9036ee001aa8fea000359860c6e53cd909e16321e1ac79
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   selenium-webdriver (4.51.0) sha256=09edf1b7fc360e0570bac609676f804ed527fe0b2f285e03233561e29b0ec105
   sentry-rails (7.1.0) sha256=21e2092f8ab013ec384a4a3e406622a1c2a04d6638c697b8f922d9d46da634fa

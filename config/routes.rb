@@ -10,6 +10,11 @@ Rails.application.routes.draw do
   post "oauth/register", to: "oauth/registrations#create", as: :oauth_register
   match "mcp", to: "mcp#invoke", via: %i[get post], as: :mcp
 
+  # Feature flags: owners only; everyone else gets a 404
+  constraints(OwnerConstraint.new) do
+    mount Flipper::UI.app(Flipper) => "/flipper"
+  end
+
   mount MissionControl::Jobs::Engine, at: "/jobs"
   mount Litestream::Engine, at: "/litestream"
 
