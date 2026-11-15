@@ -26,6 +26,11 @@ class User < ApplicationRecord
     left_joins(:profile).where("LOWER(users.email_address) LIKE :pattern OR LOWER(profiles.name) LIKE :pattern", pattern: pattern)
   }
 
+  # Identifies a user to Flipper so a flag can be on for named people.
+  def flipper_id
+    "User;#{id}"
+  end
+
   def can_edit?
     editor? || owner?
   end

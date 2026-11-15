@@ -102,6 +102,11 @@ gem "litestream", "~> 0.16.1"
 
 gem "mission_control-jobs", "~> 1.3"
 
+# Feature flags: new member-visible work ships dark and is switched on per group
+gem "flipper", "~> 1.4"
+gem "flipper-active_record", "~> 1.4"
+gem "flipper-ui", "~> 1.4"
+
 gem "webmock", "~> 3.34", group: :test
 
 gem "sentry-ruby"
