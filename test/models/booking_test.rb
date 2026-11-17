@@ -241,7 +241,7 @@ class BookingTest < ActiveSupport::TestCase
     assert_not_includes unpaid, unpaid_cancelled
   end
 
-  test "validation blocks new booking when user has unpaid confirmed bookings that ended more than 2 weeks ago" do
+  test "overdue unpaid bookings do not stop a member making a new booking" do
     Booking.create!(
       space: @space, user: @user, title: "Unpaid Booking",
       starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 1.hour,
@@ -254,40 +254,23 @@ class BookingTest < ActiveSupport::TestCase
       starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour,
       agree_booking_rules: "1", agree_ethics: "1"
     )
-    assert_not new_booking.valid?
-    assert_includes new_booking.errors[:base], "You have unpaid bookings. Please settle outstanding payments before making a new booking."
+    assert new_booking.valid?, new_booking.errors.full_messages.to_sentence
   end
 
-  test "validation allows new booking when user has unpaid confirmed bookings that ended less than 2 weeks ago" do
-    Booking.create!(
-      space: @space, user: @user, title: "Unpaid Booking",
-      starts_at: 1.week.ago, ends_at: 1.week.ago + 1.hour,
-      paid: false, status: :confirmed,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
+  test "unpaid_past_counts_for counts each booker's ended, confirmed, unpaid bookings" do
+    other = users(:editor)
+    create = ->(user, starts_at, **attrs) {
+      Booking.create!(space: @space, user: user, title: "Gig", starts_at: starts_at, ends_at: starts_at + 1.hour,
+                      agree_booking_rules: "1", agree_ethics: "1", **attrs)
+    }
+    create.(@user, 3.weeks.ago, status: :confirmed, paid: false)
+    create.(@user, 2.days.ago, status: :confirmed, paid: false)
+    create.(@user, 4.weeks.ago, status: :confirmed, paid: true)
+    create.(@user, 5.weeks.ago, status: :cancelled, paid: false)
+    create.(@user, 6.weeks.ago, status: :pending, paid: false)
+    create.(@user, 1.week.from_now, status: :confirmed, paid: false)
 
-    new_booking = Booking.new(
-      space: @space, user: @user, title: "New Booking",
-      starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-    assert new_booking.valid?
-  end
-
-  test "validation allows new booking when user has unpaid confirmed bookings that have not yet ended" do
-    Booking.create!(
-      space: @space, user: @user, title: "Unpaid Booking",
-      starts_at: 1.day.from_now, ends_at: 1.day.from_now + 1.hour,
-      paid: false, status: :confirmed,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-
-    new_booking = Booking.new(
-      space: @space, user: @user, title: "New Booking",
-      starts_at: 3.days.from_now, ends_at: 3.days.from_now + 1.hour,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-    assert new_booking.valid?
+    assert_equal({ @user.id => 2 }, Booking.unpaid_past_counts_for([ @user.id, other.id ]))
   end
 
   test "validation allows new booking when user has no unpaid bookings" do

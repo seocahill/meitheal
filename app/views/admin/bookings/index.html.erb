@@ -16,7 +16,7 @@
     <%= link_to admin_bookings_path(base.merge(paid: "unpaid")), data: { count: :unpaid }, class: "#{tab} #{params[:paid] == 'unpaid' && params[:overdue].blank? ? 'bg-red-100 text-red-700' : idle}" do %>
       Unpaid <span class="font-semibold"><%= @counts[:unpaid] %></span>
     <% end %>
-    <%= link_to admin_bookings_path(base.merge(overdue: "1")), data: { count: :overdue }, title: "Unpaid and ended more than two weeks ago. These block the booker from making a new booking.", class: "#{tab} #{params[:overdue].present? ? 'bg-rose-100 text-rose-700' : idle}" do %>
+    <%= link_to admin_bookings_path(base.merge(overdue: "1")), data: { count: :overdue }, title: "Unpaid and ended more than two weeks ago.", class: "#{tab} #{params[:overdue].present? ? 'bg-rose-100 text-rose-700' : idle}" do %>
       Overdue <span class="font-semibold"><%= @counts[:overdue] %></span>
     <% end %>
     <%= link_to "Paid", admin_bookings_path(base.merge(paid: "paid")), class: "#{tab} #{params[:paid] == 'paid' ? 'bg-blue-100 text-blue-700' : idle}" %>
@@ -78,6 +78,7 @@
               </td>
               <td class="px-3 py-3 text-sm text-gray-900 [overflow-wrap:anywhere]">
                 <%= safe_join(booking.user.email_address.split(/(?=@)/), tag.wbr) %>
+                <div><%= render "bookings/unpaid_warning", count: @unpaid_past_counts[booking.user_id] %></div>
               </td>
               <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900">
                 <div><%= booking.starts_at.strftime("%b %d, %Y") %></div>

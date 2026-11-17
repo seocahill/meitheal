@@ -43,6 +43,18 @@ class User < ApplicationRecord
     memberships.active.exists? && !memberships.active.first.associate?
   end
 
+  # Why the user cannot book a space, worded for them to act on. Nil when they can.
+  def booking_membership_problem
+    return if has_active_membership?
+
+    expired = memberships.lapsed.order(expires_on: :desc).first
+    if expired
+      "You can't book a space: your annual membership expired on #{expired.expires_on.strftime('%-d %B %Y')}. Pay the annual membership fee to book again."
+    else
+      "You can't book a space: booking needs a paid annual membership, and you haven't paid one yet."
+    end
+  end
+
   def name
     return unless approved?
 
