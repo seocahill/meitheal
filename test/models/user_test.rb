@@ -59,4 +59,30 @@ class UserTest < ActiveSupport::TestCase
     assert_not editor.can_manage?
     assert_not viewer.can_manage?
   end
+
+  test "booking_membership_problem is nil when the annual membership is paid" do
+    assert_nil users(:viewer).booking_membership_problem
+  end
+
+  test "booking_membership_problem says a lapsed membership expired and when" do
+    expired = memberships(:expired_membership)
+    message = users(:editor).booking_membership_problem
+
+    assert_includes message, "can't book a space"
+    assert_includes message, "expired on #{expired.expires_on.strftime('%-d %B %Y')}"
+  end
+
+  test "booking_membership_problem says an associate has not paid the annual membership" do
+    user = User.create!(email_address: "assoc@example.com", password: "password123", approved: true)
+    user.memberships.create!(membership_type: :associate, starts_on: Date.current)
+
+    assert_includes user.booking_membership_problem, "can't book a space"
+    assert_includes user.booking_membership_problem, "paid annual membership"
+  end
+
+  test "booking_membership_problem says the same when there is no membership" do
+    user = User.create!(email_address: "nomember@example.com", password: "password123", approved: true)
+
+    assert_includes user.booking_membership_problem, "paid annual membership"
+  end
 end

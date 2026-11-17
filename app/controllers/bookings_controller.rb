@@ -22,6 +22,7 @@ class BookingsController < ApplicationController
     # For admin: show pending bookings needing confirmation
     if authenticated? && Current.user.can_edit?
       @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)
+      @unpaid_past_counts = Booking.unpaid_past_counts_for(@pending_bookings.map(&:user_id))
     end
   end
 
@@ -106,8 +107,8 @@ class BookingsController < ApplicationController
   end
 
   def require_active_membership
-    unless Current.user&.has_active_membership?
-      redirect_to calendar_path, alert: "You need an active membership to book spaces. Please renew your membership."
+    if (problem = Current.user.booking_membership_problem)
+      redirect_to calendar_path, alert: problem
     end
   end
 end

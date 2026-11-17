@@ -90,6 +90,7 @@
                   <div class="truncate">
                     <span class="text-gray-700"><%= booking.title %></span>
                     <span class="text-gray-500 text-xs block"><%= booking.starts_at.strftime("%b %d, %H:%M") %></span>
+                    <%= render "bookings/unpaid_warning", count: @unpaid_past_counts[booking.user_id] %>
                   </div>
                   <%= button_to "Confirm", confirm_booking_path(booking), method: :patch, class: "text-green-600 hover:text-green-800 text-xs font-medium" %>
                 </li>
@@ -217,7 +218,7 @@
   <% if @unpaid_bookings.any? %>
     <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
       <h2 class="text-lg font-semibold text-amber-900 mb-2">⚠️ Unpaid Bookings</h2>
-      <p class="text-sm text-amber-800 mb-3">You have <%= pluralize(@unpaid_bookings.count, "unpaid booking") %>. Please settle outstanding payments before making new bookings.</p>
+      <p class="text-sm text-amber-800 mb-3">You have <%= pluralize(@unpaid_bookings.count, "unpaid booking") %>. Please settle outstanding payments.</p>
       <ul class="space-y-2">
         <% @unpaid_bookings.each do |booking| %>
           <li class="text-sm text-amber-900">

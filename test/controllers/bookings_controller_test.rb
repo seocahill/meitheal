@@ -151,22 +151,64 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_equal @viewer, booking.reload.user
   end
 
-  test "reassigning an overdue booking lets the original booker book again" do
-    overdue = Booking.create!(
-      space: @space, user: @viewer, title: "Fringe gig",
-      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
-      status: :confirmed, paid: false,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-    sign_in_as(@editor)
-    patch booking_path(overdue), params: { booking: { user_id: @owner.id } }
+  test "a member with overdue unpaid bookings can still request a booking, which stays pending" do
+    unpaid_past_booking(@viewer)
+    sign_in_as(@viewer)
 
-    new_booking = @viewer.bookings.build(
-      space: @space, title: "Next gig",
-      starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 2.hours,
-      agree_booking_rules: "1", agree_ethics: "1"
-    )
-    assert new_booking.valid?, new_booking.errors.full_messages.to_sentence
+    assert_difference -> { @viewer.bookings.count }, 1 do
+      post bookings_path, params: { booking: {
+        space_id: @space.id, title: "Next gig",
+        starts_at: 3.weeks.from_now, ends_at: 3.weeks.from_now + 2.hours,
+        agree_booking_rules: "1", agree_ethics: "1"
+      } }
+    end
+    assert_redirected_to calendar_path
+    assert @viewer.bookings.order(:created_at).last.pending?
+  end
+
+  test "the calendar shows the owner that a pending booking's booker has unpaid bookings" do
+    unpaid_past_booking(@viewer)
+    sign_in_as(@owner)
+    get calendar_path(month: bookings(:pending_booking).starts_at.strftime("%Y-%m"))
+
+    assert_select "[data-unpaid-warning]", text: /1 unpaid past booking/
+  end
+
+  test "the calendar shows no unpaid warning when the booker is square" do
+    sign_in_as(@owner)
+    get calendar_path(month: bookings(:pending_booking).starts_at.strftime("%Y-%m"))
+
+    assert_select "[data-unpaid-warning]", count: 0
+  end
+
+  test "a member whose annual membership lapsed is told why they cannot book" do
+    expired = memberships(:expired_membership)
+    sign_in_as(@editor)
+    get new_booking_path
+
+    assert_redirected_to calendar_path
+    follow_redirect!
+    assert_select "[data-membership-required]", text: /expired on #{expired.expires_on.strftime('%-d %B %Y')}/
+    assert_select "a[href=?]", new_membership_payment_path(expired), text: /Pay your annual membership/
+    assert_select "span", text: "Annual membership payment required to book"
+  end
+
+  test "the calendar tells a member who has not paid why they cannot book and how to pay" do
+    user = User.create!(email_address: "assoc@example.com", password: "password123", approved: true)
+    associate = user.memberships.create!(membership_type: :associate, starts_on: Date.current)
+    sign_in_as(user)
+    get calendar_path
+
+    assert_select "[data-membership-required]", text: /paid annual membership/
+    assert_select "a[href=?]", new_membership_payment_path(associate), text: /Pay your annual membership/
+  end
+
+  test "the calendar shows no membership notice to a member who has paid" do
+    sign_in_as(@viewer)
+    get calendar_path
+
+    assert_select "[data-membership-required]", count: 0
+    assert_select "a[href=?]", new_booking_path, text: "Book Space"
   end
 
   test "editor can confirm booking" do
@@ -325,5 +367,16 @@ class BookingsControllerTest < ActionDispatch::IntegrationTest
     patch mark_as_paid_booking_path(unpaid_booking)
     unpaid_booking.reload
     assert_equal true, unpaid_booking.paid
+  end
+
+  private
+
+  def unpaid_past_booking(user)
+    Booking.create!(
+      space: @space, user: user, title: "Fringe gig",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
   end
 end

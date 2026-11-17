@@ -300,4 +300,17 @@ class Admin::BookingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "tr:contains('Long Overdue') td[data-status]", text: /Confirmed.*Unpaid.*Overdue/m
     assert_select "tr:contains('Settled') td[data-status]", text: /Confirmed.*Paid/m
   end
+
+  test "index warns editors about a booker's unpaid past bookings, on every row of theirs" do
+    Booking.create!(
+      space: @space, user: @viewer, title: "Fringe gig",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    sign_in_as(@editor)
+    get admin_bookings_path(paid: "unpaid")
+
+    assert_select "[data-unpaid-warning]", text: /unpaid past booking/
+  end
 end
