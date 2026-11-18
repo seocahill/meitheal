@@ -56,4 +56,31 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     get dashboard_path
     assert_no_match "Last Year's Gig", response.body
   end
+
+  test "an editor sees which pending bookings are from bookers with unpaid past bookings" do
+    Booking.create!(
+      space: spaces(:front_room), user: @user, title: "Fringe gig",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    sign_in_as(users(:editor))
+    get dashboard_path
+
+    assert_select "[data-unpaid-warning]", text: /1 unpaid past booking/
+  end
+
+  test "a member's own unpaid bookings reminder no longer says it blocks new bookings" do
+    Booking.create!(
+      space: spaces(:front_room), user: @user, title: "Fringe gig",
+      starts_at: 3.weeks.ago, ends_at: 3.weeks.ago + 2.hours,
+      status: :confirmed, paid: false,
+      agree_booking_rules: "1", agree_ethics: "1"
+    )
+    sign_in_as(@user)
+    get dashboard_path
+
+    assert_match "Please settle outstanding payments", response.body
+    assert_no_match(/before making new bookings/, response.body)
+  end
 end

@@ -13,7 +13,6 @@ class Booking < ApplicationRecord
   validate :ends_after_starts
   validate :no_overlapping_bookings
   validate :agreements_accepted, on: :create
-  validate :no_unpaid_bookings_for_user, on: :create
 
   enum :status, { pending: 0, confirmed: 1, cancelled: 2 }, default: :pending
 
@@ -30,6 +29,13 @@ class Booking < ApplicationRecord
   }
   scope :unpaid, -> { where(paid: false).where.not(status: :cancelled) }
   scope :overdue, -> { where("ends_at < ?", 2.weeks.ago) }
+  scope :ended, -> { where("ends_at < ?", Time.current) }
+
+  # How many confirmed bookings each of these bookers has had and not paid for, by user id. Editors
+  # use it to spot a booker with money outstanding when deciding whether to confirm.
+  def self.unpaid_past_counts_for(user_ids)
+    confirmed.unpaid.ended.where(user_id: user_ids).group(:user_id).count
+  end
 
   def payment_overdue?
     confirmed? && !paid? && ends_at < 2.weeks.ago
@@ -163,12 +169,6 @@ class Booking < ApplicationRecord
     end
     unless agree_ethics.to_s == "1"
       errors.add(:agree_ethics, "must be accepted")
-    end
-  end
-
-  def no_unpaid_bookings_for_user
-    if user&.bookings&.confirmed&.unpaid&.overdue&.any?
-      errors.add(:base, "You have unpaid bookings. Please settle outstanding payments before making a new booking.")
     end
   end
 end

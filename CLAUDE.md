@@ -120,3 +120,11 @@ For complete methodology, see the systematic-debugging skill
 
 ## Running specs
 - bin/rails test
+## Agent roles
+
+- **Architect** (weekly): `docs/product/ARCHITECT.md`. Proposes, never codes.
+- **Builder** (scheduled): `docs/product/BUILDER.md`. Builds `auto` and `approved` issues, merges on green CI.
+- **Watchdog** (nightly): files `auto` issues labelled `regression` or `security` for the builder. Never changes code.
+- The owner's decisions and preferences: `docs/product/DECISIONS.md`; the end state: `docs/product/VISION.md`.
+- Member-, editor- or visitor-visible changes go behind a Flipper flag for the `owners` group: see `docs/feature_flags.md`.
+- Default branch is `main`; it deploys to production once CI passes.

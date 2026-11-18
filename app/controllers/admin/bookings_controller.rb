@@ -54,6 +54,7 @@ class Admin::BookingsController < Admin::BaseController
     }
     @spaces = Space.order(:name)
     @pagy, @bookings = pagy(scope, limit: 20)
+    @unpaid_past_counts = Booking.unpaid_past_counts_for(@bookings.map(&:user_id))
   end
 
   # Corrects a payment recorded in error. Payments are recorded from the booking's payment form.

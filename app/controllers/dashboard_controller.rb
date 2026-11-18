@@ -20,6 +20,7 @@ class DashboardController < ApplicationController
     # Editor items
     if @user.can_edit?
       @pending_bookings = Booking.pending.upcoming.includes(:space, :user).limit(10)
+      @unpaid_past_counts = Booking.unpaid_past_counts_for(@pending_bookings.map(&:user_id))
       @draft_events = Event.draft.includes(:user).order(updated_at: :desc).limit(10)
     end
 

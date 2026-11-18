@@ -1,0 +1,6 @@
+<%# Tells an editor the booker has money outstanding. count is the booker's unpaid past bookings. %>
+<% if count.to_i > 0 %>
+  <span data-unpaid-warning class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
+    <%= pluralize(count, "unpaid past booking") %>
+  </span>
+<% end %>
