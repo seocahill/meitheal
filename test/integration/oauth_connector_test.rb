@@ -50,6 +50,53 @@ class OauthConnectorTest < ActionDispatch::IntegrationTest
     assert_equal "invalid_client_metadata", response.parsed_body["error"]
   end
 
+  test "registration with a script-scheme redirect uri is rejected" do
+    assert_no_difference -> { Doorkeeper::Application.count } do
+      post "/oauth/register", params: {
+        client_name: "Evil", redirect_uris: [ "javascript:alert(document.domain)" ]
+      }.to_json, headers: { "Content-Type" => "application/json" }
+    end
+    assert_response :bad_request
+    assert_equal "invalid_client_metadata", response.parsed_body["error"]
+  end
+
+  test "denying consent never redirects to a redirect uri the client did not register" do
+    app = Doorkeeper::Application.create!(
+      name: "Claude", redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+      scopes: "mcp:access", confidential: false
+    )
+    sign_in_as(users(:owner))
+
+    delete "/oauth/authorize", params: {
+      client_id: app.uid, redirect_uri: "https://attacker.example/steal",
+      response_type: "code", scope: "mcp:access", state: "xyz"
+    }
+
+    assert_not response.redirect?, "deny must not redirect to an unregistered uri"
+    assert_not_includes response.body, "attacker.example"
+  end
+
+  test "denying consent redirects to the client's registered uri with access_denied" do
+    app = Doorkeeper::Application.create!(
+      name: "Claude", redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+      scopes: "mcp:access", confidential: false
+    )
+    sign_in_as(users(:owner))
+
+    delete "/oauth/authorize", params: {
+      client_id: app.uid, redirect_uri: app.redirect_uri,
+      response_type: "code", scope: "mcp:access", state: "xyz",
+      code_challenge: "a" * 43, code_challenge_method: "S256"
+    }
+
+    assert_response :redirect
+    location = URI(response.location)
+    assert_equal "https://claude.ai/api/mcp/auth_callback", "#{location.scheme}://#{location.host}#{location.path}"
+    query = Rack::Utils.parse_query(location.query)
+    assert_equal "access_denied", query["error"]
+    assert_equal "xyz", query["state"]
+  end
+
   test "token endpoint issues a token for a valid PKCE code and rejects a bad verifier" do
     verifier = "a" * 64
     challenge = Base64.urlsafe_encode64(Digest::SHA256.digest(verifier), padding: false)
