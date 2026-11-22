@@ -350,6 +350,8 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
     sumup_transaction("recorded")
     create_payment(description: "Fee", payment_method: :sumup).update!(sumup_transaction_id: "recorded")
     sumup_transaction("stale", occurred_at: 61.days.ago)
+    sumup_transaction("refunded", status: "REFUNDED")
+    sumup_transaction("refund-row", kind: "REFUND")
 
     sign_in_as(@owner)
     get admin_payments_path
@@ -360,6 +362,8 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
       assert_select "tbody tr:last-child", text: /Print sale/
       assert_select "td", text: "TC-recorded", count: 0
       assert_select "td", text: "TC-stale", count: 0
+      assert_select "td", text: "TC-refunded", count: 0
+      assert_select "td", text: "TC-refund-row", count: 0
       assert_select "form, button", count: 0
     end
   end
@@ -368,6 +372,7 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
     Flipper.enable_group(:f216_unrecorded_sumup_payments, :owners)
     sumup_transaction("one")
     sumup_transaction("two")
+    sumup_transaction("refunded", status: "REFUNDED")
 
     sign_in_as(@owner)
     get admin_memberships_path

@@ -71,7 +71,7 @@
             <%= link_to admin_payments_path, class: sidebar_nav_class("admin/payments") do %>
               <%= t("payments") %>
               <% if (unrecorded_count = unrecorded_sumup_transactions&.size).to_i.positive? %>
-                <span class="ml-1 inline-flex px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800" data-unrecorded-sumup-count><%= unrecorded_count %></span>
+                <span class="ml-1 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full" data-unrecorded-sumup-count><%= unrecorded_count %></span>
               <% end %>
             <% end %>
             <%= link_to t("bank"), admin_bank_imports_path, class: sidebar_nav_class("admin/bank_imports") %>
