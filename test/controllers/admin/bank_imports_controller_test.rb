@@ -95,7 +95,7 @@ class Admin::BankImportsControllerTest < ActionDispatch::IntegrationTest
 
   test "a file that is not a SumUp report is refused with the reason" do
     sign_in_as(@editor)
-    bad = Rack::Test::UploadedFile.new(StringIO.new("Date,Memo\r\n2025-01-01,Hi\r\n"), "text/csv", original_filename: "other.csv")
+    bad = Rack::Test::UploadedFile.new(StringIO.new(+"Date,Memo\r\n2025-01-01,Hi\r\n"), "text/csv", original_filename: "other.csv")
 
     post admin_bank_imports_path, params: { file: bad }
 
