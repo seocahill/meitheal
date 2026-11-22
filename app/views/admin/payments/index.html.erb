@@ -12,6 +12,10 @@
     <%= link_to "Export CSV", admin_payments_path(list_filters.symbolize_keys.merge(format: :csv)), class: "border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50" %>
   </div>
 
+  <% if unrecorded_sumup_transactions&.load&.any? %>
+    <%= render "unrecorded_sumup", transactions: unrecorded_sumup_transactions %>
+  <% end %>
+
   <!-- Total for the current filters -->
   <div class="bg-white shadow rounded-lg px-5 py-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-2">
     <div>

@@ -334,4 +334,80 @@ class Admin::PaymentsControllerTest < ActionDispatch::IntegrationTest
     get admin_payments_path(payment_method: "cash", period: "this_year")
     assert_select "a[href*='.csv'][href*='payment_method=cash'][href*='period=this_year']", text: /Export/
   end
+
+  # Unrecorded SumUp payments
+  def sumup_transaction(sumup_id, occurred_at: 1.day.ago, **attrs)
+    SumupTransaction.create!({
+      sumup_id: sumup_id, transaction_id: sumup_id, amount_cents: 2500, occurred_at: occurred_at,
+      kind: "PAYMENT", status: "SUCCESSFUL", product_summary: "Card reader sale", transaction_code: "TC-#{sumup_id}"
+    }.merge(attrs))
+  end
+
+  test "with the flag on, owners see SumUp payments not recorded here, newest first" do
+    Flipper.enable_group(:f216_unrecorded_sumup_payments, :owners)
+    sumup_transaction("older", occurred_at: 3.days.ago, product_summary: "Print sale")
+    sumup_transaction("newer", occurred_at: 1.day.ago, amount_cents: 1250)
+    sumup_transaction("recorded")
+    create_payment(description: "Fee", payment_method: :sumup).update!(sumup_transaction_id: "recorded")
+    sumup_transaction("stale", occurred_at: 61.days.ago)
+    sumup_transaction("refunded", status: "REFUNDED")
+    sumup_transaction("refund-row", kind: "REFUND")
+
+    sign_in_as(@owner)
+    get admin_payments_path
+
+    assert_select "[data-unrecorded-sumup]" do
+      assert_select "tbody tr", 2
+      assert_select "tbody tr:first-child", text: /TC-newer.*12\.50|12\.50.*TC-newer/m
+      assert_select "tbody tr:last-child", text: /Print sale/
+      assert_select "td", text: "TC-recorded", count: 0
+      assert_select "td", text: "TC-stale", count: 0
+      assert_select "td", text: "TC-refunded", count: 0
+      assert_select "td", text: "TC-refund-row", count: 0
+      assert_select "form, button", count: 0
+    end
+  end
+
+  test "with the flag on, the payments nav link shows how many SumUp payments are unrecorded" do
+    Flipper.enable_group(:f216_unrecorded_sumup_payments, :owners)
+    sumup_transaction("one")
+    sumup_transaction("two")
+    sumup_transaction("refunded", status: "REFUNDED")
+
+    sign_in_as(@owner)
+    get admin_memberships_path
+
+    assert_select "a[href='#{admin_payments_path}'] [data-unrecorded-sumup-count]", text: "2"
+  end
+
+  test "with the flag on and every SumUp payment recorded, there is no panel or count" do
+    Flipper.enable_group(:f216_unrecorded_sumup_payments, :owners)
+
+    sign_in_as(@owner)
+    get admin_payments_path
+
+    assert_select "[data-unrecorded-sumup]", count: 0
+    assert_select "[data-unrecorded-sumup-count]", count: 0
+  end
+
+  test "with the flag off, unrecorded SumUp payments are not shown" do
+    sumup_transaction("unrecorded")
+
+    sign_in_as(@owner)
+    get admin_payments_path
+
+    assert_select "[data-unrecorded-sumup]", count: 0
+    assert_select "[data-unrecorded-sumup-count]", count: 0
+  end
+
+  test "the flag for owners does not show the panel to editors" do
+    Flipper.enable_group(:f216_unrecorded_sumup_payments, :owners)
+    sumup_transaction("unrecorded")
+
+    sign_in_as(@editor)
+    get admin_payments_path
+
+    assert_select "[data-unrecorded-sumup]", count: 0
+    assert_select "[data-unrecorded-sumup-count]", count: 0
+  end
 end
