@@ -1,7 +1,8 @@
 require "test_helper"
 
 # Covers the OAuth 2.1 surface Claude's connector relies on: discovery metadata,
-# dynamic client registration, and the PKCE-protected token exchange.
+# dynamic client registration, the consent deny path, the PKCE-protected token
+# exchange and refresh, and the authorized-applications endpoint.
 class OauthConnectorTest < ActionDispatch::IntegrationTest
   test "authorization server metadata advertises the endpoints and S256 PKCE" do
     get "/.well-known/oauth-authorization-server"
@@ -51,13 +52,14 @@ class OauthConnectorTest < ActionDispatch::IntegrationTest
   end
 
   test "registration with a script-scheme redirect uri is rejected" do
-    assert_no_difference -> { Doorkeeper::Application.count } do
-      post "/oauth/register", params: {
-        client_name: "Evil", redirect_uris: [ "javascript:alert(document.domain)" ]
-      }.to_json, headers: { "Content-Type" => "application/json" }
+    [ "javascript://claude.ai/%0Aalert(document.domain)", "data://x/text/html" ].each do |uri|
+      assert_no_difference -> { Doorkeeper::Application.count }, uri do
+        post "/oauth/register", params: { client_name: "Evil", redirect_uris: [ uri ] }.to_json,
+          headers: { "Content-Type" => "application/json" }
+      end
+      assert_response :bad_request
+      assert_equal "invalid_client_metadata", response.parsed_body["error"]
     end
-    assert_response :bad_request
-    assert_equal "invalid_client_metadata", response.parsed_body["error"]
   end
 
   test "denying consent never redirects to a redirect uri the client did not register" do
@@ -69,10 +71,11 @@ class OauthConnectorTest < ActionDispatch::IntegrationTest
 
     delete "/oauth/authorize", params: {
       client_id: app.uid, redirect_uri: "https://attacker.example/steal",
-      response_type: "code", scope: "mcp:access", state: "xyz"
+      response_type: "code", scope: "mcp:access", state: "xyz",
+      code_challenge: "a" * 43, code_challenge_method: "S256"
     }
 
-    assert_not response.redirect?, "deny must not redirect to an unregistered uri"
+    assert_response :bad_request
     assert_not_includes response.body, "attacker.example"
   end
 
@@ -128,5 +131,33 @@ class OauthConnectorTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert response.parsed_body["access_token"].present?
     assert_equal "mcp:access", response.parsed_body["scope"]
+  end
+
+  test "refresh token yields a new mcp:access token for a public client" do
+    app = Doorkeeper::Application.create!(
+      name: "Claude", redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+      scopes: "mcp:access", confidential: false
+    )
+    token = Doorkeeper::AccessToken.create!(
+      application: app, resource_owner_id: users(:owner).id, scopes: "mcp:access",
+      expires_in: 2.hours, use_refresh_token: true
+    )
+
+    post "/oauth/token", params: {
+      grant_type: "refresh_token", refresh_token: token.refresh_token, client_id: app.uid
+    }
+    assert_response :success
+    assert response.parsed_body["access_token"].present?
+    assert_not_equal token.token, response.parsed_body["access_token"]
+    assert_equal "mcp:access", response.parsed_body["scope"]
+  end
+
+  test "authorized applications require a signed-in owner" do
+    get "/oauth/authorized_applications"
+    assert_redirected_to new_session_path
+
+    sign_in_as(users(:owner))
+    get "/oauth/authorized_applications"
+    assert_response :success
   end
 end
