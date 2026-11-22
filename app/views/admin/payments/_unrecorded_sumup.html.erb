@@ -1,0 +1,29 @@
+<%# SumUp payments with no matching payment or ticket here. Read-only: owners record them by hand. %>
+<div class="bg-white shadow rounded-lg overflow-x-auto mb-6 border-l-4 border-amber-400" data-unrecorded-sumup>
+  <div class="px-5 py-4">
+    <h2 class="text-lg font-semibold text-gray-900">Not yet recorded in Meitheal</h2>
+    <p class="text-sm text-gray-500">
+      <%= pluralize(transactions.size, "SumUp payment") %> from the last 60 days with no matching payment or ticket here.
+    </p>
+  </div>
+  <table class="min-w-full divide-y divide-gray-200">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction code</th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <% transactions.each do |transaction| %>
+        <tr>
+          <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-900"><%= transaction.occurred_at.strftime("%d %b %Y") %></td>
+          <td class="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">&euro;<%= number_with_precision(transaction.amount_cents / 100.0, precision: 2) %></td>
+          <td class="px-3 py-3 text-sm text-gray-900"><%= truncate(transaction.product_summary, length: 60) %></td>
+          <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500 font-mono"><%= transaction.transaction_code %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

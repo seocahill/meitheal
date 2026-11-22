@@ -58,4 +58,13 @@ class SumupTransactionTest < ActiveSupport::TestCase
 
     assert_empty SumupTransaction.unmatched
   end
+
+  test "recent is the last 60 days" do
+    travel_to Time.utc(2026, 11, 22, 12) do
+      inside = transaction("inside", occurred_at: 60.days.ago + 1.minute)
+      transaction("outside", occurred_at: 60.days.ago - 1.minute)
+
+      assert_equal [ inside ], SumupTransaction.recent.to_a
+    end
+  end
 end

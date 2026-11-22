@@ -13,4 +13,7 @@ class SumupTransaction < ApplicationRecord
       .where("sumup_id NOT IN (#{known})")
       .where("transaction_id IS NULL OR transaction_id NOT IN (#{known})")
   }
+
+  # The window owners are shown when looking for payments to record.
+  scope :recent, -> { where(occurred_at: 60.days.ago..) }
 end
