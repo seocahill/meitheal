@@ -107,7 +107,7 @@ gem "flipper", "~> 1.4"
 gem "flipper-active_record", "~> 1.4"
 gem "flipper-ui", "~> 1.4"
 
-gem "webmock", "~> 3.34", group: :test
+gem "webmock", "~> 3.36", group: :test
 
 gem "sentry-ruby"
 gem "sentry-rails"
